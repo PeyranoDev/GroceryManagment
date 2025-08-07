@@ -1,0 +1,71 @@
+@import 'tailwindcss';
+
+/* KPI Card Styles */
+
+.kpiCardTitle {
+  @apply text-sm text-slate-500 dark:text-slate-400;
+}
+
+.kpiCardValue {
+  @apply text-3xl font-bold;
+}
+
+.kpiCardValueDefault {
+  @apply text-slate-900 dark:text-white;
+}
+
+.kpiCardComparison {
+  @apply bg-slate-50 dark:bg-[#141312] px-4 py-2 text-xs;
+}
+
+.kpiCardComparisonDefault {
+  @apply text-green-600 dark:text-green-400;
+}
+
+/* Weekly Sales Chart Styles */
+
+.weeklySalesChart {
+  @apply lg:col-span-2;
+}
+
+.weeklySalesChart__container {
+  @apply h-80 flex items-end justify-around gap-2 p-4 ;
+}
+
+.weeklySalesChart__dayColumn {
+  @apply flex-1 flex flex-col items-center gap-2;
+}
+
+.weeklySalesChart__bar {
+  @apply flex items-center justify-center w-full bg-green-200 dark:bg-green-800/50 rounded-t-md hover:bg-green-300 dark:hover:bg-green-700 transition-all;
+}
+
+.weeklySalesChart__barValue {
+  @apply text-xs font-semibold text-gray-800 dark:text-gray-200;
+}
+
+.weeklySalesChart__dayLabel {
+  @apply text-xs font-medium text-gray-500 dark:text-gray-400;
+}
+
+/* Recent Activity Styles */
+
+.recentActivity__list {
+  @apply space-y-4;
+}
+
+.recentActivity__item {
+  @apply flex items-start gap-3;
+}
+
+.recentActivity__iconContainer {
+  @apply p-2 bg-gray-100 dark:bg-gray-700 rounded-full;
+}
+
+.recentActivity__description {
+  @apply text-sm font-medium text-gray-800 dark:text-gray-200;
+}
+
+.recentActivity__details {
+  @apply text-xs text-gray-500 dark:text-gray-400;
+}
