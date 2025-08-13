@@ -1,23 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Domain.Entities
+﻿namespace Domain.Entities
 {
     public class Product : IEntity, IHasGrocery
     {
         public int Id { get; set; }
-        public string Name { get; set; } = default!;
-        public decimal Stock { get; set; }
-        public string Unit { get; set; } = default!;
-        public decimal UnitPrice { get; set; }
-        public decimal SalePrice { get; set; }
-        public string Category { get; set; } = default!;
-        public string Emoji { get; set; } = default!;
-        public Promotion? Promotion { get; set; }   
+        public string Name { get; set; } = null!;
+        public decimal Price { get; set; }
 
         public int GroceryId { get; set; }
+        public Grocery Grocery { get; set; } = null!;
+
+        public Promotion Promotion { get; set; } = new Promotion();
     }
 }

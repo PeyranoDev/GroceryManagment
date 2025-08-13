@@ -1,20 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Domain.Entities
+﻿namespace Domain.Entities
 {
     public class User : IEntity
     {
         public int Id { get; set; }
-        public string Name { get; set; } = default!;
-        public string Email { get; set; } = default!;
-        public string PasswordHash { get; set; } = default!;
+        public string Name { get; set; } = null!;
+        public string Email { get; set; } = null!;
+        public string PasswordHash { get; set; } = null!;
 
-        public bool IsSuperAdmin { get; set; }
-
-        public ICollection<UserGrocery> Memberships { get; set; } = new List<UserGrocery>();
+        public ICollection<UserGrocery> UserGroceries { get; set; } = new List<UserGrocery>();
     }
 }
