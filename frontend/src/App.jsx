@@ -6,12 +6,10 @@ import Sales from "./components/sales/Sales";
 import Inventory from "./components/inventory/Inventory";
 import Reports from "./components/reports/Reports";
 import Delivery from "./components/delivery/Delivery";
-import { mockInventory } from "./data/products";
 import Header from "./components/ui/header/Header";
 
 function App() {
-  const [user, setUser] = useState(null);
-  const [inventory, setInventory] = useState(mockInventory);
+  const [user, setUser] = useState({ name: "Admin", id: 1 });
 
   const [purchaseProducts, setPurchaseProducts] = useState([
     {
@@ -41,9 +39,7 @@ function App() {
     },
   ]);
 
-  
-
-  const handleLogin = () => setUser({ name: "Tomillo" });
+  const handleLogin = () => setUser({ name: "Admin", id: 1 });
   const handleLogout = () => setUser(null);
 
   const handleAddPurchaseProduct = () =>
@@ -65,15 +61,6 @@ function App() {
     setPurchaseProducts((prev) =>
       prev.map((p) => (p.id === productId ? updatedProduct : p))
     );
-  const handleUpdateStock = (productId, newStock) => {
-    setInventory((prev) =>
-      prev.map((p) =>
-        p.id === productId
-          ? { ...p, stock: newStock, lastUpdated: new Date().toISOString() }
-          : p
-      )
-    );
-  };
 
   return (
     <>
@@ -86,9 +73,9 @@ function App() {
 
         <main>
           <Routes>
-            <Route path="/" element={<Dashboard inventoryData={inventory} />} />
+            <Route path="/" element={<Dashboard />} />
             <Route path="/ventas" element={<Sales />} />
-            <Route path="/pedidos" element={<Delivery inventory={inventory} />} />
+            <Route path="/pedidos" element={<Delivery />} />
             <Route
               path="/compras"
               element={
@@ -100,15 +87,11 @@ function App() {
                 />
               }
             />
-            <Route
-              path="/inventario"
-              element={
-                <Inventory inventory={inventory} onUpdateStock={handleUpdateStock} />
-              }
-            />
+            <Route path="/inventario" element={<Inventory />} />
             <Route path="/reportes" element={<Reports />} />
           </Routes>
         </main>
+        
       </div>
     </>
   );
