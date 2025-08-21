@@ -130,7 +130,7 @@ const Delivery = () => {
             {/* Sección de selección de productos por categoría */}
             <div>
               <div className="flex items-center justify-between mb-4">
-                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+                <h3 className="text-lg font-semibold text-gray-200">
                   Productos disponibles
                 </h3>
                 <div className="flex gap-2">
@@ -142,20 +142,20 @@ const Delivery = () => {
                       );
                       setSelectedProducts(allSelected);
                     }}
-                    className="px-3 py-1 text-xs bg-green-100 hover:bg-green-200 dark:bg-green-900/50 dark:hover:bg-green-900 text-green-700 dark:text-green-300 rounded-md transition-colors"
+                    className="px-3 py-1 text-xs bg-green-900/50 hover:bg-green-900 text-green-300 rounded-md transition-colors"
                   >
                     Seleccionar todos
                   </button>
                   <button
                     onClick={() => setSelectedProducts({})}
-                    className="px-3 py-1 text-xs bg-red-100 hover:bg-red-200 dark:bg-red-900/50 dark:hover:bg-red-900 text-red-700 dark:text-red-300 rounded-md transition-colors"
+                    className="px-3 py-1 text-xs bg-red-900/50 hover:bg-red-900 text-red-300 rounded-md transition-colors"
                   >
                     Deseleccionar todos
                   </button>
                 </div>
               </div>
 
-              <div className="bg-[#141312] rounded-lg border border-gray-700 dark:border-black max-h-96 overflow-y-auto">
+              <div className="bg-[#141312] rounded-lg border border-black max-h-96 overflow-y-auto">
                 <div className="p-4 space-y-4">
                   {(() => {
                     // Agrupar productos por categoría
@@ -176,12 +176,12 @@ const Delivery = () => {
                         <div key={category} className="pb-4 last:pb-0">
                           {/* Header de categoría */}
                           <div className="flex items-center justify-between mb-3">
-                            <h4 className="text-md font-semibold text-gray-200 dark:text-gray-300 flex items-center gap-2">
+                            <h4 className="text-md font-semibold text-gray-300 flex items-center gap-2">
                               <span className="text-lg">
                                 {products[0]?.emoji || "📦"}
                               </span>
                               {category}
-                              <span className="text-xs bg-green-700 dark:bg-green-800 text-gray-300 dark:text-white px-2 py-1 rounded-full">
+                              <span className="text-xs bg-green-800 text-white px-2 py-1 rounded-full">
                                 {products.length}
                               </span>
                             </h4>
@@ -197,7 +197,7 @@ const Delivery = () => {
                                     ...categorySelected,
                                   }));
                                 }}
-                                className="px-2 py-1 text-xs bg-blue-800 hover:bg-blue-700 dark:bg-blue-900/50 dark:hover:bg-blue-900 text-blue-200 dark:text-blue-300 rounded transition-colors"
+                                className="px-2 py-1 text-xs bg-blue-900/50 hover:bg-blue-900 text-blue-300 rounded transition-colors"
                               >
                                 Todos
                               </button>
@@ -211,7 +211,7 @@ const Delivery = () => {
                                   );
                                   setSelectedProducts(categoryDeselected);
                                 }}
-                                className="px-2 py-1 text-xs bg-gray-700 hover:bg-gray-600 dark:bg-gray-600 dark:hover:bg-gray-500 text-gray-200 dark:text-gray-300 rounded transition-colors"
+                                className="px-2 py-1 text-xs bg-gray-600 hover:bg-gray-500 text-gray-300 rounded transition-colors"
                               >
                                 Ninguno
                               </button>
@@ -226,8 +226,8 @@ const Delivery = () => {
                                 onClick={() => handleProductSelection(p.id)}
                                 className={`flex items-center gap-2 px-3 py-2 rounded-md border cursor-pointer transition-all duration-200 ${
                                   selectedProducts[p.id]
-                                    ? "border-green-600 bg-green-900/30 dark:bg-green-900/20"
-                                    : "border-gray-600 dark:border-[#302E2B] bg-gray-800 dark:bg-black hover:border-gray-500 dark:hover:border-gray-800"
+                                    ? "border-green-600 bg-green-900/20"
+                                    : "border-[#302E2B] bg-black hover:border-gray-800"
                                 }`}
                               >
                                 <div className="flex-shrink-0">
@@ -235,7 +235,7 @@ const Delivery = () => {
                                     className={`w-4 h-4 rounded border flex items-center justify-center ${
                                       selectedProducts[p.id]
                                         ? "border-green-500 bg-green-500"
-                                        : "border-gray-500 dark:border-gray-500"
+                                        : "border-gray-500"
                                     }`}
                                   >
                                     {selectedProducts[p.id] && (
@@ -257,15 +257,15 @@ const Delivery = () => {
                                 <div className="flex-1 min-w-0">
                                   <div className="flex items-center gap-1 mb-1">
                                     <span className="text-sm">{p.emoji}</span>
-                                    <span className="font-medium text-gray-100 dark:text-gray-100 text-xs truncate">
+                                    <span className="font-medium text-gray-100 text-xs truncate">
                                       {p.name}
                                     </span>
                                   </div>
                                   <div className="flex items-center justify-between">
-                                    <span className="text-xs text-gray-400 dark:text-gray-400">
+                                    <span className="text-xs text-gray-400">
                                       {p.unit}
                                     </span>
-                                    <span className="text-xs font-semibold text-green-400 dark:text-green-400">
+                                    <span className="text-xs font-semibold text-green-400">
                                       ${p.salePrice.toLocaleString()}
                                     </span>
                                   </div>
@@ -297,15 +297,15 @@ const Delivery = () => {
         {/* Resultado del mensaje */}
         {generatedOfferMessage && (
           <div className="  rounded-lg p-6">
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4 flex items-center gap-2">
-              <Copy size={20} className="text-blue-600 dark:text-blue-400" />
+            <h3 className="text-lg font-semibold text-gray-200 mb-4 flex items-center gap-2">
+              <Copy size={20} className="text-blue-400" />
               Mensaje generado
             </h3>
-            <div className="bg-white mb-4 dark:bg-[#141312] rounded-lg  overflow-hidden">
+            <div className="bg-[#141312] mb-4 rounded-lg  overflow-hidden">
               <textarea
                 readOnly
                 value={generatedOfferMessage}
-                className="w-full h-64 p-4 bg-transparent border-none resize-none font-mono text-sm text-gray-800 dark:text-gray-200 focus:outline-none"
+                className="w-full h-64 p-4 bg-transparent border-none resize-none font-mono text-sm text-gray-200 focus:outline-none"
               />
             </div>
             <button

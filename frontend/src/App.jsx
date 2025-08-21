@@ -77,7 +77,6 @@ function App() {
 
   return (
     <>
-      <style>{`input[type="date"]::-webkit-calendar-picker-indicator { display: none; -webkit-appearance: none; }`}</style>
       <div className="app">
         <Header
           user={user}

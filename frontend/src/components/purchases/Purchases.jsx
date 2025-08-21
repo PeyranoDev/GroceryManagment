@@ -39,10 +39,10 @@ const Purchases = ({
       <div className="space-y-6">
         <div className="flex justify-between items-center bg-[var(--color-bg-secondary)] p-4 rounded-lg border border-[var(--color-border)]">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900 dark:text-white">
+            <h1 className="text-2xl font-bold text-white">
               Registro de Compras
             </h1>
-            <p className="text-gray-500 dark:text-gray-400">
+            <p className="text-gray-400">
               Gestión de productos y promociones de venta
             </p>
           </div>
@@ -50,7 +50,7 @@ const Purchases = ({
             <div className="relative">
               <Calendar
                 size={18}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 dark:text-gray-500 pointer-events-none"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"
               />
               <Input
                 type="date"
@@ -61,7 +61,7 @@ const Purchases = ({
             </div>
             <button
               onClick={handleSave}
-              className="flex items-center gap-2 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-white font-semibold py-2 px-4 rounded-md"
+              className="flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-md"
             >
               <Save size={18} /> Guardar
             </button>
@@ -86,7 +86,7 @@ const Purchases = ({
         >
           <div className="overflow-x-auto">
             <table className="w-full text-sm text-left">
-              <thead className="text-xs text-gray-500 dark:text-gray-400 uppercase">
+              <thead className="text-xs text-gray-400 uppercase">
                 <tr>
                   <th className="p-2">Producto</th>
                   <th className="p-2">Unidad de Medida</th>

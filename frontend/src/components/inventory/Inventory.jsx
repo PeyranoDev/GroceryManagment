@@ -85,7 +85,7 @@ const Inventory = ({ inventory, onUpdateStock }) => {
                   <td className="p-3 font-medium text-[var(--color-text)]">
                     {p.name}
                   </td>
-                  <td className="p-3 font-mono text-gray-600 dark:text-gray-300">
+                  <td className="p-3 font-mono text-gray-300">
                     {p.stock} {p.unit}
                   </td>
                   <td className="p-3">
