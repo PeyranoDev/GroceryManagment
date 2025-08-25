@@ -109,7 +109,8 @@ const Inventory = () => {
           </Select>
         </div>
 
-        <div className="overflow-x-auto rounded-t-md">
+        {/* Desktop Table View */}
+        <div className="hidden md:block overflow-x-auto rounded-t-md">
           <table className="w-full text-sm text-left">
             <thead className="text-xs text-[var(--color-secondary-text)] uppercase bg-[var(--color-border)]">
               <tr>
@@ -154,6 +155,53 @@ const Inventory = () => {
             </tbody>
           </table>
           {filteredInventory.length === 0 && (
+            <div className="p-4 text-sm text-center text-[var(--color-secondary-text)]">
+              No se encontraron productos.
+            </div>
+          )}
+        </div>
+
+        {/* Mobile Card View */}
+        <div className="md:hidden space-y-4">
+          {filteredInventory.length > 0 ? (
+            filteredInventory.map((p) => (
+              <div
+                key={p.id}
+                className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg p-4 space-y-3"
+              >
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <h3 className="font-medium text-[var(--color-text)] text-base">
+                      {p.name}
+                    </h3>
+                    <p className="text-sm text-gray-400 font-mono mt-1">
+                      {p.stock} {p.unit}
+                    </p>
+                  </div>
+                  <StockStatus stock={p.stock} />
+                </div>
+                
+                <div className="text-sm">
+                  <span className="text-gray-400">Última actualización:</span>
+                  <p className="text-[var(--color-secondary-text)] mt-1">
+                    {p.lastUpdated
+                      ? new Date(p.lastUpdated).toLocaleString("es-AR")
+                      : "—"}
+                  </p>
+                </div>
+                
+                <div className="flex justify-center pt-2">
+                  <button
+                    onClick={() => handleAdjustClick(p)}
+                    className="flex items-center gap-2 btn-secondary w-full justify-center"
+                  >
+                    <Edit size={14} />
+                    Ajustar Stock
+                  </button>
+                </div>
+              </div>
+            ))
+          ) : (
             <div className="p-4 text-sm text-center text-[var(--color-secondary-text)]">
               No se encontraron productos.
             </div>

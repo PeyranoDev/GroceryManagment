@@ -158,7 +158,7 @@ const Sales = () => {
         }
       />
 
-      <div className="flex gap-6">
+      <div className="flex flex-col lg:flex-row gap-6">
         <SalesSummary
           subtotal={subtotal}
           total={total}
