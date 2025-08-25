@@ -1,7 +1,11 @@
 import { useState } from 'react';
 
 // API Service para conectar con el backend
-const API_BASE_URL = 'http://localhost:5277/api'; // Ajusta el puerto según tu configuración
+// En producción con Docker, el backend está en el mismo host pero puerto 5000
+// En desarrollo, puede estar en localhost:5000 o backend:5000 dependiendo del setup
+const API_BASE_URL = process.env.NODE_ENV === 'production' 
+  ? 'http://localhost:5000/api' 
+  : process.env.VITE_API_URL || 'http://localhost:5000/api';
 
 // Headers base para todas las peticiones
 const getHeaders = () => ({

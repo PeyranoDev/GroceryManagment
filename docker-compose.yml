@@ -1,0 +1,72 @@
+version: '3.8'
+
+services:
+  # Base de datos SQLite compartida (opcional, ya que SQLite es un archivo)
+  database:
+    image: alpine:latest
+    container_name: grocery-database
+    volumes:
+      - sqlite_data:/data
+    command: tail -f /dev/null # Mantener el contenedor vivo
+    networks:
+      - grocery-network
+
+  # Servicio Backend - API .NET
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: grocery-backend
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:5000
+      - ConnectionStrings__GroceryManagmentDBConnectionString=Data Source=/app/data/GroceryManagmentDB.db
+    volumes:
+      - sqlite_data:/app/data
+    networks:
+      - grocery-network
+    depends_on:
+      - database
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/api/health", "||", "exit", "1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Servicio Frontend - React + Nginx
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: grocery-frontend
+    restart: unless-stopped
+    ports:
+      - "80:80"
+      - "3000:80"  # Puerto alternativo para desarrollo
+    environment:
+      - REACT_APP_API_URL=http://localhost:5000/api
+    networks:
+      - grocery-network
+    depends_on:
+      - backend
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:80", "||", "exit", "1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  sqlite_data:
+    driver: local
+
+networks:
+  grocery-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16

@@ -2,6 +2,7 @@
 # This .gitignore file was automatically created by Microsoft(R) Visual Studio.
 ################################################################################
 
+# Backend - Visual Studio
 /backend/.vs
 /backend/Application/bin/
 /backend/Presentation/bin/
@@ -11,4 +12,54 @@
 /backend/Infraestructure/obj
 /backend/Domain/bin/
 /backend/Presentation/obj/
+
+# Frontend - Node.js
+/frontend/node_modules/
+/frontend/dist/
+/frontend/build/
+/frontend/.vite/
+
+# Docker
+*.log
+docker-compose.override.yml
+/volumes/
+
+# Variables de entorno sensibles
+.env
+.env.local
+.env.*.local
+
+# Logs del sistema
+logs/
+*.log
+
+# Archivos temporales
+tmp/
+temp/
+
+# Archivos de backup
+*.bak
+*.backup
+
+# Archivos del sistema operativo
+.DS_Store
+Thumbs.db
+Desktop.ini
+
+# IDEs y editores
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Base de datos local (se maneja en contenedores)
+*.db
+*.db-shm
+*.db-wal
+
+# Certificados y llaves
+*.pem
+*.key
+*.crt
 

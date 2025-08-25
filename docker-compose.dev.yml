@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  # Servicio Backend - Desarrollo con hot reload
+  backend-dev:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile.dev
+    container_name: grocery-backend-dev
+    restart: unless-stopped
+    ports:
+      - "5000:5000"
+      - "5001:5001"  # Puerto HTTPS para desarrollo
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ASPNETCORE_URLS=http://+:5000;https://+:5001
+      - ConnectionStrings__GroceryManagmentDBConnectionString=Data Source=/app/data/GroceryManagmentDB.db
+    volumes:
+      - ./backend:/app
+      - sqlite_data:/app/data
+      - dotnet_packages:/root/.nuget/packages
+    networks:
+      - grocery-network
+    stdin_open: true
+    tty: true
+
+  # Servicio Frontend - Desarrollo con Vite hot reload
+  frontend-dev:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile.dev
+    container_name: grocery-frontend-dev
+    restart: unless-stopped
+    ports:
+      - "5173:5173"  # Puerto por defecto de Vite
+    environment:
+      - VITE_API_URL=http://localhost:5000/api
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    networks:
+      - grocery-network
+    depends_on:
+      - backend-dev
+    stdin_open: true
+    tty: true
+
+  # Adminer para gestión de base de datos (opcional)
+  adminer:
+    image: adminer:latest
+    container_name: grocery-adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    networks:
+      - grocery-network
+
+volumes:
+  sqlite_data:
+    driver: local
+  dotnet_packages:
+    driver: local
+
+networks:
+  grocery-network:
+    driver: bridge
