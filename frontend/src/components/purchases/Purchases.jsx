@@ -37,17 +37,17 @@ const Purchases = ({
   return (
     <>
       <div className="space-y-6">
-        <div className="flex justify-between items-center bg-[var(--color-bg-secondary)] p-4 rounded-lg border border-[var(--color-border)]">
+        <div className="bg-[var(--color-bg-secondary)] p-4 rounded-lg border border-[var(--color-border)] space-y-4">
           <div>
-            <h1 className="text-2xl font-bold text-white">
+            <h1 className="text-xl sm:text-2xl font-bold text-white">
               Registro de Compras
             </h1>
-            <p className="text-gray-400">
+            <p className="text-gray-400 text-sm sm:text-base">
               Gestión de productos y promociones de venta
             </p>
           </div>
-          <div className="flex items-center gap-4">
-            <div className="relative">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="relative w-full sm:w-auto">
               <Calendar
                 size={18}
                 className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"
@@ -56,21 +56,23 @@ const Purchases = ({
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
-                className="pl-10"
+                className="pl-10 w-full sm:w-auto"
               />
             </div>
-            <button
-              onClick={handleSave}
-              className="flex items-center gap-2 bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-md"
-            >
-              <Save size={18} /> Guardar
-            </button>
-            <button
-              onClick={handleExport}
-              className="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md"
-            >
-              <Download size={18} /> Exportar
-            </button>
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
+              <button
+                onClick={handleSave}
+                className="flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-md"
+              >
+                <Save size={18} /> Guardar
+              </button>
+              <button
+                onClick={handleExport}
+                className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md"
+              >
+                <Download size={18} /> Exportar
+              </button>
+            </div>
           </div>
         </div>
         <Card
@@ -84,7 +86,8 @@ const Purchases = ({
             </button>
           }
         >
-          <div className="overflow-x-auto">
+          {/* Desktop Table View */}
+          <div className="hidden lg:block overflow-x-auto">
             <table className="w-full text-sm text-left">
               <thead className="text-xs text-gray-400 uppercase">
                 <tr>
@@ -109,6 +112,20 @@ const Purchases = ({
                 ))}
               </tbody>
             </table>
+          </div>
+
+          {/* Mobile Card View */}
+          <div className="lg:hidden space-y-4">
+            {products.map((p) => (
+              <ProductRow
+                key={p.id}
+                product={p}
+                onProductChange={onProductChange}
+                onRemoveProduct={onRemoveProduct}
+                onOpenPromoModal={handleOpenPromoModal}
+                isMobile={true}
+              />
+            ))}
           </div>
         </Card>
       </div>

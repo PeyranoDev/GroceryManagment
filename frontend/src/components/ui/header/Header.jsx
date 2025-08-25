@@ -1,9 +1,12 @@
 // src/components/Header/Header.jsx
-import { Leaf, LogIn, LogOut, Moon, Sun, UserCircle } from "lucide-react";
+import { Leaf, LogIn, LogOut, Moon, Sun, UserCircle, Menu, X } from "lucide-react";
 import { NavLink } from "react-router-dom";
+import { useState } from "react";
 import "./Header.css";
 
 const Header = ({ user, onLogin, onLogout }) => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
   const navItems = [
     { name: "Dashboard", path: "/" },
     { name: "Ventas", path: "/ventas" },
@@ -12,6 +15,14 @@ const Header = ({ user, onLogin, onLogout }) => {
     { name: "Inventario", path: "/inventario" },
     { name: "Reportes", path: "/reportes" },
   ];
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+  };
 
   return (
     <header className="header-container">
@@ -24,7 +35,7 @@ const Header = ({ user, onLogin, onLogout }) => {
               <span className="header-logo-text">VerduSoft</span>
             </div>
 
-            {/* Navegación */}
+            {/* Navegación Desktop */}
             <nav className="header-nav">
               {navItems.map((item) => (
                 <NavLink
@@ -39,6 +50,15 @@ const Header = ({ user, onLogin, onLogout }) => {
               ))}
             </nav>
           </div>
+
+          {/* Mobile Menu Button */}
+          <button 
+            className="mobile-menu-button md:hidden"
+            onClick={toggleMobileMenu}
+            aria-label="Toggle mobile menu"
+          >
+            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+          </button>
 
           {/* Usuario */}
           <div className="header-right-section">
@@ -63,6 +83,65 @@ const Header = ({ user, onLogin, onLogout }) => {
             )}
           </div>
         </div>
+
+        {/* Mobile Navigation Menu */}
+        {isMobileMenuOpen && (
+          <div className="mobile-nav-overlay">
+            <nav className="mobile-nav">
+              {navItems.map((item) => (
+                <NavLink
+                  key={item.name}
+                  to={item.path}
+                  className={({ isActive }) =>
+                    `mobile-nav-item ${isActive ? "mobile-nav-item-active" : "mobile-nav-item-inactive"}`
+                  }
+                  onClick={closeMobileMenu}
+                >
+                  {item.name}
+                </NavLink>
+              ))}
+              
+              {/* Mobile Auth Section */}
+              <div className="mobile-auth-section">
+                {user ? (
+                  <div className="mobile-user-info">
+                    <div className="flex items-center gap-2 mb-4">
+                      <UserCircle size={24} className="text-gray-400" />
+                      <span className="text-gray-200">{user.name}</span>
+                    </div>
+                    <button 
+                      onClick={() => {
+                        onLogout();
+                        closeMobileMenu();
+                      }} 
+                      className="mobile-logout-button"
+                    >
+                      <LogOut size={16} /> Cerrar Sesión
+                    </button>
+                  </div>
+                ) : (
+                  <div className="mobile-auth-buttons">
+                    <button 
+                      onClick={() => {
+                        onLogin();
+                        closeMobileMenu();
+                      }} 
+                      className="mobile-login-button"
+                    >
+                      <LogIn size={16} /> Iniciar Sesión
+                    </button>
+                    <button 
+                      onClick={closeMobileMenu}
+                      className="mobile-register-button"
+                    >
+                      Registrarse
+                    </button>
+                  </div>
+                )}
+              </div>
+            </nav>
+          </div>
+        )}
       </div>
     </header>
   );

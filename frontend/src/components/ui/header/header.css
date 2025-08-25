@@ -41,7 +41,7 @@
 }
 
 .header-right-section {
-  @apply flex items-center gap-4;
+  @apply hidden md:flex items-center gap-4;
 }
 
 .theme-toggle-button {
@@ -66,4 +66,53 @@
 
 .register-button {
   @apply text-sm font-semibold bg-green-700 text-white py-2 px-3 rounded-md;
+}
+
+/* Mobile Menu Styles */
+.mobile-menu-button {
+  @apply p-2 rounded-md text-gray-300 hover:bg-gray-700 hover:text-white transition-colors;
+}
+
+.mobile-nav-overlay {
+  @apply md:hidden absolute top-full left-0 right-0 bg-[#262422] border-t border-[#141312] shadow-lg z-50;
+}
+
+.mobile-nav {
+  @apply flex flex-col py-4;
+}
+
+.mobile-nav-item {
+  @apply block px-6 py-3 text-base font-medium transition-colors border-b border-[#141312]/50;
+}
+
+.mobile-nav-item-active {
+  @apply bg-green-900/50 text-green-400;
+}
+
+.mobile-nav-item-inactive {
+  @apply text-gray-300 hover:bg-gray-700 hover:text-white;
+}
+
+.mobile-auth-section {
+  @apply mt-4 pt-4 px-6 border-t border-[#141312];
+}
+
+.mobile-user-info {
+  @apply space-y-4;
+}
+
+.mobile-logout-button {
+  @apply flex items-center gap-2 w-full px-4 py-2 text-sm font-medium text-red-400 hover:bg-red-900/20 rounded-md transition-colors;
+}
+
+.mobile-auth-buttons {
+  @apply space-y-3;
+}
+
+.mobile-login-button {
+  @apply flex items-center justify-center gap-2 w-full px-4 py-2 text-sm font-semibold text-gray-300 hover:text-green-400 border border-gray-600 rounded-md transition-colors;
+}
+
+.mobile-register-button {
+  @apply w-full px-4 py-2 text-sm font-semibold bg-green-700 text-white rounded-md hover:bg-green-600 transition-colors;
 }
