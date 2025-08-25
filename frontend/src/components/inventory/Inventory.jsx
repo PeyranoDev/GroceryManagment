@@ -1,12 +1,14 @@
 import { useMemo, useState } from "react";
 import { Edit, Package, Search } from "lucide-react";
+import { useInventory } from "../../hooks/useInventory";
 import AdjustStockModal from "./AdjustStockModal";
 import Card from "../ui/card/Card";
 import Input from "../ui/input/Input";
 import Select from "../ui/select/Select";
 import StockStatus from "./StockStatus";
 
-const Inventory = ({ inventory, onUpdateStock }) => {
+const Inventory = () => {
+  const { inventory, loading, error, updateStock, fetchInventory } = useInventory();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -14,12 +16,13 @@ const Inventory = ({ inventory, onUpdateStock }) => {
 
   const filteredInventory = useMemo(() => {
     return inventory
-      .filter((p) =>
-        p.name.toLowerCase().includes(searchTerm.trim().toLowerCase())
+      .filter((item) =>
+        (item.product?.name || item.name || '').toLowerCase().includes(searchTerm.trim().toLowerCase())
       )
-      .filter((p) => {
-        if (statusFilter === "low") return p.stock > 0 && p.stock <= 10;
-        if (statusFilter === "out") return p.stock === 0;
+      .filter((item) => {
+        const stock = item.stock || 0;
+        if (statusFilter === "low") return stock > 0 && stock <= 10;
+        if (statusFilter === "out") return stock === 0;
         return true;
       });
   }, [inventory, searchTerm, statusFilter]);
@@ -34,9 +37,43 @@ const Inventory = ({ inventory, onUpdateStock }) => {
     setSelectedProduct(null);
   };
 
-  const handleSaveStock = (productId, newStock) => {
-    onUpdateStock(productId, newStock);
+  const handleSaveStock = async (productId, newStock) => {
+    try {
+      await updateStock(productId, newStock);
+      handleCloseModal();
+    } catch (error) {
+      alert(`Error al ajustar stock: ${error.message}`);
+    }
   };
+
+  const handleFilterChange = (searchTerm, statusFilter) => {
+    // Aplicar filtros localmente o hacer una nueva consulta al backend
+    const filters = {};
+    if (searchTerm) filters.searchTerm = searchTerm;
+    if (statusFilter !== 'all') filters.statusFilter = statusFilter;
+    
+    if (Object.keys(filters).length > 0) {
+      fetchInventory(filters);
+    } else {
+      fetchInventory();
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-lg text-gray-400">Cargando inventario...</div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-lg text-red-400">Error: {error}</div>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -51,12 +88,19 @@ const Inventory = ({ inventory, onUpdateStock }) => {
           <Input
             placeholder="Buscar producto por nombre..."
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              // Aplicar filtro después de un breve delay para evitar muchas consultas
+              setTimeout(() => handleFilterChange(e.target.value, statusFilter), 300);
+            }}
             icon={<Search size={18} className="text-gray-400" />}
           />
           <Select
             value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              handleFilterChange(searchTerm, e.target.value);
+            }}
             className="max-w-xs"
           >
             <option value="all">Todos los estados</option>
@@ -78,28 +122,28 @@ const Inventory = ({ inventory, onUpdateStock }) => {
               </tr>
             </thead>
             <tbody>
-              {filteredInventory.map((p) => (
+              {filteredInventory.map((item) => (
                 <tr
-                  key={p.id}
+                  key={item.id}
                   className="border-b border-[var(--color-border)]"
                 >
                   <td className="p-3 font-medium text-[var(--color-text)]">
-                    {p.name}
+                    {item.product?.name || item.name || 'Producto sin nombre'}
                   </td>
                   <td className="p-3 font-mono text-gray-300">
-                    {p.stock} {p.unit}
+                    {item.stock || 0} {item.product?.unit || item.unit || 'u'}
                   </td>
                   <td className="p-3">
-                    <StockStatus stock={p.stock} />
+                    <StockStatus stock={item.stock || 0} />
                   </td>
                   <td className="p-3 text-[var(--color-secondary-text)]">
-                    {p.lastUpdated
-                      ? new Date(p.lastUpdated).toLocaleString("es-AR")
+                    {item.lastUpdated
+                      ? new Date(item.lastUpdated).toLocaleString("es-AR")
                       : "—"}
                   </td>
                   <td className="p-3 flex justify-center">
                     <button
-                      onClick={() => handleAdjustClick(p)}
+                      onClick={() => handleAdjustClick(item)}
                       className="flex items-center gap-2 btn-secondary"
                     >
                       <Edit size={14} />

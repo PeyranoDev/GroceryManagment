@@ -1,5 +1,6 @@
-import { useMemo, useState, useEffect } from "react";
-import { mockSaleProducts } from "../../data/products";
+import { useState, useEffect } from "react";
+import { useProducts } from "../../hooks/useProducts";
+import { useSales, useCart } from "../../hooks/useSales";
 import SalesHeader from "./SalesHeader";
 import ProductSearch from "./ProductSearch";
 import SalesSummary from "./SalesSummary";
@@ -16,6 +17,20 @@ const Sales = () => {
     return `${hours}:${minutes}`;
   };
 
+  // Hooks de datos
+  const { products, loading: productsLoading, searchProducts } = useProducts();
+  const { createSaleFromCart, generateWhatsAppMessage, loading: salesLoading } = useSales();
+  const {
+    cart,
+    addProductToCart,
+    removeFromCart,
+    updateQuantity,
+    togglePromotion,
+    clearCart,
+    calculateTotals
+  } = useCart();
+
+  // Estados locales
   const [details, setDetails] = useState({
     date: new Date().toISOString().slice(0, 10),
     time: getCurrentTime(),
@@ -25,10 +40,10 @@ const Sales = () => {
     isOnline: false,
     deliveryCost: 5000,
   });
-  const [cart, setCart] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
   const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
+  const [lastSaleId, setLastSaleId] = useState(null);
 
   // Actualizar la hora automáticamente cada minuto
   useEffect(() => {
@@ -48,74 +63,26 @@ const Sales = () => {
   const handleSearchChange = (e) => {
     const term = e.target.value;
     setSearchTerm(term);
-    if (term.trim())
-      setSearchResults(
-        mockSaleProducts.filter((p) =>
-          p.name.toLowerCase().includes(term.toLowerCase())
-        )
-      );
-    else setSearchResults([]);
+    if (term.trim()) {
+      const results = searchProducts(term);
+      setSearchResults(results);
+    } else {
+      setSearchResults([]);
+    }
   };
 
-  const addProductToCart = (product) => {
-    setCart((prev) => {
-      const existing = prev.find((item) => item.product.id === product.id);
-      if (existing)
-        return prev.map((item) =>
-          item.product.id === product.id
-            ? { ...item, quantity: item.quantity + 1 }
-            : item
-        );
-      return [
-        ...prev,
-        { product, quantity: 1, promotionApplied: !!product.promotion },
-      ];
-    });
+  const handleAddProductToCart = (product) => {
+    addProductToCart(product);
     setSearchTerm("");
     setSearchResults([]);
   };
 
-  const removeFromCart = (productId) =>
-    setCart((prev) => prev.filter((item) => item.product.id !== productId));
-
-  const updateQuantity = (productId, quantity) =>
-    setCart((prev) =>
-      prev.map((item) =>
-        item.product.id === productId
-          ? { ...item, quantity: quantity > 0 ? quantity : 1 }
-          : item
-      )
-    );
-
-  const togglePromotion = (productId) =>
-    setCart((prev) =>
-      prev.map((item) =>
-        item.product.id === productId
-          ? { ...item, promotionApplied: !item.promotionApplied }
-          : item
-      )
-    );
-
-  const { subtotal, total } = useMemo(() => {
-    let sub = 0;
-    cart.forEach((item) => {
-      if (item.promotionApplied && item.product.promotion) {
-        const promo = item.product.promotion;
-        const promoSets = Math.floor(item.quantity / promo.quantity);
-        const remainingQty = item.quantity % promo.quantity;
-        sub += promoSets * promo.price + remainingQty * item.product.unitPrice;
-      } else {
-        sub += item.quantity * item.product.unitPrice;
-      }
-    });
-    const deliveryCost = details.isOnline
-      ? parseFloat(details.deliveryCost || 0)
-      : 0;
-    return { subtotal: sub, total: sub + deliveryCost };
-  }, [cart, details.isOnline, details.deliveryCost]);
+  const { subtotal, total } = calculateTotals(
+    details.isOnline ? details.deliveryCost : 0
+  );
 
   const resetSale = () => {
-    setCart([]);
+    clearCart();
     setDetails({
       date: new Date().toISOString().slice(0, 10),
       time: getCurrentTime(),
@@ -123,23 +90,54 @@ const Sales = () => {
       paymentMethod: "Efectivo",
       observations: "",
       isOnline: false,
-      deliveryCost: 0,
+      deliveryCost: 5000,
     });
+    setLastSaleId(null);
   };
 
-  const finalizeSale = () => {
-    console.log("Finalizando Venta:", { details, cart, total });
-    alert(
-      `Venta ${
-        details.isOnline ? "online" : "presencial"
-      } finalizada. Revisa la consola.`
-    );
-    resetSale();
+  const finalizeSale = async () => {
+    if (cart.length === 0) {
+      alert("El carrito está vacío");
+      return;
+    }
+
+    try {
+      const cartData = {
+        userId: 1, // ID temporal, deberías usar el usuario actual
+        cart: cart,
+        details: details
+      };
+
+      const newSale = await createSaleFromCart(cartData);
+      setLastSaleId(newSale.id);
+      
+      alert(
+        `Venta ${
+          details.isOnline ? "online" : "presencial"
+        } #${newSale.id} finalizada exitosamente.`
+      );
+      
+      resetSale();
+    } catch (error) {
+      alert(`Error al finalizar la venta: ${error.message}`);
+    }
   };
 
   const generateSaleMessage = () => {
-    setShowWhatsAppModal(true);
+    if (lastSaleId) {
+      setShowWhatsAppModal(true);
+    } else {
+      alert("Primero debes finalizar una venta para generar el mensaje de WhatsApp");
+    }
   };
+
+  if (productsLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="text-lg text-gray-400">Cargando productos...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -155,7 +153,7 @@ const Sales = () => {
             searchTerm={searchTerm}
             searchResults={searchResults}
             onSearchChange={handleSearchChange}
-            onAddProduct={addProductToCart}
+            onAddProduct={handleAddProductToCart}
           />
         }
       />
@@ -173,19 +171,21 @@ const Sales = () => {
           onSave={finalizeSale}
           onClear={resetSale}
           onShowWhatsApp={generateSaleMessage}
-          isLoading={false}
+          isLoading={salesLoading}
         />
       </div>
 
       {/* Modal de WhatsApp */}
-      {showWhatsAppModal && (
+      {showWhatsAppModal && lastSaleId && (
         <WhatsAppMessage
+          saleId={lastSaleId}
           cart={cart}
           details={details}
           total={total}
           deliveryCost={details ? parseFloat(details.deliveryCost || 0) : 0}
           isOpen={showWhatsAppModal}
           onClose={() => setShowWhatsAppModal(false)}
+          generateWhatsAppMessage={generateWhatsAppMessage}
         />
       )}
     </div>
