@@ -25,7 +25,7 @@ const Modal = ({ isOpen, onClose, title, children }) => {
           </h3>
           <button 
             onClick={onClose} 
-            className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 p-1 rounded"
+            className="text-gray-400 hover:text-gray-200 p-1 rounded"
             aria-label="Cerrar modal"
           >
             <X size={20} />

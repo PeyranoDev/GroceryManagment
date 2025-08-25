@@ -19,7 +19,7 @@ export const ProductRow = ({
     onProductChange(product.id, { ...product, [field]: value });
 
   return (
-    <tr className="border-b border-gray-200 dark:border-[#141312]">
+    <tr className="border-b border-[#141312]">
       <td className="p-2 w-1/4">
         <Input
           placeholder="Nombre del producto"
@@ -53,13 +53,13 @@ export const ProductRow = ({
           icon={<DollarSign size={14} className="text-gray-400" />}
         />
       </td>
-      <td className="p-2 w-[12%] text-center font-mono text-gray-700 dark:text-gray-300">
+      <td className="p-2 w-[12%] text-center font-mono text-gray-300">
         ${unitPrice} / {displayUnit}
       </td>
       <td className="p-2 w-[15%] text-center">
         <button
           onClick={() => onOpenPromoModal(product)}
-          className="flex items-center justify-center w-full gap-2 bg-gray-100 dark:bg-gray-700/50 text-gray-700 dark:text-gray-300 hover:bg-gray-200 dark:hover:bg-gray-700 font-semibold py-1 px-3 rounded-md text-xs"
+          className="flex items-center justify-center w-full gap-2 bg-gray-700/50 text-gray-300 hover:bg-gray-700 font-semibold py-1 px-3 rounded-md text-xs"
         >
           <Settings2 size={14} />
           <span>Gestionar ({product.promotions.length})</span>
@@ -68,7 +68,7 @@ export const ProductRow = ({
       <td className="p-2 w-[5%] text-center">
         <button
           onClick={() => onRemoveProduct(product.id)}
-          className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-500"
+          className="text-red-400 hover:text-red-500"
         >
           <Trash2 size={20} />
         </button>

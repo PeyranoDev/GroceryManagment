@@ -16,7 +16,7 @@ const SalesCart = ({
     >
       <div className="overflow-x-auto">
         <table className="w-full text-sm text-left">
-          <thead className="text-xs text-gray-500 dark:text-gray-400 uppercase">
+          <thead className="text-xs text-gray-400 uppercase">
             <tr>
               <th className="p-3">Producto</th>
               <th className="p-3">Cantidad</th>

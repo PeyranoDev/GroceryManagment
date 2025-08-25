@@ -47,7 +47,7 @@ const Header = ({ user, onLogin, onLogout }) => {
                 <span className="user-name">{user.name}</span>
                 <UserCircle
                   size={28}
-                  className="text-gray-500 dark:text-gray-400"
+                  className="text-gray-400"
                 />
                 <button onClick={onLogout} className="theme-toggle-button">
                   <LogOut size={20} />

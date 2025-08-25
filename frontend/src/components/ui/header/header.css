@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
 .header-container {
-  @apply bg-white dark:bg-[#262422] shadow-md border-b border-gray-200 dark:border-[#141312] sticky top-0 z-10;
+  @apply bg-[#262422] shadow-md border-b border-[#141312] sticky top-0 z-10;
 }
 
 .header-inner {
@@ -21,7 +21,7 @@
 }
 
 .header-logo-text {
-  @apply font-bold text-xl text-gray-900 dark:text-white;
+  @apply font-bold text-xl text-white;
 }
 
 .header-nav {
@@ -33,11 +33,11 @@
 }
 
 .nav-item-active {
-  @apply bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-400;
+  @apply bg-green-900/50 text-green-400;
 }
 
 .nav-item-inactive {
-  @apply text-gray-500 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-700;
+  @apply text-gray-300 hover:bg-gray-700;
 }
 
 .header-right-section {
@@ -45,7 +45,7 @@
 }
 
 .theme-toggle-button {
-  @apply p-2 rounded-full text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700;
+  @apply p-2 rounded-full text-gray-400 hover:bg-gray-700;
 }
 
 .user-info-container {
@@ -53,7 +53,7 @@
 }
 
 .user-name {
-  @apply font-medium text-gray-800 dark:text-gray-200;
+  @apply font-medium text-gray-200;
 }
 
 .auth-button-group {
@@ -61,9 +61,9 @@
 }
 
 .login-button {
-  @apply flex items-center gap-2 text-sm font-semibold text-gray-600 dark:text-gray-300 hover:text-green-600 dark:hover:text-green-400 py-2 px-3 rounded-md;
+  @apply flex items-center gap-2 text-sm font-semibold text-gray-300 hover:text-green-400 py-2 px-3 rounded-md;
 }
 
 .register-button {
-  @apply text-sm font-semibold bg-green-600 hover:bg-green-700 text-white py-2 px-3 rounded-md;
+  @apply text-sm font-semibold bg-green-700 text-white py-2 px-3 rounded-md;
 }

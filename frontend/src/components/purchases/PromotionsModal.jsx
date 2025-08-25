@@ -57,10 +57,10 @@ export const PromotionsModal = ({ isOpen, onClose, product, onSave }) => {
                 handlePromotionChange(index, "quantity", e.target.value)
               }
             />
-            <span className="font-semibold text-gray-600 dark:text-gray-300">
+            <span className="font-semibold text-gray-300">
               {displayUnit}
             </span>
-            <span className="text-gray-500 dark:text-gray-400">=</span>
+            <span className="text-gray-400">=</span>
             <Input
               type="number"
               placeholder="Precio"
@@ -73,7 +73,7 @@ export const PromotionsModal = ({ isOpen, onClose, product, onSave }) => {
             />
             <button
               onClick={() => handleRemovePromotion(index)}
-              className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-500 p-2 rounded-md hover:bg-red-100 dark:hover:bg-red-900/50"
+              className="text-red-400 hover:text-red-500 p-2 rounded-md hover:bg-red-900/50"
             >
               <Trash2 size={18} />
             </button>
@@ -81,13 +81,13 @@ export const PromotionsModal = ({ isOpen, onClose, product, onSave }) => {
         ))}
         <button
           onClick={handleAddPromotion}
-          className="w-full mt-2 bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-700 dark:text-gray-300 font-semibold text-sm py-2 px-4 rounded-md flex items-center justify-center gap-2"
+          className="w-full mt-2 bg-gray-700 hover:bg-gray-600 text-gray-300 font-semibold text-sm py-2 px-4 rounded-md flex items-center justify-center gap-2"
         >
           <Plus size={16} />
           <span>Agregar Promoción</span>
         </button>
       </div>
-      <div className="p-4 bg-[var(--color-bg-secondary)] border-gray-200 dark:border-gray-700 flex justify-end gap-3">
+      <div className="p-4 bg-[var(--color-bg-secondary)] border-gray-700 flex justify-end gap-3">
         <button
           onClick={onClose}
           className="btn-secondary !bg-gray-700"

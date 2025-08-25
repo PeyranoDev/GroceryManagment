@@ -10,22 +10,22 @@ const SalesSummary = ({
   return (
     <Card title="Resumen de Venta">
       <div className="space-y-2">
-        <div className="flex justify-between text-gray-600 dark:text-gray-300">
+        <div className="flex justify-between text-gray-300">
           <p>Subtotal:</p>
           <p>${subtotal.toFixed(2)}</p>
         </div>
         {isOnline && deliveryCost > 0 && (
-          <div className="flex justify-between text-gray-600 dark:text-gray-300">
+          <div className="flex justify-between text-gray-300">
             <p>Costo de Envío:</p>
             <p>${parseFloat(deliveryCost).toFixed(2)}</p>
           </div>
         )}
-        <div className="flex justify-between text-xl font-bold text-gray-900 dark:text-white border-t border-gray-200 dark:border-gray-600 pt-2 mt-2">
+        <div className="flex justify-between text-xl font-bold text-white border-t border-gray-600 pt-2 mt-2">
           <p>Total:</p>
           <p>${total.toFixed(2)}</p>
         </div>
       </div>
-      <div className="mt-4 p-3 bg-blue-50 dark:bg-blue-900/30 rounded-lg flex items-start gap-2 text-blue-800 dark:text-blue-300 text-sm">
+      <div className="mt-4 p-3 bg-blue-900/30 rounded-lg flex items-start gap-2 text-blue-300 text-sm">
         <Info size={18} className="flex-shrink-0 mt-0.5" />
         <p>
           {isOnline

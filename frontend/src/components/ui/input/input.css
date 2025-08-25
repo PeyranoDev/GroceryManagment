@@ -2,8 +2,7 @@
 
 input {
   @apply py-2 w-full border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] 
-  bg-gray-100 border-gray-300 text-gray-900 placeholder-gray-500
-  dark:bg-[#141312] dark:border-[#141312] dark:text-white  dark:placeholder-gray-400 ;
+  bg-[#141312] border-[#141312] text-white placeholder-gray-400 ;
 }
 
 /* Ocultar los botones de incrementar/decrementar en inputs type="number" */
