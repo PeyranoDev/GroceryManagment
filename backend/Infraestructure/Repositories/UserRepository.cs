@@ -1,6 +1,6 @@
 ﻿using Domain.Entities;
 using Domain.Repositories;
-using Infraestructure.Tenancy;
+using Domain.Tenancy;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infraestructure.Repositories

@@ -12,5 +12,6 @@ namespace Domain.Repositories
         Task Update(T entity);
         Task Delete(T entity);
         Task SaveChanges();
+        Task<IReadOnlyList<T>> GetAllByGroceryId(int groceryId);
     }
 }

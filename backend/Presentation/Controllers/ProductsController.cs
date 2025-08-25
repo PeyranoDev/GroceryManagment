@@ -1,7 +1,6 @@
 using Application.Schemas;
 using Application.Schemas.Products;
 using Application.Services.Interfaces;
-using Infraestructure.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Filters;
 
@@ -13,12 +12,10 @@ namespace Presentation.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly IProductService _productService;
-        private readonly ITenantProvider _tenantProvider;
 
-        public ProductsController(IProductService productService, ITenantProvider tenantProvider)
+        public ProductsController(IProductService productService)
         {
             _productService = productService;
-            _tenantProvider = tenantProvider;
         }
 
         /// <summary>
@@ -41,10 +38,6 @@ namespace Presentation.Controllers
         public async Task<ActionResult<ApiResponse<ProductForResponseDto>>> GetById(int id)
         {
             var product = await _productService.GetById(id);
-            
-            if (product != null && product.GroceryId != _tenantProvider.CurrentGroceryId)
-                return NotFound(ApiResponse<ProductForResponseDto>.ErrorResponse("Producto no encontrado."));
-
             return Ok(ApiResponse<ProductForResponseDto>.SuccessResponse(
                 product!, 
                 "Producto obtenido exitosamente"
@@ -80,10 +73,6 @@ namespace Presentation.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ApiResponse<ProductForResponseDto>.ErrorResponse("Datos de entrada inválidos."));
 
-            var existingProduct = await _productService.GetById(id);
-            if (existingProduct.GroceryId != _tenantProvider.CurrentGroceryId)
-                return NotFound(ApiResponse<ProductForResponseDto>.ErrorResponse("Producto no encontrado."));
-
             var product = await _productService.Update(id, dto);
             return Ok(ApiResponse<ProductForResponseDto>.SuccessResponse(
                 product!, 
@@ -97,10 +86,6 @@ namespace Presentation.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<ApiResponse>> Delete(int id)
         {
-            var existingProduct = await _productService.GetById(id);
-            if (existingProduct.GroceryId != _tenantProvider.CurrentGroceryId)
-                return NotFound(ApiResponse.ErrorResponse("Producto no encontrado."));
-
             await _productService.Delete(id);
             return Ok(ApiResponse.SuccessResponse("Producto eliminado exitosamente"));
         }

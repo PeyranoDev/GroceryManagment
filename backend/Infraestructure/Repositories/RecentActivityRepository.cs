@@ -1,6 +1,6 @@
 using Domain.Entities;
 using Domain.Repositories;
-using Infraestructure.Tenancy;
+using Domain.Tenancy;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infraestructure.Repositories
@@ -12,6 +12,7 @@ namespace Infraestructure.Repositories
 
         public async Task<IReadOnlyList<RecentActivity>> GetRecent(int count = 10)
             => await _ctx.RecentActivities.AsNoTracking()
+                .Where(a => a.GroceryId == _tenant.CurrentGroceryId)
                 .OrderByDescending(a => a.Date)
                 .Take(count)
                 .ToListAsync();

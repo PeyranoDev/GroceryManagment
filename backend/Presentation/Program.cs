@@ -2,14 +2,24 @@ using Application.Mapping;
 using Application.Services.Implementations;
 using Application.Services.Interfaces;
 using Domain.Repositories;
+using Domain.Tenancy;
 using Infraestructure;
 using Infraestructure.Repositories;
 using Infraestructure.Tenancy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
+using Presentation.Filters;
 using Presentation.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowAllOrigins",
+        builder => builder.AllowAnyOrigin() // Allows all origins
+                          .AllowAnyMethod() // Allows all HTTP methods (GET, POST, PUT, DELETE, etc.)
+                          .AllowAnyHeader()); // Allows all headers
+});
 
 builder.Services.AddControllers();
 
@@ -29,8 +39,27 @@ builder.Services.AddSwaggerGen(c =>
         Type = SecuritySchemeType.ApiKey,
         In = ParameterLocation.Header,
         Name = "X-Grocery-Id",
-        Description = "ID del grocery/verdulería para multi-tenancy"
+        Description = "ID del grocery/verdulería para multi-tenancy (requerido para todas las operaciones)"
     });
+
+    // Hacer que el header X-Grocery-Id sea requerido para todas las operaciones
+    c.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "GroceryId"
+                }
+            },
+            new string[] { }
+        }
+    });
+
+    // Agregar operación para filtrar que omita ciertos endpoints que no requieren grocery ID
+    c.OperationFilter<GroceryIdHeaderOperationFilter>();
 });
 
 // AutoMapper
@@ -43,6 +72,8 @@ builder.Services.AddAutoMapper(cfg =>
     cfg.AddProfile<GroceryProfile>();
     cfg.AddProfile<UserProfile>();
     cfg.AddProfile<RecentActivityProfile>();
+    cfg.AddProfile<PurchaseProfile>();
+    cfg.AddProfile<DashboardProfile>();
 });
 
 builder.Services.AddHttpContextAccessor();
@@ -62,6 +93,7 @@ builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
 builder.Services.AddScoped<ISaleRepository, SaleRepository>();
 builder.Services.AddScoped<IGroceryRepository, GroceryRepository>();
 builder.Services.AddScoped<IRecentActivityRepository, RecentActivityRepository>();
+builder.Services.AddScoped<IPurchaseRepository, PurchaseRepository>();
 
 // Services
 builder.Services.AddScoped<IUserService, UserService>();
@@ -71,6 +103,9 @@ builder.Services.AddScoped<IInventoryService, InventoryService>();
 builder.Services.AddScoped<ISaleService, SaleService>();
 builder.Services.AddScoped<IGroceryService, GroceryService>();
 builder.Services.AddScoped<IRecentActivityService, RecentActivityService>();
+builder.Services.AddScoped<IPurchaseService, PurchaseService>();
+builder.Services.AddScoped<IDashboardService, DashboardService>();
+builder.Services.AddScoped<IReportService, ReportService>();
 
 // Password hasher
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
@@ -87,8 +122,17 @@ if (app.Environment.IsDevelopment())
     {
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Grocery Management API v1");
         c.RoutePrefix = ""; 
+        
+        // Configuración adicional para una mejor experiencia de usuario
+        c.DisplayRequestDuration();
+        c.EnableDeepLinking();
+        c.EnableFilter();
+        c.ShowExtensions();
+        c.EnableValidator();
     });
 }
+
+app.UseCors("AllowAllOrigins");
 
 app.UseHttpsRedirection();
 

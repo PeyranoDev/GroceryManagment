@@ -1,3 +1,4 @@
+using Domain.Tenancy;
 using Infraestructure.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;

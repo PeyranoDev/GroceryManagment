@@ -1,78 +1,135 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Copy, MessageCircle, Check } from "lucide-react";
 import Modal from "../ui/modal/Modal";
 
 const WhatsAppMessage = ({ 
+  saleId,
   cart,
   details,
   total,
   deliveryCost,
   isOpen,
-  onClose 
+  onClose,
+  generateWhatsAppMessage
 }) => {
   const [copied, setCopied] = useState(false);
+  const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const generateMessage = () => {
+  // Generar mensaje usando la API del backend cuando se abra el modal
+  useEffect(() => {
+    if (isOpen && saleId && generateWhatsAppMessage) {
+      const fetchMessage = async () => {
+        setLoading(true);
+        try {
+          const response = await generateWhatsAppMessage(saleId, details);
+          setMessage(response.message || generateFallbackMessage());
+        } catch (error) {
+          console.error('Error generating WhatsApp message:', error);
+          setMessage(generateFallbackMessage());
+        } finally {
+          setLoading(false);
+        }
+      };
+      
+      fetchMessage();
+    } else if (isOpen) {
+      // Si no hay saleId, usar el mensaje de fallback
+      setMessage(generateFallbackMessage());
+    }
+  }, [isOpen, saleId, details, generateWhatsAppMessage]);
+
+  const generateFallbackMessage = () => {
     if (!details || cart.length === 0) return "";
 
     const customerName = details.client || "Cliente";
-    const address = details.address || "";
-    const phone = details.phone || "";
     
-    let message = `¡Hola ${customerName}! 👋\n\n`;
-    message += `Resumen de tu pedido:\n\n`;
+    let message = `🛒 *Tomillo Verdulería*\n\n`;
+    message += `📅 Fecha: ${new Date(details.date).toLocaleDateString('es-AR')}\n`;
+    message += `🕐 Hora: ${details.time}\n`;
+    
+    if (customerName) {
+      message += `👤 Cliente: ${customerName}\n`;
+    }
+    
+    message += `� Método de pago: ${details.paymentMethod}\n`;
+    
+    if (details.isOnline) {
+      message += `🚚 Venta Online - Costo de envío: $${deliveryCost.toFixed(0)}\n`;
+    }
+    
+    message += `\n📋 *Detalle de productos:*\n`;
     
     // Lista de productos
-    cart.forEach((item, index) => {
-      const itemTotal = (item.quantity * item.product.unitPrice).toFixed(2);
-      message += `${index + 1}. ${item.product.emoji} *${item.product.name}*\n`;
-      message += `   Cantidad: ${item.quantity} ${item.product.unit}\n`;
-      message += `   Precio: $${item.product.unitPrice}/${item.product.unit}\n`;
-      message += `   Subtotal: $${itemTotal}\n\n`;
+    cart.forEach((item) => {
+      const itemPrice = item.promotionApplied && item.product.promotion 
+        ? calculatePromotionPrice(item) 
+        : item.quantity * item.product.unitPrice;
+      
+      message += `• ${item.product.name} x${item.quantity} - $${itemPrice.toFixed(0)}\n`;
     });
     
     // Resumen de costos
-    const subtotal = cart.reduce((sum, item) => sum + (item.quantity * item.product.unitPrice), 0);
-    message += `📋 *RESUMEN:*\n`;
-    message += `Subtotal: $${subtotal.toFixed(2)}\n`;
+    const subtotal = cart.reduce((sum, item) => {
+      if (item.promotionApplied && item.product.promotion) {
+        return sum + calculatePromotionPrice(item);
+      }
+      return sum + (item.quantity * item.product.unitPrice);
+    }, 0);
     
-    if (deliveryCost > 0) {
-      message += `Envío: $${parseFloat(deliveryCost).toFixed(2)}\n`;
+    message += `\n💰 *Subtotal:* $${subtotal.toFixed(0)}\n`;
+    
+    if (details.isOnline && deliveryCost > 0) {
+      message += `🚚 *Envío:* $${deliveryCost.toFixed(0)}\n`;
+      message += `💰 *Total:* $${(subtotal + deliveryCost).toFixed(0)}\n`;
+    } else {
+      message += `� *Total:* $${subtotal.toFixed(0)}\n`;
     }
     
-    message += `*Total: $${total.toFixed(2)}*\n\n`;
-    
-    // Información de entrega
-    if (address) {
-      message += `📍 *Dirección de entrega:*\n${address}\n\n`;
+    if (details.observations) {
+      message += `\n� *Observaciones:* ${details.observations}`;
     }
     
-    if (phone) {
-      message += `📞 *Teléfono de contacto:* ${phone}\n\n`;
-    }
-    
-    message += `¡Gracias por tu compra! 🛒✨\n`;
-    message += `Te contactaremos pronto para coordinar la entrega.`;
+    message += `\n\n¡Gracias por tu compra! �`;
     
     return message;
   };
 
+  const calculatePromotionPrice = (item) => {
+    if (item.product.promotion?.quantity > 0 && item.product.promotion?.price > 0) {
+      const promoQuantity = item.product.promotion.quantity;
+      const promoPrice = item.product.promotion.price;
+      
+      const promoSets = Math.floor(item.quantity / promoQuantity);
+      const remainingQty = item.quantity % promoQuantity;
+      
+      return (promoSets * promoPrice) + (remainingQty * item.product.unitPrice);
+    }
+    
+    return item.quantity * item.product.unitPrice;
+  };
+
   const handleCopy = async () => {
-    const message = generateMessage();
     try {
       await navigator.clipboard.writeText(message);
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error('Error al copiar:', err);
+      // Fallback para navegadores que no soportan clipboard
+      const textArea = document.createElement('textarea');
+      textArea.value = message;
+      document.body.appendChild(textArea);
+      textArea.select();
+      document.execCommand('copy');
+      document.body.removeChild(textArea);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
     }
   };
 
   const handleWhatsAppSend = () => {
-    const message = generateMessage();
-    
     // Usar encodeURI en lugar de encodeURIComponent para preservar mejor los emojis
-    // y caracteres especiales Unicode
     const encodedMessage = encodeURI(message).replace(/#/g, '%23');
     const phone = details?.phone?.replace(/\D/g, '') || '';
     
@@ -86,8 +143,6 @@ const WhatsAppMessage = ({
     window.open(whatsappUrl, '_blank');
   };
 
-  const message = generateMessage();
-
   return (
     <Modal 
       isOpen={isOpen} 
@@ -96,22 +151,30 @@ const WhatsAppMessage = ({
     >
       <div className="p-4 space-y-4">
         <div className="bg-[var(--color-bg-secondary)] rounded-lg p-4 max-h-96 overflow-y-auto">
-          <pre className="whitespace-pre-wrap text-sm text-gray-200 font-mono">
-            {message}
-          </pre>
+          {loading ? (
+            <div className="text-center py-8 text-gray-400">
+              Generando mensaje...
+            </div>
+          ) : (
+            <pre className="whitespace-pre-wrap text-sm text-gray-200 font-mono">
+              {message}
+            </pre>
+          )}
         </div>
         
-        <div className="flex gap-3 justify-around ">
+        <div className="flex gap-3 justify-around">
           <button
             onClick={handleCopy}
-            className="btn-secondary flex-1 flex gap-3 items-center"
+            disabled={loading || !message}
+            className="btn-secondary flex-1 flex gap-3 items-center disabled:opacity-50"
           >
             {copied ? <Check size={18} /> : <Copy size={18} />}
             {copied ? "¡Copiado!" : "Copiar Mensaje"}
           </button>
           <button
             onClick={handleWhatsAppSend}
-            className="btn-primary flex-1 gap-3 flex items-center"
+            disabled={loading || !message}
+            className="btn-primary flex-1 gap-3 flex items-center disabled:opacity-50"
           >
             <MessageCircle size={18} />
             Enviar por WhatsApp

@@ -8,5 +8,6 @@ namespace Domain.Repositories
         Task<IReadOnlyList<Sale>> GetByUserId(int userId);
         Task<IReadOnlyList<Sale>> GetByGroceryId(int groceryId);
         Task<decimal> GetTotalSalesByDateRange(DateTime startDate, DateTime endDate);
+        Task<IReadOnlyList<Sale>> GetSalesByDateRangeAndGrocery(DateTime startDate, DateTime endDate, int groceryId);
     }
 }

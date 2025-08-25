@@ -40,7 +40,7 @@ namespace Infraestructure.Migrations
                     b.HasIndex("GroceryId", "Name")
                         .IsUnique();
 
-                    b.ToTable("Categories");
+                    b.ToTable("Categories", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Grocery", b =>
@@ -56,7 +56,7 @@ namespace Infraestructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Groceries");
+                    b.ToTable("Groceries", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.InventoryItem", b =>
@@ -83,7 +83,7 @@ namespace Infraestructure.Migrations
 
                     b.HasIndex("ProductId");
 
-                    b.ToTable("InventoryItems");
+                    b.ToTable("InventoryItems", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Product", b =>
@@ -125,7 +125,73 @@ namespace Infraestructure.Migrations
                     b.HasIndex("GroceryId", "Name")
                         .IsUnique();
 
-                    b.ToTable("Products");
+                    b.ToTable("Products", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Entities.Purchase", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("Date")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("GroceryId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Notes")
+                        .HasMaxLength(1000)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Supplier")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("TEXT");
+
+                    b.Property<decimal>("Total")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GroceryId");
+
+                    b.ToTable("Purchases", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Entities.PurchaseItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("GroceryId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("PurchaseId")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("Quantity")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<decimal>("TotalCost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("UnitCost")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("GroceryId");
+
+                    b.HasIndex("ProductId");
+
+                    b.HasIndex("PurchaseId");
+
+                    b.ToTable("PurchaseItems", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.RecentActivity", b =>
@@ -149,7 +215,7 @@ namespace Infraestructure.Migrations
 
                     b.HasIndex("GroceryId");
 
-                    b.ToTable("RecentActivities");
+                    b.ToTable("RecentActivities", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Sale", b =>
@@ -176,7 +242,7 @@ namespace Infraestructure.Migrations
 
                     b.HasIndex("UserId");
 
-                    b.ToTable("Sales");
+                    b.ToTable("Sales", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.SaleItem", b =>
@@ -208,7 +274,7 @@ namespace Infraestructure.Migrations
 
                     b.HasIndex("SaleId");
 
-                    b.ToTable("SaleItems");
+                    b.ToTable("SaleItems", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.User", b =>
@@ -235,7 +301,7 @@ namespace Infraestructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("Users");
+                    b.ToTable("Users", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.UserGrocery", b =>
@@ -260,7 +326,7 @@ namespace Infraestructure.Migrations
                     b.HasIndex("UserId", "GroceryId")
                         .IsUnique();
 
-                    b.ToTable("UserGroceries");
+                    b.ToTable("UserGroceries", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.WeeklySale", b =>
@@ -285,7 +351,7 @@ namespace Infraestructure.Migrations
 
                     b.HasIndex("GroceryId");
 
-                    b.ToTable("WeeklySales");
+                    b.ToTable("WeeklySales", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Entities.Category", b =>
@@ -335,7 +401,7 @@ namespace Infraestructure.Migrations
 
                             b1.HasKey("InventoryItemId");
 
-                            b1.ToTable("InventoryItems");
+                            b1.ToTable("InventoryItems", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("InventoryItemId");
@@ -385,7 +451,7 @@ namespace Infraestructure.Migrations
 
                             b1.HasKey("ProductId");
 
-                            b1.ToTable("Products");
+                            b1.ToTable("Products", (string)null);
 
                             b1.WithOwner()
                                 .HasForeignKey("ProductId");
@@ -397,6 +463,44 @@ namespace Infraestructure.Migrations
 
                     b.Navigation("Promotion")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Entities.Purchase", b =>
+                {
+                    b.HasOne("Domain.Entities.Grocery", "Grocery")
+                        .WithMany()
+                        .HasForeignKey("GroceryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Grocery");
+                });
+
+            modelBuilder.Entity("Domain.Entities.PurchaseItem", b =>
+                {
+                    b.HasOne("Domain.Entities.Grocery", "Grocery")
+                        .WithMany()
+                        .HasForeignKey("GroceryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Product", "Product")
+                        .WithMany()
+                        .HasForeignKey("ProductId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Purchase", "Purchase")
+                        .WithMany("Items")
+                        .HasForeignKey("PurchaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Grocery");
+
+                    b.Navigation("Product");
+
+                    b.Navigation("Purchase");
                 });
 
             modelBuilder.Entity("Domain.Entities.RecentActivity", b =>
@@ -503,6 +607,11 @@ namespace Infraestructure.Migrations
             modelBuilder.Entity("Domain.Entities.Product", b =>
                 {
                     b.Navigation("InventoryItems");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Purchase", b =>
+                {
+                    b.Navigation("Items");
                 });
 
             modelBuilder.Entity("Domain.Entities.Sale", b =>

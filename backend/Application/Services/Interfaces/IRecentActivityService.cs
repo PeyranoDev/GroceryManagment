@@ -9,5 +9,6 @@ namespace Application.Services.Interfaces
         Task<RecentActivityForResponseDto> Create(RecentActivityForCreateDto dto);
         Task<bool> Delete(int id);
         Task<IReadOnlyList<RecentActivityForResponseDto>> GetRecent(int count = 10);
+        Task LogActivityAsync(string action, int groceryId);
     }
 }

@@ -1,6 +1,6 @@
 ﻿using Domain.Entities;
+using Domain.Tenancy;
 using Microsoft.EntityFrameworkCore;
-using Infraestructure.Tenancy;
 
 namespace Infraestructure
 {
@@ -24,6 +24,8 @@ namespace Infraestructure
         public DbSet<RecentActivity> RecentActivities { get; set; }
         public DbSet<Sale> Sales { get; set; }
         public DbSet<SaleItem> SaleItems { get; set; }
+        public DbSet<Purchase> Purchases { get; set; }
+        public DbSet<PurchaseItem> PurchaseItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder mb)
         {
@@ -108,6 +110,31 @@ namespace Infraestructure
                 });
             });
 
+            // Purchase configuration
+            mb.Entity<Purchase>(b =>
+            {
+                b.Property(p => p.Supplier).IsRequired().HasMaxLength(200);
+                b.Property(p => p.Total).HasColumnType("decimal(18,2)");
+                b.Property(p => p.Notes).HasMaxLength(1000);
+                
+                b.HasMany(p => p.Items)
+                 .WithOne(pi => pi.Purchase)
+                 .HasForeignKey(pi => pi.PurchaseId)
+                 .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // PurchaseItem configuration
+            mb.Entity<PurchaseItem>(b =>
+            {
+                b.Property(pi => pi.UnitCost).HasColumnType("decimal(18,2)");
+                b.Property(pi => pi.TotalCost).HasColumnType("decimal(18,2)");
+                
+                b.HasOne(pi => pi.Product)
+                 .WithMany()
+                 .HasForeignKey(pi => pi.ProductId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
             // Sale configuration
             mb.Entity<Sale>(b =>
             {
@@ -149,6 +176,8 @@ namespace Infraestructure
             mb.Entity<SaleItem>().HasQueryFilter(e => e.GroceryId == _tenant.CurrentGroceryId);
             mb.Entity<WeeklySale>().HasQueryFilter(e => e.GroceryId == _tenant.CurrentGroceryId);
             mb.Entity<RecentActivity>().HasQueryFilter(e => e.GroceryId == _tenant.CurrentGroceryId);
+            mb.Entity<Purchase>().HasQueryFilter(e => e.GroceryId == _tenant.CurrentGroceryId);
+            mb.Entity<PurchaseItem>().HasQueryFilter(e => e.GroceryId == _tenant.CurrentGroceryId);
         }
     }
 }

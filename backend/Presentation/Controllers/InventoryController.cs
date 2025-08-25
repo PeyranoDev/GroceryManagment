@@ -1,7 +1,6 @@
 using Application.Schemas;
 using Application.Schemas.Inventory;
 using Application.Services.Interfaces;
-using Infraestructure.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Filters;
 
@@ -13,12 +12,10 @@ namespace Presentation.Controllers
     public class InventoryController : ControllerBase
     {
         private readonly IInventoryService _inventoryService;
-        private readonly ITenantProvider _tenantProvider;
 
-        public InventoryController(IInventoryService inventoryService, ITenantProvider tenantProvider)
+        public InventoryController(IInventoryService inventoryService)
         {
             _inventoryService = inventoryService;
-            _tenantProvider = tenantProvider;
         }
 
         /// <summary>
@@ -35,16 +32,118 @@ namespace Presentation.Controllers
         }
 
         /// <summary>
+        /// Obtener inventario con filtros (para la página de inventario del frontend)
+        /// </summary>
+        [HttpGet("filtered")]
+        public async Task<ActionResult<ApiResponse<IReadOnlyList<InventoryItemForResponseDto>>>> GetFiltered(
+            [FromQuery] string? searchTerm,
+            [FromQuery] string? statusFilter)
+        {
+            var items = await _inventoryService.GetAll();
+            
+            // Aplicar filtros
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                items = items.Where(i => i.Product.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
+            }
+            
+            if (!string.IsNullOrEmpty(statusFilter))
+            {
+                items = statusFilter.ToLower() switch
+                {
+                    "low" => items.Where(i => i.Stock > 0 && i.Stock <= 10).ToList(),
+                    "out" => items.Where(i => i.Stock == 0).ToList(),
+                    _ => items
+                };
+            }
+            
+            return Ok(ApiResponse<IReadOnlyList<InventoryItemForResponseDto>>.SuccessResponse(
+                items, 
+                "Items de inventario filtrados obtenidos exitosamente"
+            ));
+        }
+
+        /// <summary>
+        /// Obtener estado del stock para un producto
+        /// </summary>
+        [HttpGet("{id}/status")]
+        public async Task<ActionResult<ApiResponse<InventoryStatusDto>>> GetStockStatus(int id)
+        {
+            var item = await _inventoryService.GetById(id);
+            var status = GetStockStatusDto(item!.Stock);
+            
+            return Ok(ApiResponse<InventoryStatusDto>.SuccessResponse(
+                status, 
+                "Estado del stock obtenido exitosamente"
+            ));
+        }
+
+        /// <summary>
+        /// Ajustar stock de un producto (lógica del frontend)
+        /// </summary>
+        [HttpPost("{id}/adjust-stock")]
+        public async Task<ActionResult<ApiResponse<InventoryItemForResponseDto>>> AdjustStock(int id, [FromBody] StockAdjustmentDto dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ApiResponse<InventoryItemForResponseDto>.ErrorResponse("Datos de entrada inválidos."));
+
+            try
+            {
+                var updateDto = new InventoryItemForUpdateDto
+                {
+                    Stock = dto.NewStock
+                };
+
+                var updatedItem = await _inventoryService.Update(id, updateDto);
+                
+                return Ok(ApiResponse<InventoryItemForResponseDto>.SuccessResponse(
+                    updatedItem!, 
+                    "Stock ajustado exitosamente"
+                ));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ApiResponse<InventoryItemForResponseDto>.ErrorResponse($"Error al ajustar stock: {ex.Message}"));
+            }
+        }
+
+        /// <summary>
+        /// Obtener productos con bajo stock
+        /// </summary>
+        [HttpGet("low-stock")]
+        public async Task<ActionResult<ApiResponse<IReadOnlyList<InventoryItemForResponseDto>>>> GetLowStock([FromQuery] int threshold = 10)
+        {
+            var items = await _inventoryService.GetAll();
+            var lowStockItems = items.Where(i => i.Stock > 0 && i.Stock <= threshold).ToList();
+            
+            return Ok(ApiResponse<IReadOnlyList<InventoryItemForResponseDto>>.SuccessResponse(
+                lowStockItems, 
+                "Productos con bajo stock obtenidos exitosamente"
+            ));
+        }
+
+        /// <summary>
+        /// Obtener productos sin stock
+        /// </summary>
+        [HttpGet("out-of-stock")]
+        public async Task<ActionResult<ApiResponse<IReadOnlyList<InventoryItemForResponseDto>>>> GetOutOfStock()
+        {
+            var items = await _inventoryService.GetAll();
+            var outOfStockItems = items.Where(i => i.Stock == 0).ToList();
+            
+            return Ok(ApiResponse<IReadOnlyList<InventoryItemForResponseDto>>.SuccessResponse(
+                outOfStockItems, 
+                "Productos sin stock obtenidos exitosamente"
+            ));
+        }
+
+        /// <summary>
         /// Obtener un item de inventario por ID (validando que pertenezca al grocery actual)
         /// </summary>
         [HttpGet("{id}")]
         public async Task<ActionResult<ApiResponse<InventoryItemForResponseDto>>> GetById(int id)
         {
             var item = await _inventoryService.GetById(id);
-            
-            if (item != null && item.GroceryId != _tenantProvider.CurrentGroceryId)
-                return NotFound(ApiResponse<InventoryItemForResponseDto>.ErrorResponse("Item de inventario no encontrado."));
-
             return Ok(ApiResponse<InventoryItemForResponseDto>.SuccessResponse(
                 item!, 
                 "Item de inventario obtenido exitosamente"
@@ -71,7 +170,7 @@ namespace Presentation.Controllers
         public async Task<ActionResult<ApiResponse<InventoryItemForResponseDto>>> Create([FromBody] InventoryItemForCreateDto dto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ApiResponse<InventoryItemForResponseDto>.ErrorResponse("Datos de entrada inv�lidos."));
+                return BadRequest(ApiResponse<InventoryItemForResponseDto>.ErrorResponse("Datos de entrada inválidos."));
 
             var item = await _inventoryService.Create(dto);
             return CreatedAtAction(
@@ -91,11 +190,7 @@ namespace Presentation.Controllers
         public async Task<ActionResult<ApiResponse<InventoryItemForResponseDto>>> Update(int id, [FromBody] InventoryItemForUpdateDto dto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ApiResponse<InventoryItemForResponseDto>.ErrorResponse("Datos de entrada inv�lidos."));
-
-            var existingItem = await _inventoryService.GetById(id);
-            if (existingItem.GroceryId != _tenantProvider.CurrentGroceryId)
-                return NotFound(ApiResponse<InventoryItemForResponseDto>.ErrorResponse("Item de inventario no encontrado."));
+                return BadRequest(ApiResponse<InventoryItemForResponseDto>.ErrorResponse("Datos de entrada inválidos."));
 
             var item = await _inventoryService.Update(id, dto);
             return Ok(ApiResponse<InventoryItemForResponseDto>.SuccessResponse(
@@ -110,12 +205,39 @@ namespace Presentation.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<ApiResponse>> Delete(int id)
         {
-            var existingItem = await _inventoryService.GetById(id);
-            if (existingItem.GroceryId != _tenantProvider.CurrentGroceryId)
-                return NotFound(ApiResponse.ErrorResponse("Item de inventario no encontrado."));
-
             await _inventoryService.Delete(id);
             return Ok(ApiResponse.SuccessResponse("Item de inventario eliminado exitosamente"));
+        }
+
+        private InventoryStatusDto GetStockStatusDto(int stock)
+        {
+            if (stock == 0)
+            {
+                return new InventoryStatusDto
+                {
+                    Status = "out",
+                    StatusText = "Sin Stock",
+                    StatusColor = "text-red-400"
+                };
+            }
+            else if (stock <= 10)
+            {
+                return new InventoryStatusDto
+                {
+                    Status = "low",
+                    StatusText = "Bajo Stock",
+                    StatusColor = "text-yellow-400"
+                };
+            }
+            else
+            {
+                return new InventoryStatusDto
+                {
+                    Status = "normal",
+                    StatusText = "Stock Normal",
+                    StatusColor = "text-green-400"
+                };
+            }
         }
     }
 }

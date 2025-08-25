@@ -4,6 +4,7 @@ using AutoMapper;
 using Domain.Entities;
 using Domain.Exceptions.Products;
 using Domain.Repositories;
+using Domain.Tenancy;
 
 namespace Application.Services.Implementations
 {
@@ -11,19 +12,21 @@ namespace Application.Services.Implementations
     {
         private readonly IProductRepository _products;
         private readonly ICategoryRepository _categories;
+        private readonly ITenantProvider _tenantProvider;
         private readonly IMapper _mapper;
 
-        public ProductService(IProductRepository products, ICategoryRepository categories, IMapper mapper)
+        public ProductService(IProductRepository products, ICategoryRepository categories, ITenantProvider tenantProvider, IMapper mapper)
         {
             _products = products;
             _categories = categories;
+            _tenantProvider = tenantProvider;
             _mapper = mapper;
         }
 
         public async Task<ProductForResponseDto?> GetById(int id)
         {
             var product = await _products.GetById(id);
-            if (product is null)
+            if (product is null || product.GroceryId != _tenantProvider.CurrentGroceryId)
                 throw new ProductNotFoundException(id);
             
             return _mapper.Map<ProductForResponseDto>(product);
@@ -31,7 +34,7 @@ namespace Application.Services.Implementations
 
         public async Task<IReadOnlyList<ProductForResponseDto>> GetAll()
         {
-            var list = await _products.GetAll();
+            var list = await _products.GetAllByGroceryId(_tenantProvider.CurrentGroceryId);
             return list.Select(_mapper.Map<ProductForResponseDto>).ToList();
         }
 
@@ -40,9 +43,9 @@ namespace Application.Services.Implementations
             if (await _products.ExistsByName(dto.Name))
                 throw new ProductAlreadyExistsException(dto.Name);
 
-            // Validar que la categoría existe
+            // Validar que la categoría existe y pertenece al grocery actual
             var categoryExists = await _categories.GetById(dto.CategoryId);
-            if (categoryExists is null)
+            if (categoryExists is null || categoryExists.GroceryId != _tenantProvider.CurrentGroceryId)
                 throw new CategoryNotValidException(dto.CategoryId);
 
             // Validar precios
@@ -53,6 +56,8 @@ namespace Application.Services.Implementations
                 throw new InvalidPriceException("precio de venta");
 
             var entity = _mapper.Map<Product>(dto);
+            entity.GroceryId = _tenantProvider.CurrentGroceryId;
+            
             var id = await _products.Create(entity);
             var created = await _products.GetById(id);
             
@@ -65,16 +70,16 @@ namespace Application.Services.Implementations
         public async Task<ProductForResponseDto?> Update(int id, ProductForUpdateDto dto)
         {
             var entity = await _products.GetById(id);
-            if (entity is null) 
+            if (entity is null || entity.GroceryId != _tenantProvider.CurrentGroceryId) 
                 throw new ProductNotFoundException(id);
 
             if (!string.Equals(entity.Name, dto.Name, StringComparison.OrdinalIgnoreCase)
                 && await _products.ExistsByName(dto.Name))
                 throw new ProductAlreadyExistsException(dto.Name);
 
-            // Validar que la categoría existe
+            // Validar que la categoría existe y pertenece al grocery actual
             var categoryExists = await _categories.GetById(dto.CategoryId);
-            if (categoryExists is null)
+            if (categoryExists is null || categoryExists.GroceryId != _tenantProvider.CurrentGroceryId)
                 throw new CategoryNotValidException(dto.CategoryId);
 
             // Validar precios
@@ -93,7 +98,7 @@ namespace Application.Services.Implementations
         public async Task<bool> Delete(int id)
         {
             var entity = await _products.GetById(id);
-            if (entity is null) 
+            if (entity is null || entity.GroceryId != _tenantProvider.CurrentGroceryId) 
                 throw new ProductNotFoundException(id);
             
             await _products.Delete(entity);

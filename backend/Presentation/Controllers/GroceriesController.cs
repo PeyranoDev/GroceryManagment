@@ -1,6 +1,7 @@
 using Application.Schemas;
 using Application.Schemas.Groceries;
 using Application.Services.Interfaces;
+using Domain.Tenancy;
 using Infraestructure.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Filters;

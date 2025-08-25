@@ -1,6 +1,6 @@
 using Domain.Entities;
 using Domain.Repositories;
-using Infraestructure.Tenancy;
+using Domain.Tenancy;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infraestructure.Repositories
@@ -14,6 +14,7 @@ namespace Infraestructure.Repositories
             => _ctx.Groceries.AsNoTracking().AnyAsync(g => g.Name == name);
 
         public Task<Grocery?> GetByName(string name)
-            => _ctx.Groceries.AsNoTracking().FirstOrDefaultAsync(g => g.Name == name)!;
+            => _ctx.Groceries.AsNoTracking().FirstOrDefaultAsync(g => g.Name == name);
     }
 }
+

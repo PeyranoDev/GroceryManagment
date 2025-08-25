@@ -1,7 +1,7 @@
 ﻿// Infraestructure/Repositories/BaseRepository.cs
 using Domain.Entities;
 using Domain.Repositories;
-using Infraestructure.Tenancy;
+using Domain.Tenancy;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
@@ -18,22 +18,38 @@ namespace Infraestructure.Repositories
             _tenant = tenant;
         }
 
-        public Task<T?> GetById(int id)
-            => _ctx.Set<T>().AsNoTracking().FirstOrDefaultAsync(e => e.Id == id)!;
+        public virtual Task<T?> GetById(int id)
+            => _ctx.Set<T>().AsNoTracking().FirstOrDefaultAsync(e => e.Id == id);
 
-        public Task<IReadOnlyList<T>> GetAll()
-            => _ctx.Set<T>().AsNoTracking().ToListAsync() as Task<IReadOnlyList<T>>;
+        public async Task<IReadOnlyList<T>> GetAll()
+        {
+            var list = await _ctx.Set<T>().AsNoTracking().ToListAsync();
+            return list;
+        }
+
+        public virtual async Task<IReadOnlyList<T>> GetAllByGroceryId(int groceryId)
+        {
+            if (typeof(IHasGrocery).IsAssignableFrom(typeof(T)))
+            {
+                var list = await _ctx.Set<T>().AsNoTracking()
+                    .Where(e => ((IHasGrocery)e).GroceryId == groceryId)
+                    .ToListAsync();
+                return list;
+            }
+            return await GetAll();
+        }
 
         public async Task<IReadOnlyList<T>> Find(Expression<Func<T, bool>> predicate)
             => await _ctx.Set<T>().AsNoTracking().Where(predicate).ToListAsync();
 
-        public async Task<int> Create(T entity)
+        public virtual async Task<int> Create(T entity)
         {
             if (entity is IHasGrocery hg)
                 hg.GroceryId = _tenant.CurrentGroceryId;   
 
             var entry = await _ctx.Set<T>().AddAsync(entity);
-            await _ctx.SaveChangesAsync();
+            
+            // Retornar 0 si no se ha guardado aún (el ID real se asignará después de SaveChanges)
             return entry.Entity.Id;
         }
 

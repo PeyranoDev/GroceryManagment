@@ -4,24 +4,27 @@ using AutoMapper;
 using Domain.Entities;
 using Domain.Exceptions.Categories;
 using Domain.Repositories;
+using Domain.Tenancy;
 
 namespace Application.Services.Implementations
 {
     public class CategoryService : ICategoryService
     {
         private readonly ICategoryRepository _categories;
+        private readonly ITenantProvider _tenantProvider;
         private readonly IMapper _mapper;
 
-        public CategoryService(ICategoryRepository categories, IMapper mapper)
+        public CategoryService(ICategoryRepository categories, ITenantProvider tenantProvider, IMapper mapper)
         {
             _categories = categories;
+            _tenantProvider = tenantProvider;
             _mapper = mapper;
         }
 
         public async Task<CategoryForResponseDto?> GetById(int id)
         {
             var category = await _categories.GetById(id);
-            if (category is null)
+            if (category is null || category.GroceryId != _tenantProvider.CurrentGroceryId)
                 throw new CategoryNotFoundException(id);
             
             return _mapper.Map<CategoryForResponseDto>(category);
@@ -29,7 +32,14 @@ namespace Application.Services.Implementations
 
         public async Task<IReadOnlyList<CategoryForResponseDto>> GetAll()
         {
-            var list = await _categories.GetAll();
+            var list = await _categories.GetAllByGroceryId(_tenantProvider.CurrentGroceryId);
+            
+            // Asegurar que la lista no sea null
+            if (list == null)
+            {
+                return new List<CategoryForResponseDto>();
+            }
+            
             return list.Select(_mapper.Map<CategoryForResponseDto>).ToList();
         }
 
@@ -39,6 +49,8 @@ namespace Application.Services.Implementations
                 throw new CategoryAlreadyExistsException(dto.Name);
 
             var entity = _mapper.Map<Category>(dto);
+            entity.GroceryId = _tenantProvider.CurrentGroceryId;
+            
             var id = await _categories.Create(entity);
             var created = await _categories.GetById(id);
             
@@ -51,7 +63,7 @@ namespace Application.Services.Implementations
         public async Task<CategoryForResponseDto?> Update(int id, CategoryForUpdateDto dto)
         {
             var entity = await _categories.GetById(id);
-            if (entity is null) 
+            if (entity is null || entity.GroceryId != _tenantProvider.CurrentGroceryId) 
                 throw new CategoryNotFoundException(id);
 
             if (!string.Equals(entity.Name, dto.Name, StringComparison.OrdinalIgnoreCase)
@@ -67,7 +79,7 @@ namespace Application.Services.Implementations
         public async Task<bool> Delete(int id)
         {
             var entity = await _categories.GetById(id);
-            if (entity is null) 
+            if (entity is null || entity.GroceryId != _tenantProvider.CurrentGroceryId) 
                 throw new CategoryNotFoundException(id);
             
             // TODO: Verificar si tiene productos asociados

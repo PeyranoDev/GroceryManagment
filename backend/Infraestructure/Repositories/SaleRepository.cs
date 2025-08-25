@@ -1,6 +1,6 @@
 using Domain.Entities;
 using Domain.Repositories;
-using Infraestructure.Tenancy;
+using Domain.Tenancy;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infraestructure.Repositories
@@ -10,20 +10,75 @@ namespace Infraestructure.Repositories
         public SaleRepository(GroceryManagmentContext ctx, ITenantProvider tenant)
             : base(ctx, tenant) { }
 
+        public override async Task<int> Create(Sale entity)
+        {
+            // Asegurar que la venta tenga el grocery correcto
+            entity.GroceryId = _tenant.CurrentGroceryId;
+            
+            // Asegurar que todos los items también tengan el grocery correcto
+            foreach (var item in entity.Items)
+            {
+                item.GroceryId = _tenant.CurrentGroceryId;
+            }
+
+            var entry = await _ctx.Set<Sale>().AddAsync(entity);
+            
+            // No llamar SaveChanges aquí, dejar que el servicio lo maneje
+            return entry.Entity.Id;
+        }
+
+        public override async Task<Sale?> GetById(int id)
+            => await _ctx.Sales.AsNoTracking()
+                .Include(s => s.Items)
+                    .ThenInclude(si => si.Product)
+                .Include(s => s.User)
+                .FirstOrDefaultAsync(s => s.Id == id);
+
         public async Task<IReadOnlyList<Sale>> GetByDateRange(DateTime startDate, DateTime endDate)
             => await _ctx.Sales.AsNoTracking()
-                .Where(s => s.Date >= startDate && s.Date <= endDate)
+                .Include(s => s.Items)
+                    .ThenInclude(si => si.Product)
+                .Include(s => s.User)
+                .Where(s => s.Date >= startDate && s.Date <= endDate && s.GroceryId == _tenant.CurrentGroceryId)
                 .ToListAsync();
 
         public async Task<IReadOnlyList<Sale>> GetByUserId(int userId)
-            => await _ctx.Sales.AsNoTracking().Where(s => s.UserId == userId).ToListAsync();
+            => await _ctx.Sales.AsNoTracking()
+                .Include(s => s.Items)
+                    .ThenInclude(si => si.Product)
+                .Include(s => s.User)
+                .Where(s => s.UserId == userId && s.GroceryId == _tenant.CurrentGroceryId)
+                .ToListAsync();
 
         public async Task<IReadOnlyList<Sale>> GetByGroceryId(int groceryId)
-            => await _ctx.Sales.AsNoTracking().Where(s => s.GroceryId == groceryId).ToListAsync();
+            => await _ctx.Sales.AsNoTracking()
+                .Include(s => s.Items)
+                    .ThenInclude(si => si.Product)
+                .Include(s => s.User)
+                .Where(s => s.GroceryId == groceryId)
+                .ToListAsync();
 
         public async Task<decimal> GetTotalSalesByDateRange(DateTime startDate, DateTime endDate)
             => await _ctx.Sales.AsNoTracking()
-                .Where(s => s.Date >= startDate && s.Date <= endDate)
+                .Where(s => s.Date >= startDate && s.Date <= endDate && s.GroceryId == _tenant.CurrentGroceryId)
                 .SumAsync(s => s.Total);
+
+        public async Task<IReadOnlyList<Sale>> GetSalesByDateRangeAndGrocery(DateTime startDate, DateTime endDate, int groceryId)
+            => await _ctx.Sales.AsNoTracking()
+                .Include(s => s.Items)
+                    .ThenInclude(si => si.Product)
+                .Include(s => s.User)
+                .Where(s => s.Date >= startDate && s.Date <= endDate && s.GroceryId == groceryId)
+                .OrderByDescending(s => s.Date)
+                .ToListAsync();
+
+        public override async Task<IReadOnlyList<Sale>> GetAllByGroceryId(int groceryId)
+            => await _ctx.Sales.AsNoTracking()
+                .Include(s => s.Items)
+                    .ThenInclude(si => si.Product)
+                .Include(s => s.User)
+                .Where(s => s.GroceryId == groceryId)
+                .OrderByDescending(s => s.Date)
+                .ToListAsync();
     }
 }

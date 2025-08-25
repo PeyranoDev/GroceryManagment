@@ -1,7 +1,6 @@
 using Application.Schemas;
 using Application.Schemas.RecentActivities;
 using Application.Services.Interfaces;
-using Infraestructure.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Filters;
 
@@ -13,12 +12,10 @@ namespace Presentation.Controllers
     public class RecentActivitiesController : ControllerBase
     {
         private readonly IRecentActivityService _recentActivityService;
-        private readonly ITenantProvider _tenantProvider;
 
-        public RecentActivitiesController(IRecentActivityService recentActivityService, ITenantProvider tenantProvider)
+        public RecentActivitiesController(IRecentActivityService recentActivityService)
         {
             _recentActivityService = recentActivityService;
-            _tenantProvider = tenantProvider;
         }
 
         /// <summary>
@@ -54,10 +51,6 @@ namespace Presentation.Controllers
         public async Task<ActionResult<ApiResponse<RecentActivityForResponseDto>>> GetById(int id)
         {
             var activity = await _recentActivityService.GetById(id);
-            
-            if (activity != null && activity.GroceryId != _tenantProvider.CurrentGroceryId)
-                return NotFound(ApiResponse<RecentActivityForResponseDto>.ErrorResponse("Actividad reciente no encontrada."));
-
             return Ok(ApiResponse<RecentActivityForResponseDto>.SuccessResponse(
                 activity!, 
                 "Actividad reciente obtenida exitosamente"
@@ -90,10 +83,6 @@ namespace Presentation.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<ApiResponse>> Delete(int id)
         {
-            var existingActivity = await _recentActivityService.GetById(id);
-            if (existingActivity.GroceryId != _tenantProvider.CurrentGroceryId)
-                return NotFound(ApiResponse.ErrorResponse("Actividad reciente no encontrada."));
-
             await _recentActivityService.Delete(id);
             return Ok(ApiResponse.SuccessResponse("Actividad reciente eliminada exitosamente"));
         }

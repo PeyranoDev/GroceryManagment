@@ -1,6 +1,6 @@
 using Domain.Entities;
 using Domain.Repositories;
-using Infraestructure.Tenancy;
+using Domain.Tenancy;
 using Microsoft.EntityFrameworkCore;
 
 namespace Infraestructure.Repositories
@@ -11,7 +11,8 @@ namespace Infraestructure.Repositories
             : base(ctx, tenant) { }
 
         public Task<bool> ExistsByName(string name)
-            => _ctx.Categories.AsNoTracking().AnyAsync(c => c.Name == name);
+            => _ctx.Categories.AsNoTracking()
+                .AnyAsync(c => c.Name == name && c.GroceryId == _tenant.CurrentGroceryId);
 
         public async Task<IReadOnlyList<Category>> GetByGroceryId(int groceryId)
             => await _ctx.Categories.AsNoTracking().Where(c => c.GroceryId == groceryId).ToListAsync();

@@ -1,11 +1,6 @@
 ﻿using Application.Schemas.Users;
 using AutoMapper;
 using Domain.Entities;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Application.Mapping
 {
@@ -13,13 +8,17 @@ namespace Application.Mapping
     {
         public UserProfile()
         {
-
             CreateMap<User, UserForResponseDto>();
 
             CreateMap<UserForCreateDto, User>()
-                .ForMember(dest => dest.PasswordHash, opt => opt.Ignore());
+                .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.UserGroceries, opt => opt.Ignore());
 
             CreateMap<UserForUpdateDto, User>()
+                .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
+                .ForMember(dest => dest.Id, opt => opt.Ignore())
+                .ForMember(dest => dest.UserGroceries, opt => opt.Ignore())
                 .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
         }
     }

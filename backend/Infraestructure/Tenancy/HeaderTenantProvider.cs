@@ -1,25 +1,28 @@
-﻿using Domain.Exceptions.Groceries;
+﻿using Domain.Tenancy;
 using Microsoft.AspNetCore.Http;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Infraestructure.Tenancy
 {
     public class HeaderTenantProvider : ITenantProvider
     {
-        private readonly IHttpContextAccessor _http;
-        public HeaderTenantProvider(IHttpContextAccessor http) => _http = http;
-        
+        private readonly IHttpContextAccessor _httpContextAccessor;
+
+        public HeaderTenantProvider(IHttpContextAccessor httpContextAccessor)
+        {
+            _httpContextAccessor = httpContextAccessor;
+        }
+
         public int CurrentGroceryId
         {
             get
             {
-                var raw = _http.HttpContext?.Request?.Headers["X-Grocery-Id"].FirstOrDefault();
-                if (int.TryParse(raw, out var id)) return id;
-                throw new InvalidGroceryIdException();
+                var context = _httpContextAccessor.HttpContext;
+                if (context?.Request.Headers.TryGetValue("X-Grocery-Id", out var groceryIdHeader) == true
+                    && int.TryParse(groceryIdHeader.FirstOrDefault(), out var groceryId))
+                {
+                    return groceryId;
+                }
+                return 1; // Valor por defecto
             }
         }
     }

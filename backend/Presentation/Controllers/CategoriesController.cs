@@ -1,7 +1,6 @@
 using Application.Schemas;
 using Application.Schemas.Categories;
 using Application.Services.Interfaces;
-using Infraestructure.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 using Presentation.Filters;
 
@@ -13,12 +12,10 @@ namespace Presentation.Controllers
     public class CategoriesController : ControllerBase
     {
         private readonly ICategoryService _categoryService;
-        private readonly ITenantProvider _tenantProvider;
 
-        public CategoriesController(ICategoryService categoryService, ITenantProvider tenantProvider)
+        public CategoriesController(ICategoryService categoryService)
         {
             _categoryService = categoryService;
-            _tenantProvider = tenantProvider;
         }
 
         /// <summary>
@@ -41,10 +38,6 @@ namespace Presentation.Controllers
         public async Task<ActionResult<ApiResponse<CategoryForResponseDto>>> GetById(int id)
         {
             var category = await _categoryService.GetById(id);
-            
-            if (category != null && category.GroceryId != _tenantProvider.CurrentGroceryId)
-                return NotFound(ApiResponse<CategoryForResponseDto>.ErrorResponse("Categoría no encontrada."));
-
             return Ok(ApiResponse<CategoryForResponseDto>.SuccessResponse(
                 category!, 
                 "Categoría obtenida exitosamente"
@@ -80,10 +73,6 @@ namespace Presentation.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ApiResponse<CategoryForResponseDto>.ErrorResponse("Datos de entrada inválidos."));
 
-            var existingCategory = await _categoryService.GetById(id);
-            if (existingCategory.GroceryId != _tenantProvider.CurrentGroceryId)
-                return NotFound(ApiResponse<CategoryForResponseDto>.ErrorResponse("Categoría no encontrada."));
-
             var category = await _categoryService.Update(id, dto);
             return Ok(ApiResponse<CategoryForResponseDto>.SuccessResponse(
                 category!, 
@@ -97,10 +86,6 @@ namespace Presentation.Controllers
         [HttpDelete("{id}")]
         public async Task<ActionResult<ApiResponse>> Delete(int id)
         {
-            var existingCategory = await _categoryService.GetById(id);
-            if (existingCategory.GroceryId != _tenantProvider.CurrentGroceryId)
-                return NotFound(ApiResponse.ErrorResponse("Categoría no encontrada."));
-
             await _categoryService.Delete(id);
             return Ok(ApiResponse.SuccessResponse("Categoría eliminada exitosamente"));
         }
