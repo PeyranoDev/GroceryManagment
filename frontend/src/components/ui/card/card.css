@@ -1,0 +1,16 @@
+@import "tailwindcss";
+
+.card {
+  @apply rounded-lg shadow-md border 
+         bg-[var(--color-bg-secondary)] border-[var(--color-border)];
+}
+
+.card-header {
+  @apply p-4 flex justify-between items-center border-b 
+         border-[var(--color-border)];
+}
+
+.card-title {
+  @apply flex items-center gap-2 text-xl font-semibold 
+         text-[var(--color-text)];
+}

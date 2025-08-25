@@ -1,68 +1,68 @@
-:root {
-  font-family: system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
+@import "tailwindcss";
+@theme {
+  /* Colores primarios */
+  --color-primary: #00a63e;
+  --color-primary-dark: #008236;
 
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  /* Colores secundarios */
+  --color-secondary: #2563eb;
+  --color-secondary-dark: #254487;
+  
+  /* color error */
+  --color-error: #FA412D;
+  --color-error-dark: #C92A19;
+  
+  /* color warning */
+  --color-warning: #FDC700;
+  --color-warning-dark: #FDBF00;
 
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-}
+  /* color success */
+  --color-success: #47A07C;
+  --color-success-dark: #3D8B6F;
 
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
+
+  /* otros */
+  --color-text: #fafafa;
+  --color-secondary-text: #e5e7eb;
+  --color-bg: #302E2B;
+  --color-bg-input: #141312;
+  --color-bg-secondary: #262422;
+  --color-border: #1C1B19;
 }
 
 body {
-  margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  @apply bg-[var(--color-bg)] min-h-screen text-[var(--color-text)] font-sans transition-colors duration-300;
+}
+main {
+  @apply mb-0 pt-3 pb-0 px-40;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
+.btn-primary {
+  @apply text-white
+  font-semibold
+  cursor-pointer
+  py-2 px-4
+  transition-colors
+  duration-200
+  rounded-lg 
+  flex items-center gap-2 justify-center
+  bg-[var(--color-primary)]
+  hover:bg-[var(--color-primary-dark)];
 }
 
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+.btn-secondary {
+  @apply text-white 
+  font-semibold 
+  cursor-pointer
+  py-2 px-4 
+  transition-colors 
+  duration-200
+  rounded-lg
+  flex items-center gap-2 justify-center
+  bg-[var(--color-secondary)] 
+  hover:bg-[var(--color-secondary-dark)];
 }
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
-  button {
-    background-color: #f9f9f9;
-  }
+.flex-center {
+  @apply flex justify-center items-center text-center;
 }

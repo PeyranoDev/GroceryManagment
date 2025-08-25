@@ -1,35 +1,117 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { Routes, Route } from "react-router-dom";
+import { useState } from "react";
+import Purchases from "./components/purchases/Purchases";
+import Dashboard from "./components/dashboard/Dashboard";
+import Sales from "./components/sales/Sales";
+import Inventory from "./components/inventory/Inventory";
+import Reports from "./components/reports/Reports";
+import Delivery from "./components/delivery/Delivery";
+import { mockInventory } from "./data/products";
+import Header from "./components/ui/header/Header";
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [user, setUser] = useState(null);
+  const [inventory, setInventory] = useState(mockInventory);
+
+  const [purchaseProducts, setPurchaseProducts] = useState([
+    {
+      id: crypto.randomUUID(),
+      name: "Rúcula",
+      purchaseUnit: "atado",
+      quantity: 3,
+      unitLabel: "u",
+      totalPrice: 5000,
+      promotions: [
+        { id: crypto.randomUUID(), quantity: 1, unit: "u", price: 1000 },
+        { id: crypto.randomUUID(), quantity: 2, unit: "u", price: 1500 },
+        { id: crypto.randomUUID(), quantity: 3, unit: "u", price: 2000 },
+      ],
+    },
+    {
+      id: crypto.randomUUID(),
+      name: "Kiwi",
+      purchaseUnit: "peso",
+      quantity: 10,
+      unitLabel: "kg",
+      totalPrice: 43000,
+      promotions: [
+        { id: crypto.randomUUID(), quantity: 1, unit: "kg", price: 6000 },
+        { id: crypto.randomUUID(), quantity: 2, unit: "kg", price: 10000 },
+      ],
+    },
+  ]);
+
+  
+
+  const handleLogin = () => setUser({ name: "Tomillo" });
+  const handleLogout = () => setUser(null);
+
+  const handleAddPurchaseProduct = () =>
+    setPurchaseProducts((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        name: "",
+        purchaseUnit: "peso",
+        quantity: "",
+        unitLabel: "",
+        totalPrice: "",
+        promotions: [],
+      },
+    ]);
+  const handleRemovePurchaseProduct = (productId) =>
+    setPurchaseProducts((prev) => prev.filter((p) => p.id !== productId));
+  const handlePurchaseProductChange = (productId, updatedProduct) =>
+    setPurchaseProducts((prev) =>
+      prev.map((p) => (p.id === productId ? updatedProduct : p))
+    );
+  const handleUpdateStock = (productId, newStock) => {
+    setInventory((prev) =>
+      prev.map((p) =>
+        p.id === productId
+          ? { ...p, stock: newStock, lastUpdated: new Date().toISOString() }
+          : p
+      )
+    );
+  };
 
   return (
     <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
+      <div className="app">
+        <Header
+          user={user}
+          onLogin={handleLogin}
+          onLogout={handleLogout}
+        />
+
+        <main>
+          <Routes>
+            <Route path="/" element={<Dashboard inventoryData={inventory} />} />
+            <Route path="/ventas" element={<Sales />} />
+            <Route path="/pedidos" element={<Delivery inventory={inventory} />} />
+            <Route
+              path="/compras"
+              element={
+                <Purchases
+                  products={purchaseProducts}
+                  onAddProduct={handleAddPurchaseProduct}
+                  onProductChange={handlePurchaseProductChange}
+                  onRemoveProduct={handleRemovePurchaseProduct}
+                />
+              }
+            />
+            <Route
+              path="/inventario"
+              element={
+                <Inventory inventory={inventory} onUpdateStock={handleUpdateStock} />
+              }
+            />
+            <Route path="/reportes" element={<Reports />} />
+          </Routes>
+        </main>
       </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
     </>
-  )
+  );
 }
 
-export default App
+export default App;
