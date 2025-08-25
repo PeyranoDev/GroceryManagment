@@ -4,8 +4,9 @@
 Sistema de Gestión de Verdulerías desarrollado como microservicios con arquitectura moderna.
 
 **Stack Tecnológico:**
-- **Backend**: .NET Core 8 + Entity Framework + SQLite
+- **Backend**: .NET Core 9 + Entity Framework + PostgreSQL
 - **Frontend**: React + Vite + TailwindCSS
+- **Base de Datos**: PostgreSQL (Producción y Desarrollo)
 - **Containerización**: Docker + Docker Compose
 - **Arquitectura**: Microservicios
 
@@ -47,9 +48,20 @@ chmod +x start.sh
 ```
 
 3. **Acceder a la aplicación:**
-- **Frontend**: http://localhost (Producción) o http://localhost:5173 (Desarrollo)
+
+### Modo Producción
+- **Frontend**: http://localhost:3000
 - **Backend API**: http://localhost:5000
+- **PostgreSQL**: localhost:5432
+- **Adminer (DB Admin)**: http://localhost:8080
 - **Documentación API**: http://localhost:5000 (Swagger)
+
+### Modo Desarrollo  
+- **Frontend**: http://localhost:3001
+- **Backend API**: http://localhost:5001
+- **PostgreSQL**: localhost:5433
+- **Adminer (DB Admin)**: http://localhost:8080
+- **Documentación API**: http://localhost:5001 (Swagger)
 
 ## 🐳 Opciones de Docker
 
@@ -57,17 +69,38 @@ chmod +x start.sh
 ```bash
 docker-compose up --build -d
 ```
-- Frontend optimizado servido por Nginx (Puerto 80)
-- Backend API optimizada (Puerto 5000)
-- Base de datos SQLite persistente
+- Frontend optimizado servido por Nginx
+- Backend API optimizada
+- PostgreSQL en producción
+- Persistencia de datos completa
 
 ### Modo Desarrollo
 ```bash
 docker-compose -f docker-compose.dev.yml up --build -d
 ```
 - Hot-reload habilitado en Frontend y Backend
+- PostgreSQL en desarrollo
 - Herramientas de desarrollo incluidas
-- Adminer para gestión de BD (Puerto 8080)
+- Adminer para gestión de BD
+
+## 🗄️ Base de Datos PostgreSQL
+
+### Credenciales por Defecto
+- **Usuario**: grocery_user
+- **Contraseña**: grocery_password
+- **BD Desarrollo**: grocery_management
+- **BD Producción**: grocery_management_prod
+
+### Gestión de Migraciones
+```powershell
+# Windows
+.\backend\migrate.ps1 add NombreMigracion
+.\backend\migrate.ps1 update
+
+# Linux/macOS
+./backend/migrate.sh add NombreMigracion
+./backend/migrate.sh update
+```
 
 ## 📋 Comandos Útiles
 

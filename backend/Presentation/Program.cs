@@ -30,16 +30,16 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = "Grocery Management API",
         Version = "v1",
-        Description = "API para administración multi-tenant de groceries."
+        Description = "API para administraciï¿½n multi-tenant de groceries."
     });
 
-    // Agregar el header X-Grocery-Id como parámetro global
+    // Agregar el header X-Grocery-Id como parï¿½metro global
     c.AddSecurityDefinition("GroceryId", new OpenApiSecurityScheme
     {
         Type = SecuritySchemeType.ApiKey,
         In = ParameterLocation.Header,
         Name = "X-Grocery-Id",
-        Description = "ID del grocery/verdulería para multi-tenancy (requerido para todas las operaciones)"
+        Description = "ID del grocery/verdulerï¿½a para multi-tenancy (requerido para todas las operaciones)"
     });
 
     // Hacer que el header X-Grocery-Id sea requerido para todas las operaciones
@@ -58,7 +58,7 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 
-    // Agregar operación para filtrar que omita ciertos endpoints que no requieren grocery ID
+    // Agregar operaciï¿½n para filtrar que omita ciertos endpoints que no requieren grocery ID
     c.OperationFilter<GroceryIdHeaderOperationFilter>();
 });
 
@@ -79,8 +79,22 @@ builder.Services.AddAutoMapper(cfg =>
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ITenantProvider, HeaderTenantProvider>();
 
+// Database configuration - Support for both SQLite and PostgreSQL
+var databaseProvider = builder.Configuration["DatabaseProvider"];
+var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+
 builder.Services.AddDbContext<GroceryManagmentContext>(options =>
-    options.UseSqlite(builder.Configuration["ConnectionStrings:GroceryManagmentDBConnectionString"]));
+{
+    if (databaseProvider?.ToLower() == "postgresql")
+    {
+        options.UseNpgsql(connectionString);
+    }
+    else
+    {
+        // Default to SQLite for development
+        options.UseSqlite(connectionString ?? builder.Configuration["ConnectionStrings:GroceryManagmentDBConnectionString"]);
+    }
+});
 
 // Repository pattern - Base repository
 builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
@@ -123,7 +137,7 @@ if (app.Environment.IsDevelopment())
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Grocery Management API v1");
         c.RoutePrefix = ""; 
         
-        // Configuración adicional para una mejor experiencia de usuario
+        // Configuraciï¿½n adicional para una mejor experiencia de usuario
         c.DisplayRequestDuration();
         c.EnableDeepLinking();
         c.EnableFilter();

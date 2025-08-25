@@ -1,15 +1,28 @@
 version: '3.8'
 
 services:
-  # Base de datos SQLite compartida (opcional, ya que SQLite es un archivo)
-  database:
-    image: alpine:latest
-    container_name: grocery-database
+  # Base de datos PostgreSQL para producción
+  postgres:
+    image: postgres:16-alpine
+    container_name: grocery-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: grocery_management_prod
+      POSTGRES_USER: grocery_user
+      POSTGRES_PASSWORD: grocery_password
     volumes:
-      - sqlite_data:/data
-    command: tail -f /dev/null # Mantener el contenedor vivo
+      - postgres_data:/var/lib/postgresql/data
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
     networks:
       - grocery-network
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U grocery_user -d grocery_management_prod"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
 
   # Servicio Backend - API .NET
   backend:
@@ -23,19 +36,19 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:5000
-      - ConnectionStrings__GroceryManagmentDBConnectionString=Data Source=/app/data/GroceryManagmentDB.db
-    volumes:
-      - sqlite_data:/app/data
+      - DatabaseProvider=postgresql
+      - ConnectionStrings__DefaultConnection=Host=grocery-postgres;Port=5432;Database=grocery_management_prod;Username=grocery_user;Password=grocery_password
     networks:
       - grocery-network
     depends_on:
-      - database
+      postgres:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:5000/api/health", "||", "exit", "1"]
       interval: 30s
       timeout: 10s
       retries: 3
-      start_period: 40s
+      start_period: 60s
 
   # Servicio Frontend - React + Nginx
   frontend:
@@ -52,7 +65,8 @@ services:
     networks:
       - grocery-network
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:80", "||", "exit", "1"]
       interval: 30s
@@ -61,7 +75,7 @@ services:
       start_period: 40s
 
 volumes:
-  sqlite_data:
+  postgres_data:
     driver: local
 
 networks:

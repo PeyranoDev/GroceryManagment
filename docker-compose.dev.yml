@@ -1,6 +1,29 @@
 version: '3.8'
 
 services:
+  # Base de datos PostgreSQL para desarrollo
+  postgres-dev:
+    image: postgres:16-alpine
+    container_name: grocery-postgres-dev
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: grocery_management
+      POSTGRES_USER: grocery_user
+      POSTGRES_PASSWORD: grocery_password
+    volumes:
+      - postgres_dev_data:/var/lib/postgresql/data
+      - ./backend/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - grocery-network
+    ports:
+      - "5433:5432"  # Puerto diferente para evitar conflictos
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U grocery_user -d grocery_management"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 30s
+
   # Servicio Backend - Desarrollo con hot reload
   backend-dev:
     build:
@@ -9,18 +32,20 @@ services:
     container_name: grocery-backend-dev
     restart: unless-stopped
     ports:
-      - "5000:5000"
-      - "5001:5001"  # Puerto HTTPS para desarrollo
+      - "5001:5000"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
-      - ASPNETCORE_URLS=http://+:5000;https://+:5001
-      - ConnectionStrings__GroceryManagmentDBConnectionString=Data Source=/app/data/GroceryManagmentDB.db
+      - ASPNETCORE_URLS=http://+:5000
+      - DatabaseProvider=postgresql
+      - ConnectionStrings__DefaultConnection=Host=grocery-postgres-dev;Port=5432;Database=grocery_management;Username=grocery_user;Password=grocery_password
     volumes:
       - ./backend:/app
-      - sqlite_data:/app/data
       - dotnet_packages:/root/.nuget/packages
     networks:
       - grocery-network
+    depends_on:
+      postgres-dev:
+        condition: service_healthy
     stdin_open: true
     tty: true
 
@@ -32,9 +57,9 @@ services:
     container_name: grocery-frontend-dev
     restart: unless-stopped
     ports:
-      - "5173:5173"  # Puerto por defecto de Vite
+      - "3001:5173"  # Puerto por defecto de Vite
     environment:
-      - VITE_API_URL=http://localhost:5000/api
+      - VITE_API_URL=http://localhost:5001/api
     volumes:
       - ./frontend:/app
       - /app/node_modules
@@ -45,7 +70,7 @@ services:
     stdin_open: true
     tty: true
 
-  # Adminer para gestión de base de datos (opcional)
+  # Adminer para gestión de base de datos PostgreSQL
   adminer:
     image: adminer:latest
     container_name: grocery-adminer
@@ -54,9 +79,11 @@ services:
       - "8080:8080"
     networks:
       - grocery-network
+    depends_on:
+      - postgres-dev
 
 volumes:
-  sqlite_data:
+  postgres_dev_data:
     driver: local
   dotnet_packages:
     driver: local

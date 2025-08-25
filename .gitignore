@@ -28,35 +28,13 @@ docker-compose.override.yml
 .env
 .env.local
 .env.*.local
+.env.postgresql.*
 
-# Logs del sistema
-logs/
-*.log
-
-# Archivos temporales
-tmp/
-temp/
-
-# Archivos de backup
-*.bak
-*.backup
-
-# Archivos del sistema operativo
-.DS_Store
-Thumbs.db
-Desktop.ini
-
-# IDEs y editores
-.vscode/
-.idea/
-*.swp
-*.swo
-*~
-
-# Base de datos local (se maneja en contenedores)
+# Base de datos
 *.db
 *.db-shm
 *.db-wal
+pgdata/
 
 # Certificados y llaves
 *.pem

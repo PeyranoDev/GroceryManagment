@@ -1,12 +1,13 @@
 # Dockerfile para desarrollo del Backend (.NET)
 
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS development
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS development
 
 # Instalar herramientas adicionales para desarrollo
 RUN apt-get update && \
     apt-get install -y \
     curl \
     sqlite3 \
+    postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
 # Instalar dotnet-ef para migraciones
@@ -21,12 +22,12 @@ ENV ASPNETCORE_ENVIRONMENT=Development
 ENV ASPNETCORE_URLS=http://+:5000
 ENV DOTNET_USE_POLLING_FILE_WATCHER=true
 ENV DOTNET_WATCH_SUPPRESS_BROWSER_REFRESH=true
+ENV DatabaseProvider=postgresql
 
 # Exponer puertos
 EXPOSE 5000
-EXPOSE 5001
 
-# Crear directorio para la base de datos
+# Crear directorio para la base de datos (por compatibilidad)
 RUN mkdir -p /app/data
 
 # Copiar archivo de solución y proyectos para aprovechar cache

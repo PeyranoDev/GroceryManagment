@@ -1,7 +1,7 @@
 # Dockerfile para el Backend (.NET)
 
 # Usar la imagen base de .NET SDK para la fase de construcción
-FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build-env
+FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build-env
 WORKDIR /app
 
 # Copiar los archivos de proyecto y restaurar dependencias
@@ -23,27 +23,27 @@ COPY . .
 RUN dotnet publish Presentation/Presentation.csproj -c Release -o out
 
 # Imagen de runtime
-FROM mcr.microsoft.com/dotnet/aspnet:8.0
+FROM mcr.microsoft.com/dotnet/aspnet:9.0
 WORKDIR /app
 
-# Instalar SQLite para el runtime
+# Instalar herramientas para bases de datos y curl para health checks
 RUN apt-get update && \
-    apt-get install -y sqlite3 && \
-    rm -rf /var/lib/apt/lists/*
+    apt-get install -y \
+    sqlite3 \
+    postgresql-client \
+    curl \
+    && rm -rf /var/lib/apt/lists/*
 
 # Copiar los archivos compilados desde la imagen de construcción
 COPY --from=build-env /app/out .
 
-# Crear el directorio para la base de datos
+# Crear el directorio para la base de datos (por compatibilidad con SQLite)
 RUN mkdir -p /app/data
 
-# Copiar la base de datos si existe
-COPY Presentation/GroceryManagmentDB.db /app/data/ 2>/dev/null || true
-
-# Configurar variables de entorno
+# Configurar variables de entorno por defecto
 ENV ASPNETCORE_ENVIRONMENT=Production
 ENV ASPNETCORE_URLS=http://+:5000
-ENV ConnectionStrings__GroceryManagmentDBConnectionString="Data Source=/app/data/GroceryManagmentDB.db"
+ENV DatabaseProvider=postgresql
 
 # Exponer el puerto
 EXPOSE 5000
