@@ -14,59 +14,141 @@ namespace Infraestructure
             _tenant = tenant;
         }
 
-        public DbSet<User> Users => Set<User>();
-        public DbSet<Grocery> Groceries => Set<Grocery>();
-        public DbSet<UserGrocery> UserGroceries => Set<UserGrocery>();
-        public DbSet<Product> Products => Set<Product>();
-        public DbSet<InventoryItem> Inventory => Set<InventoryItem>();
-        public DbSet<WeeklySale> WeeklySales => Set<WeeklySale>();
-        public DbSet<RecentActivity> RecentActivities => Set<RecentActivity>();
-        public DbSet<Sale> Sales => Set<Sale>();
-        public DbSet<SaleItem> SaleItems => Set<SaleItem>();
+        public DbSet<User> Users { get; set; }
+        public DbSet<Grocery> Groceries { get; set; }
+        public DbSet<UserGrocery> UserGroceries { get; set; }
+        public DbSet<Category> Categories { get; set; }
+        public DbSet<Product> Products { get; set; }
+        public DbSet<InventoryItem> InventoryItems { get; set; }
+        public DbSet<WeeklySale> WeeklySales { get; set; }
+        public DbSet<RecentActivity> RecentActivities { get; set; }
+        public DbSet<Sale> Sales { get; set; }
+        public DbSet<SaleItem> SaleItems { get; set; }
 
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        protected override void OnModelCreating(ModelBuilder mb)
         {
-            base.OnModelCreating(modelBuilder);
+            base.OnModelCreating(mb);
 
-            // --- Configuración de Owned Types ---
-            modelBuilder.Entity<Product>().OwnsOne(p => p.Promotion);
-            modelBuilder.Entity<InventoryItem>().OwnsOne(i => i.Promotion);
+            // User configuration
+            mb.Entity<User>()
+                .Property(u => u.PasswordHash)
+                .HasMaxLength(100)
+                .IsRequired();
 
-            // --- Índices únicos por Grocery ---
-            modelBuilder.Entity<Product>()
-                .HasIndex(p => new { p.GroceryId, p.Name })
-                .IsUnique();
+            // UserGrocery configuration
+            mb.Entity<UserGrocery>(b =>
+            {
+                b.HasKey(x => x.Id);
+                b.HasIndex(x => new { x.UserId, x.GroceryId }).IsUnique();
 
-            // --- Relaciones ---
-            modelBuilder.Entity<UserGrocery>()
-                .HasKey(ug => new { ug.UserId, ug.GroceryId });
+                b.HasOne(x => x.User)
+                 .WithMany(u => u.UserGroceries)
+                 .HasForeignKey(x => x.UserId)
+                 .OnDelete(DeleteBehavior.Cascade);
 
-            modelBuilder.Entity<UserGrocery>()
-                .HasOne(ug => ug.User)
-                .WithMany(u => u.UserGroceries)
-                .HasForeignKey(ug => ug.UserId);
+                b.HasOne(x => x.Grocery)
+                 .WithMany(g => g.UserGroceries)
+                 .HasForeignKey(x => x.GroceryId)
+                 .OnDelete(DeleteBehavior.Cascade);
+            });
 
-            modelBuilder.Entity<UserGrocery>()
-                .HasOne(ug => ug.Grocery)
-                .WithMany(g => g.UserGroceries)
-                .HasForeignKey(ug => ug.GroceryId);
+            // Grocery configuration
+            mb.Entity<Grocery>(b =>
+            {
+                b.Property(g => g.Name).IsRequired().HasMaxLength(200);
+            });
 
-            modelBuilder.Entity<SaleItem>()
-                .HasOne(si => si.Product)
-                .WithMany()
-                .HasForeignKey(si => si.ProductId);
+            // Category configuration
+            mb.Entity<Category>(b =>
+            {
+                b.Property(c => c.Name).IsRequired().HasMaxLength(100);
+                b.Property(c => c.Icon).HasMaxLength(10);
+                b.HasIndex(c => new { c.GroceryId, c.Name }).IsUnique();
+            });
 
-            modelBuilder.Entity<SaleItem>()
-                .HasOne(si => si.Sale)
-                .WithMany(s => s.Items)
-                .HasForeignKey(si => si.SaleId);
+            // Product configuration
+            mb.Entity<Product>(b =>
+            {
+                b.Property(p => p.Name).IsRequired().HasMaxLength(200);
+                b.Property(p => p.Unit).IsRequired().HasMaxLength(50);
+                b.Property(p => p.Emoji).HasMaxLength(10);
+                b.Property(p => p.UnitPrice).HasColumnType("decimal(18,2)");
+                b.Property(p => p.SalePrice).HasColumnType("decimal(18,2)");
+                
+                b.HasIndex(p => new { p.GroceryId, p.Name }).IsUnique();
+                
+                b.HasOne(p => p.Category)
+                 .WithMany(c => c.Products)
+                 .HasForeignKey(p => p.CategoryId)
+                 .OnDelete(DeleteBehavior.Restrict);
 
-            modelBuilder.Entity<Product>().HasQueryFilter(e => e.GroceryId == _tenant.CurrentGroceryId);
-            modelBuilder.Entity<InventoryItem>().HasQueryFilter(e => e.GroceryId == _tenant.CurrentGroceryId);
-            modelBuilder.Entity<WeeklySale>().HasQueryFilter(e => e.GroceryId == _tenant.CurrentGroceryId);
-            modelBuilder.Entity<RecentActivity>().HasQueryFilter(e => e.GroceryId == _tenant.CurrentGroceryId);
-            modelBuilder.Entity<Sale>().HasQueryFilter(e => e.GroceryId == _tenant.CurrentGroceryId);
-            modelBuilder.Entity<SaleItem>().HasQueryFilter(e => e.GroceryId == _tenant.CurrentGroceryId);
+                // Configure Promotion as owned entity
+                b.OwnsOne(p => p.Promotion, promo =>
+                {
+                    promo.Property(pr => pr.DiscountPercent).HasColumnType("decimal(5,2)");
+                    promo.Property(pr => pr.DiscountAmount).HasColumnType("decimal(18,2)");
+                    promo.Property(pr => pr.PromotionPrice).HasColumnType("decimal(18,2)");
+                });
+            });
+
+            // InventoryItem configuration
+            mb.Entity<InventoryItem>(b =>
+            {
+                b.HasOne(i => i.Product)
+                 .WithMany(p => p.InventoryItems)
+                 .HasForeignKey(i => i.ProductId)
+                 .OnDelete(DeleteBehavior.Cascade);
+
+                // Configure Promotion as owned entity
+                b.OwnsOne(i => i.Promotion, promo =>
+                {
+                    promo.Property(pr => pr.DiscountPercent).HasColumnType("decimal(5,2)");
+                    promo.Property(pr => pr.DiscountAmount).HasColumnType("decimal(18,2)");
+                    promo.Property(pr => pr.PromotionPrice).HasColumnType("decimal(18,2)");
+                });
+            });
+
+            // Sale configuration
+            mb.Entity<Sale>(b =>
+            {
+                b.Property(s => s.Total).HasColumnType("decimal(18,2)");
+                
+                b.HasOne(s => s.User)
+                 .WithMany()
+                 .HasForeignKey(s => s.UserId)
+                 .OnDelete(DeleteBehavior.Restrict);
+
+                b.HasMany(s => s.Items)
+                 .WithOne(si => si.Sale)
+                 .HasForeignKey(si => si.SaleId)
+                 .OnDelete(DeleteBehavior.Cascade);
+            });
+
+            // SaleItem configuration
+            mb.Entity<SaleItem>(b =>
+            {
+                b.Property(si => si.Price).HasColumnType("decimal(18,2)");
+                
+                b.HasOne(si => si.Product)
+                 .WithMany()
+                 .HasForeignKey(si => si.ProductId)
+                 .OnDelete(DeleteBehavior.Restrict);
+            });
+
+            // RecentActivity configuration
+            mb.Entity<RecentActivity>(b =>
+            {
+                b.Property(ra => ra.Action).IsRequired().HasMaxLength(500);
+            });
+
+            // Query filters for multi-tenancy
+            mb.Entity<Category>().HasQueryFilter(e => e.GroceryId == _tenant.CurrentGroceryId);
+            mb.Entity<Product>().HasQueryFilter(e => e.GroceryId == _tenant.CurrentGroceryId);
+            mb.Entity<InventoryItem>().HasQueryFilter(e => e.GroceryId == _tenant.CurrentGroceryId);
+            mb.Entity<Sale>().HasQueryFilter(e => e.GroceryId == _tenant.CurrentGroceryId);
+            mb.Entity<SaleItem>().HasQueryFilter(e => e.GroceryId == _tenant.CurrentGroceryId);
+            mb.Entity<WeeklySale>().HasQueryFilter(e => e.GroceryId == _tenant.CurrentGroceryId);
+            mb.Entity<RecentActivity>().HasQueryFilter(e => e.GroceryId == _tenant.CurrentGroceryId);
         }
     }
 }

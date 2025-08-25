@@ -1,35 +1,44 @@
-﻿using Domain.Entities;
+﻿// Infraestructure/Repositories/BaseRepository.cs
+using Domain.Entities;
+using Domain.Repositories;
+using Infraestructure.Tenancy;
 using Microsoft.EntityFrameworkCore;
-using SQLitePCL;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+using System.Linq.Expressions;
 
 namespace Infraestructure.Repositories
 {
     public class BaseRepository<T> : IBaseRepository<T> where T : class, IEntity
     {
-        public readonly GroceryManagmentContext _context;
+        protected readonly GroceryManagmentContext _ctx;
+        protected readonly ITenantProvider _tenant;
 
-        public BaseRepository(GroceryManagmentContext context)
+        public BaseRepository(GroceryManagmentContext ctx, ITenantProvider tenant)
         {
-            _context = context;
+            _ctx = ctx;
+            _tenant = tenant;
         }
 
-        public async Task<T?> GetById(int id)
-        {
-            return await _context.Set<T>().FirstOrDefaultAsync(t => t.Id == id);
-        }
+        public Task<T?> GetById(int id)
+            => _ctx.Set<T>().AsNoTracking().FirstOrDefaultAsync(e => e.Id == id)!;
+
+        public Task<IReadOnlyList<T>> GetAll()
+            => _ctx.Set<T>().AsNoTracking().ToListAsync() as Task<IReadOnlyList<T>>;
+
+        public async Task<IReadOnlyList<T>> Find(Expression<Func<T, bool>> predicate)
+            => await _ctx.Set<T>().AsNoTracking().Where(predicate).ToListAsync();
 
         public async Task<int> Create(T entity)
         {
-            var entityEntry = await _context.Set<T>().AddAsync(entity);
+            if (entity is IHasGrocery hg)
+                hg.GroceryId = _tenant.CurrentGroceryId;   
 
-            await _context.SaveChangesAsync();
-
-            return entityEntry.Entity.Id;
+            var entry = await _ctx.Set<T>().AddAsync(entity);
+            await _ctx.SaveChangesAsync();
+            return entry.Entity.Id;
         }
+
+        public Task Update(T entity) { _ctx.Set<T>().Update(entity); return Task.CompletedTask; }
+        public Task Delete(T entity) { _ctx.Set<T>().Remove(entity); return Task.CompletedTask; }
+        public Task SaveChanges() => _ctx.SaveChangesAsync();
     }
 }

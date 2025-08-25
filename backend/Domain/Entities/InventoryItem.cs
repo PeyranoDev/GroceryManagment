@@ -6,7 +6,8 @@
         public int ProductId { get; set; }
         public Product Product { get; set; } = null!;
 
-        public int Quantity { get; set; }
+        public int Stock { get; set; }
+        public DateTime LastUpdated { get; set; }
 
         public int GroceryId { get; set; }
         public Grocery Grocery { get; set; } = null!;

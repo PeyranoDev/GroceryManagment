@@ -3,11 +3,12 @@
 ################################################################################
 
 /backend/.vs
-/backend/Application/bin/Debug/net9.0
+/backend/Application/bin/
+/backend/Presentation/bin/
+/backend/Infraestructure/bin
 /backend/Application/obj
 /backend/Domain/obj
-/backend/Infraestructure/bin/Debug/net9.0
 /backend/Infraestructure/obj
-/backend/Domain/bin/Debug/net9.0
-/backend/Presentation/bin/Debug/net9.0
-/backend/Presentation/obj
+/backend/Domain/bin/
+/backend/Presentation/obj/
+

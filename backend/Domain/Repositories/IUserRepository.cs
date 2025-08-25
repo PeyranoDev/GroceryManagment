@@ -1,8 +1,12 @@
 ﻿using Domain.Entities;
 
-namespace Infraestructure.Repositories
+namespace Domain.Repositories
 {
     public interface IUserRepository : IBaseRepository<User>
     {
+        Task<User?> GetByEmail(string email);
+        Task<bool> ExistsByEmail(string email);
+        Task<bool> IsSuperAdmin(int userId);
+        Task SetSuperAdmin(int userId, bool isSuperAdmin);
     }
 }

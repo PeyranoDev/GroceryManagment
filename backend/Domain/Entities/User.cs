@@ -6,7 +6,7 @@
         public string Name { get; set; } = null!;
         public string Email { get; set; } = null!;
         public string PasswordHash { get; set; } = null!;
-
+        public bool IsSuperAdmin { get; set; }   
         public ICollection<UserGrocery> UserGroceries { get; set; } = new List<UserGrocery>();
     }
 }
