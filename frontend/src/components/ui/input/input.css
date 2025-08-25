@@ -2,7 +2,10 @@
 
 input {
   @apply py-2 w-full border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] 
-  bg-[#141312] border-[#141312] text-white placeholder-gray-400 ;
+  bg-[#141312] border-[#141312] text-white placeholder-gray-400
+  transition-all duration-200 ease-in-out
+  hover:border-[var(--color-primary)]/50 hover:shadow-md
+  focus:border-[var(--color-primary)] focus:shadow-lg focus:scale-[1.02];
 }
 
 /* Ocultar los botones de incrementar/decrementar en inputs type="number" */
@@ -18,5 +21,6 @@ input[type="number"] {
 }
 
 .icon {
-  @apply absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none;
+  @apply absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none
+  transition-all duration-200;
 }
