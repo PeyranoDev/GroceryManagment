@@ -29,7 +29,7 @@
 }
 
 .weeklySalesChart__container {
-  @apply h-80 flex items-end justify-around gap-2 p-4 ;
+  @apply h-64 sm:h-80 flex items-end justify-around gap-1 sm:gap-2 p-2 sm:p-4;
 }
 
 .weeklySalesChart__dayColumn {
@@ -41,11 +41,11 @@
 }
 
 .weeklySalesChart__barValue {
-  @apply text-xs font-semibold text-gray-200;
+  @apply text-xs sm:text-sm font-semibold text-gray-200;
 }
 
 .weeklySalesChart__dayLabel {
-  @apply text-xs font-medium text-gray-400;
+  @apply text-xs sm:text-sm font-medium text-gray-400;
 }
 
 /* Recent Activity Styles */

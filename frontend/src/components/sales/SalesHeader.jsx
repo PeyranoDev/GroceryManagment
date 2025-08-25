@@ -21,8 +21,8 @@ const SalesHeader = ({ details, onDetailChange }) => {
         </div>
       }
       actions={
-        <div className="flex items-center gap-4">
-          <span className="font-medium text-gray-300">Tipo de Venta:</span>
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
+          <span className="font-medium text-gray-300 text-sm sm:text-base">Tipo de Venta:</span>
           <div className="flex items-center gap-2">
             <button
               onClick={() => onDetailChange("isOnline", false)}
@@ -50,7 +50,7 @@ const SalesHeader = ({ details, onDetailChange }) => {
     >
       <form className="flex flex-col gap-4">
         {/* Campos básicos de la venta */}
-        <div className="flex gap-4 justify-around">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Input
             type="date"
             value={details.date}
@@ -85,7 +85,7 @@ const SalesHeader = ({ details, onDetailChange }) => {
 
         {/* Campos específicos para ventas online */}
         {details.isOnline && (
-          <div className="flex gap-4 justify-around">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
             <Select
               value={details.deliveryMethod}
               onChange={(e) => onDetailChange("deliveryMethod", e.target.value)}

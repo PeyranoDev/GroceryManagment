@@ -14,7 +14,8 @@ const SalesCart = ({
       title="Productos en la Venta"
       actions={productSearchComponent} // Usar el componente pasado como prop
     >
-      <div className="overflow-x-auto">
+      {/* Desktop Table View */}
+      <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-sm text-left">
           <thead className="text-xs text-gray-400 uppercase">
             <tr>
@@ -47,6 +48,26 @@ const SalesCart = ({
             )}
           </tbody>
         </table>
+      </div>
+
+      {/* Mobile Card View */}
+      <div className="md:hidden space-y-4">
+        {cart.length > 0 ? (
+          cart.map((item) => (
+            <SaleItemRow
+              key={item.product.id}
+              item={item}
+              onQuantityChange={onQuantityChange}
+              onRemove={onRemove}
+              onTogglePromotion={onTogglePromotion}
+              isMobile={true}
+            />
+          ))
+        ) : (
+          <div className="text-center p-6 text-gray-500">
+            Aún no hay productos en la venta.
+          </div>
+        )}
       </div>
     </Card>
   );
