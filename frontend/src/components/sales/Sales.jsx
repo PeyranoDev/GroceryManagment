@@ -5,11 +5,10 @@ import SalesHeader from "./SalesHeader";
 import ProductSearch from "./ProductSearch";
 import SalesSummary from "./SalesSummary";
 import SalesActions from "./SalesActions";
-import WhatsAppMessage from "./WhatsAppMessage";
+import WhatsAppMessage from "./WhatsappMessage";
 import SalesCart from "./SalesCart";
 
 const Sales = () => {
-  // Función para obtener la hora actual en formato 24 horas (HH:mm)
   const getCurrentTime = () => {
     const now = new Date();
     const hours = now.getHours().toString().padStart(2, "0");
@@ -17,7 +16,6 @@ const Sales = () => {
     return `${hours}:${minutes}`;
   };
 
-  // Hooks de datos
   const { products, loading: productsLoading, searchProducts } = useProducts();
   const { createSaleFromCart, generateWhatsAppMessage, loading: salesLoading } = useSales();
   const {
@@ -30,7 +28,6 @@ const Sales = () => {
     calculateTotals
   } = useCart();
 
-  // Estados locales
   const [details, setDetails] = useState({
     date: new Date().toISOString().slice(0, 10),
     time: getCurrentTime(),
@@ -45,7 +42,6 @@ const Sales = () => {
   const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
   const [lastSaleId, setLastSaleId] = useState(null);
 
-  // Actualizar la hora automáticamente cada minuto
   useEffect(() => {
     const interval = setInterval(() => {
       setDetails((prev) => ({

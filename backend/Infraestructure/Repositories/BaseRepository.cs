@@ -1,4 +1,3 @@
-﻿// Infraestructure/Repositories/BaseRepository.cs
 using Domain.Entities;
 using Domain.Repositories;
 using Domain.Tenancy;
@@ -49,7 +48,6 @@ namespace Infraestructure.Repositories
 
             var entry = await _ctx.Set<T>().AddAsync(entity);
             
-            // Retornar 0 si no se ha guardado aún (el ID real se asignará después de SaveChanges)
             return entry.Entity.Id;
         }
 

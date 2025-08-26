@@ -17,9 +17,6 @@ namespace Presentation.Controllers
             _reportService = reportService;
         }
 
-        /// <summary>
-        /// Obtener reportes para el grocery actual
-        /// </summary>
         [HttpPost]
         public async Task<IActionResult> GetReports([FromBody] ReportFilterDto filter)
         {
@@ -34,9 +31,6 @@ namespace Presentation.Controllers
             }
         }
 
-        /// <summary>
-        /// Obtener resumen de ventas para el grocery actual
-        /// </summary>
         [HttpGet("sales-summary")]
         public async Task<IActionResult> GetSalesSummary(
             [FromQuery] DateTime? startDate,
@@ -56,9 +50,6 @@ namespace Presentation.Controllers
             }
         }
 
-        /// <summary>
-        /// Obtener total de ventas para el grocery actual
-        /// </summary>
         [HttpGet("total-sales")]
         public async Task<IActionResult> GetTotalSales(
             [FromQuery] DateTime startDate,
@@ -75,9 +66,6 @@ namespace Presentation.Controllers
             }
         }
 
-        /// <summary>
-        /// Obtener total de compras para el grocery actual
-        /// </summary>
         [HttpGet("total-purchases")]
         public async Task<IActionResult> GetTotalPurchases(
             [FromQuery] DateTime startDate,

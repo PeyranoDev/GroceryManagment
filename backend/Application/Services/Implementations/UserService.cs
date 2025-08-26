@@ -1,4 +1,4 @@
-Ôªøusing Application.Schemas.Users;
+using Application.Schemas.Users;
 using Application.Services.Interfaces;
 using AutoMapper;
 using Domain.Entities;
@@ -34,7 +34,7 @@ namespace Application.Services.Implementations
         public async Task<UserForResponseDto> Create(UserForCreateDto dto)
         {
             if (await _users.ExistsByEmail(dto.Email))
-                throw new InvalidOperationException("El email ya est√° registrado.");
+                throw new InvalidOperationException("El email ya est· registrado.");
 
             var entity = _mapper.Map<User>(dto);
             entity.PasswordHash = Hash(dto.Password);
@@ -52,7 +52,7 @@ namespace Application.Services.Implementations
 
             if (!string.Equals(entity.Email, dto.Email, StringComparison.OrdinalIgnoreCase)
                 && await _users.ExistsByEmail(dto.Email))
-                throw new InvalidOperationException("El email ya est√° registrado.");
+                throw new InvalidOperationException("El email ya est· registrado.");
 
             _mapper.Map(dto, entity);
 

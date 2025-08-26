@@ -1,4 +1,3 @@
-// src/components/inventory/StockStatus.jsx
 
 const StockStatus = ({ stock }) => {
   if (stock === 0)

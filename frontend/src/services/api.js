@@ -1,19 +1,27 @@
 import { useState } from 'react';
 
-// API Service para conectar con el backend
-// En producción con Docker, el backend está en el mismo host pero puerto 5000
-// En desarrollo, puede estar en localhost:5000 o backend:5000 dependiendo del setup
-const API_BASE_URL = process.env.NODE_ENV === 'production' 
-  ? 'http://localhost:5000/api' 
-  : process.env.VITE_API_URL || 'http://localhost:5000/api';
 
-// Headers base para todas las peticiones
+const runtimeEnv = (typeof window !== 'undefined' && window.__APP_ENV__) || {};
+const runtimeApi = runtimeEnv.API_URL; 
+
+const viteApi = import.meta.env.VITE_API_URL; 
+
+const normalizeApi = (url) => {
+  if (!url || typeof url !== 'string') return undefined;
+  const trimmed = url.replace(/\/+$/, '');
+  return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`;
+};
+
+const API_BASE_URL =
+  normalizeApi(runtimeApi) ||
+  normalizeApi(viteApi) ||
+  'http://localhost:5001/api';
+
 const getHeaders = () => ({
   'Content-Type': 'application/json',
-  'GroceryId': '1', // Por ahora usaremos un ID fijo, luego se puede hacer dinámico
+  'GroceryId': '1', 
 });
 
-// Función para hacer peticiones HTTP
 const apiRequest = async (endpoint, options = {}) => {
   const url = `${API_BASE_URL}${endpoint}`;
   const config = {
@@ -36,7 +44,6 @@ const apiRequest = async (endpoint, options = {}) => {
   }
 };
 
-// Servicios de Products
 export const productsAPI = {
   getAll: () => apiRequest('/Products'),
   getById: (id) => apiRequest(`/Products/${id}`),
@@ -53,7 +60,6 @@ export const productsAPI = {
   }),
 };
 
-// Servicios de Inventory
 export const inventoryAPI = {
   getAll: () => apiRequest('/Inventory'),
   getFiltered: (params = {}) => {
@@ -81,7 +87,6 @@ export const inventoryAPI = {
   }),
 };
 
-// Servicios de Sales
 export const salesAPI = {
   getAll: () => apiRequest('/Sales'),
   getById: (id) => apiRequest(`/Sales/${id}`),
@@ -107,13 +112,11 @@ export const salesAPI = {
   }),
 };
 
-// Servicios de Dashboard
 export const dashboardAPI = {
   getStats: () => apiRequest('/Dashboard/stats'),
   getWeeklySales: () => apiRequest('/Dashboard/weekly-sales'),
 };
 
-// Servicios de Recent Activities
 export const recentActivitiesAPI = {
   getAll: () => apiRequest('/RecentActivities'),
   getRecent: (count = 10) => apiRequest(`/RecentActivities/recent?count=${count}`),
@@ -127,7 +130,6 @@ export const recentActivitiesAPI = {
   }),
 };
 
-// Servicios de Purchases
 export const purchasesAPI = {
   getAll: () => apiRequest('/Purchases'),
   getById: (id) => apiRequest(`/Purchases/${id}`),
@@ -149,7 +151,6 @@ export const purchasesAPI = {
   }),
 };
 
-// Servicios de Reports
 export const reportsAPI = {
   getFilteredReports: (filters) => apiRequest('/Reports', {
     method: 'POST',
@@ -166,7 +167,6 @@ export const reportsAPI = {
   },
 };
 
-// Servicios de Categories
 export const categoriesAPI = {
   getAll: () => apiRequest('/Categories'),
   getById: (id) => apiRequest(`/Categories/${id}`),
@@ -183,11 +183,9 @@ export const categoriesAPI = {
   }),
 };
 
-// Función de utilidad para manejar errores de API
 export const handleApiError = (error) => {
   console.error('API Error:', error);
   
-  // Puedes personalizar el manejo de errores aquí
   if (error.message.includes('Failed to fetch')) {
     return 'Error de conexión. Verifica que el servidor esté ejecutándose.';
   }
@@ -195,7 +193,6 @@ export const handleApiError = (error) => {
   return error.message || 'Error desconocido';
 };
 
-// Hook personalizado para gestionar el estado de carga
 export const useApiState = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);

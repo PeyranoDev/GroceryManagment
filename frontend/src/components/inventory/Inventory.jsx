@@ -47,7 +47,6 @@ const Inventory = () => {
   };
 
   const handleFilterChange = (searchTerm, statusFilter) => {
-    // Aplicar filtros localmente o hacer una nueva consulta al backend
     const filters = {};
     if (searchTerm) filters.searchTerm = searchTerm;
     if (statusFilter !== 'all') filters.statusFilter = statusFilter;
@@ -90,7 +89,6 @@ const Inventory = () => {
             value={searchTerm}
             onChange={(e) => {
               setSearchTerm(e.target.value);
-              // Aplicar filtro después de un breve delay para evitar muchas consultas
               setTimeout(() => handleFilterChange(e.target.value, statusFilter), 300);
             }}
             icon={<Search size={18} className="text-gray-400" />}

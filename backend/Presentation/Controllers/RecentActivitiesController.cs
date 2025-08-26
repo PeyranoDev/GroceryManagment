@@ -18,9 +18,6 @@ namespace Presentation.Controllers
             _recentActivityService = recentActivityService;
         }
 
-        /// <summary>
-        /// Obtener todas las actividades recientes del grocery actual
-        /// </summary>
         [HttpGet]
         public async Task<ActionResult<ApiResponse<IReadOnlyList<RecentActivityForResponseDto>>>> GetAll()
         {
@@ -31,9 +28,6 @@ namespace Presentation.Controllers
             ));
         }
 
-        /// <summary>
-        /// Obtener las actividades más recientes del grocery actual
-        /// </summary>
         [HttpGet("recent")]
         public async Task<ActionResult<ApiResponse<IReadOnlyList<RecentActivityForResponseDto>>>> GetRecent([FromQuery] int count = 10)
         {
@@ -44,9 +38,6 @@ namespace Presentation.Controllers
             ));
         }
 
-        /// <summary>
-        /// Obtener una actividad reciente por ID (validando que pertenezca al grocery actual)
-        /// </summary>
         [HttpGet("{id}")]
         public async Task<ActionResult<ApiResponse<RecentActivityForResponseDto>>> GetById(int id)
         {
@@ -57,9 +48,6 @@ namespace Presentation.Controllers
             ));
         }
 
-        /// <summary>
-        /// Crear una nueva actividad reciente en el grocery actual
-        /// </summary>
         [HttpPost]
         public async Task<ActionResult<ApiResponse<RecentActivityForResponseDto>>> Create([FromBody] RecentActivityForCreateDto dto)
         {
@@ -77,9 +65,6 @@ namespace Presentation.Controllers
             );
         }
 
-        /// <summary>
-        /// Eliminar una actividad reciente (validando que pertenezca al grocery actual)
-        /// </summary>
         [HttpDelete("{id}")]
         public async Task<ActionResult<ApiResponse>> Delete(int id)
         {

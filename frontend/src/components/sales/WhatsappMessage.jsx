@@ -16,7 +16,6 @@ const WhatsAppMessage = ({
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // Generar mensaje usando la API del backend cuando se abra el modal
   useEffect(() => {
     if (isOpen && saleId && generateWhatsAppMessage) {
       const fetchMessage = async () => {
@@ -34,7 +33,6 @@ const WhatsAppMessage = ({
       
       fetchMessage();
     } else if (isOpen) {
-      // Si no hay saleId, usar el mensaje de fallback
       setMessage(generateFallbackMessage());
     }
   }, [isOpen, saleId, details, generateWhatsAppMessage]);
@@ -60,7 +58,6 @@ const WhatsAppMessage = ({
     
     message += `\n📋 *Detalle de productos:*\n`;
     
-    // Lista de productos
     cart.forEach((item) => {
       const itemPrice = item.promotionApplied && item.product.promotion 
         ? calculatePromotionPrice(item) 
@@ -69,7 +66,6 @@ const WhatsAppMessage = ({
       message += `• ${item.product.name} x${item.quantity} - $${itemPrice.toFixed(0)}\n`;
     });
     
-    // Resumen de costos
     const subtotal = cart.reduce((sum, item) => {
       if (item.promotionApplied && item.product.promotion) {
         return sum + calculatePromotionPrice(item);
@@ -116,7 +112,6 @@ const WhatsAppMessage = ({
       setTimeout(() => setCopied(false), 2000);
     } catch (err) {
       console.error('Error al copiar:', err);
-      // Fallback para navegadores que no soportan clipboard
       const textArea = document.createElement('textarea');
       textArea.value = message;
       document.body.appendChild(textArea);
@@ -129,7 +124,6 @@ const WhatsAppMessage = ({
   };
 
   const handleWhatsAppSend = () => {
-    // Usar encodeURI en lugar de encodeURIComponent para preservar mejor los emojis
     const encodedMessage = encodeURI(message).replace(/#/g, '%23');
     const phone = details?.phone?.replace(/\D/g, '') || '';
     

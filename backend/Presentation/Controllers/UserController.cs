@@ -16,9 +16,6 @@ namespace Presentation.Controllers
             _userService = userService;
         }
 
-        /// <summary>
-        /// Obtener todos los usuarios
-        /// </summary>
         [HttpGet]
         public async Task<ActionResult<ApiResponse<IReadOnlyList<UserForResponseDto>>>> GetAll()
         {
@@ -29,9 +26,6 @@ namespace Presentation.Controllers
             ));
         }
 
-        /// <summary>
-        /// Obtener un usuario por ID
-        /// </summary>
         [HttpGet("{id}")]
         public async Task<ActionResult<ApiResponse<UserForResponseDto>>> GetById(int id)
         {
@@ -42,9 +36,6 @@ namespace Presentation.Controllers
             ));
         }
 
-        /// <summary>
-        /// Crear un nuevo usuario
-        /// </summary>
         [HttpPost]
         public async Task<ActionResult<ApiResponse<UserForResponseDto>>> Create([FromBody] UserForCreateDto dto)
         {
@@ -62,9 +53,6 @@ namespace Presentation.Controllers
             );
         }
 
-        /// <summary>
-        /// Actualizar un usuario existente
-        /// </summary>
         [HttpPut("{id}")]
         public async Task<ActionResult<ApiResponse<UserForResponseDto>>> Update(int id, [FromBody] UserForUpdateDto dto)
         {
@@ -78,9 +66,6 @@ namespace Presentation.Controllers
             ));
         }
 
-        /// <summary>
-        /// Eliminar un usuario
-        /// </summary>
         [HttpDelete("{id}")]
         public async Task<ActionResult<ApiResponse>> Delete(int id)
         {
@@ -88,9 +73,6 @@ namespace Presentation.Controllers
             return Ok(ApiResponse.SuccessResponse("Usuario eliminado exitosamente"));
         }
 
-        /// <summary>
-        /// Establecer o quitar permisos de SuperAdmin a un usuario
-        /// </summary>
         [HttpPatch("{id}/super-admin")]
         public async Task<ActionResult<ApiResponse<UserForResponseDto>>> SetSuperAdmin(int id, [FromBody] SetSuperAdminDto dto)
         {

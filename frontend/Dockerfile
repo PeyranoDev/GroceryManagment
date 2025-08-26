@@ -1,34 +1,20 @@
-# Dockerfile para el Frontend (React + Vite)
-
-# Etapa de construcción
-FROM node:18-alpine AS build-stage
-
-# Establecer el directorio de trabajo
+FROM node:20-alpine AS build
 WORKDIR /app
-
-# Copiar archivos de configuración de dependencias
-COPY package.json package-lock.json* ./
-
-# Instalar dependencias
-RUN npm ci --only=production
-
-# Copiar el código fuente
+COPY package*.json ./
+RUN npm ci --include=dev
 COPY . .
-
-# Construir la aplicación para producción
+ARG VITE_BASE=/
+ENV VITE_BASE=${VITE_BASE}
 RUN npm run build
 
-# Etapa de producción con Nginx
-FROM nginx:alpine AS production-stage
-
-# Copiar archivos construidos desde la etapa anterior
-COPY --from=build-stage /app/dist /usr/share/nginx/html
-
-# Copiar configuración personalizada de Nginx
-COPY nginx.conf /etc/nginx/conf.d/default.conf
-
-# Exponer puerto 80
+FROM nginx:1.27-alpine
+WORKDIR /
+COPY nginx.conf /etc/nginx/nginx.conf
+COPY default.conf.template /etc/nginx/conf.d/default.conf.template
+COPY env.template.js /usr/share/nginx/html/env.template.js
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod +x /entrypoint.sh
+COPY --from=build /app/dist /usr/share/nginx/html
 EXPOSE 80
-
-# Comando por defecto
+ENTRYPOINT ["/entrypoint.sh"]
 CMD ["nginx", "-g", "daemon off;"]

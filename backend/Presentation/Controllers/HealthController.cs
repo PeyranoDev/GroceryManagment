@@ -6,9 +6,6 @@ namespace Presentation.Controllers
     [Route("api/[controller]")]
     public class HealthController : ControllerBase
     {
-        /// <summary>
-        /// Endpoint de verificación de salud del servicio
-        /// </summary>
         [HttpGet]
         public IActionResult Get()
         {
@@ -21,18 +18,11 @@ namespace Presentation.Controllers
             });
         }
 
-        /// <summary>
-        /// Endpoint detallado de verificación de salud
-        /// </summary>
         [HttpGet("detailed")]
         public IActionResult GetDetailed()
         {
             try
             {
-                // Aquí podrías agregar verificaciones adicionales como:
-                // - Conectividad a la base de datos
-                // - Estado de servicios externos
-                // - Uso de memoria, etc.
 
                 return Ok(new
                 {

@@ -12,10 +12,8 @@ namespace Infraestructure.Repositories
 
         public override async Task<int> Create(Sale entity)
         {
-            // Asegurar que la venta tenga el grocery correcto
             entity.GroceryId = _tenant.CurrentGroceryId;
             
-            // Asegurar que todos los items también tengan el grocery correcto
             foreach (var item in entity.Items)
             {
                 item.GroceryId = _tenant.CurrentGroceryId;
@@ -23,7 +21,6 @@ namespace Infraestructure.Repositories
 
             var entry = await _ctx.Set<Sale>().AddAsync(entity);
             
-            // No llamar SaveChanges aquí, dejar que el servicio lo maneje
             return entry.Entity.Id;
         }
 

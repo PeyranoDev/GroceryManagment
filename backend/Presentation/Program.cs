@@ -10,15 +10,59 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Presentation.Filters;
 using Presentation.Middleware;
+using Azure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
+
+string conn = string.Empty;
+
+if (builder.Environment.IsProduction())
+{
+    try
+    {
+        var keyVaultEndpoint = new Uri("https://grocerymanagerkv.vault.azure.net/");
+        builder.Configuration.AddAzureKeyVault(keyVaultEndpoint, new DefaultAzureCredential());
+        Console.WriteLine("Key Vault configurado correctamente.");
+        
+        var pgHost = builder.Configuration["PGHOST"];
+        var pgPort = builder.Configuration["PGPORT"] ?? "5432";
+        var pgDatabase = builder.Configuration["PGDATABASE"];
+        var pgUser = builder.Configuration["PGUSER"];
+        var pgPassword = builder.Configuration["PGPASSWORD"];
+        var pgSslMode = builder.Configuration["PGSSLMODE"] ?? "require";
+        var pgChannelBinding = builder.Configuration["PGCHANNELBINDING"] ?? "require";
+        
+        if (string.IsNullOrWhiteSpace(pgHost) || 
+            string.IsNullOrWhiteSpace(pgDatabase) || 
+            string.IsNullOrWhiteSpace(pgUser) || 
+            string.IsNullOrWhiteSpace(pgPassword))
+        {
+            throw new InvalidOperationException("Faltan secretos requeridos en Key Vault: PGHOST, PGDATABASE, PGUSER, PGPASSWORD");
+        }
+        
+        conn = $"Host={pgHost};Port={pgPort};Database={pgDatabase};Username={pgUser};Password={pgPassword};SSL Mode={pgSslMode};Channel Binding={pgChannelBinding}";
+        
+        Console.WriteLine($"Cadena de conexión construida desde Key Vault - Host: {pgHost}, Database: {pgDatabase}, User: {pgUser}");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error configurando Key Vault: {ex.Message}");
+        Console.WriteLine($"Stack trace: {ex.StackTrace}");
+        throw;
+    }
+}
+else
+{
+    conn = builder.Configuration.GetConnectionString("DefaultConnection") 
+           ?? throw new InvalidOperationException("No se encontró la cadena de conexión para desarrollo.");
+}
 
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins",
-        builder => builder.AllowAnyOrigin() // Allows all origins
-                          .AllowAnyMethod() // Allows all HTTP methods (GET, POST, PUT, DELETE, etc.)
-                          .AllowAnyHeader()); // Allows all headers
+        p => p.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader());
 });
 
 builder.Services.AddControllers();
@@ -30,19 +74,17 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = "Grocery Management API",
         Version = "v1",
-        Description = "API para administraci�n multi-tenant de groceries."
+        Description = "API para administración multi-tenant de groceries."
     });
 
-    // Agregar el header X-Grocery-Id como par�metro global
     c.AddSecurityDefinition("GroceryId", new OpenApiSecurityScheme
     {
         Type = SecuritySchemeType.ApiKey,
         In = ParameterLocation.Header,
         Name = "X-Grocery-Id",
-        Description = "ID del grocery/verduler�a para multi-tenancy (requerido para todas las operaciones)"
+        Description = "ID del grocery (requerido)"
     });
 
-    // Hacer que el header X-Grocery-Id sea requerido para todas las operaciones
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -54,17 +96,16 @@ builder.Services.AddSwaggerGen(c =>
                     Id = "GroceryId"
                 }
             },
-            new string[] { }
+            Array.Empty<string>()
         }
     });
 
-    // Agregar operaci�n para filtrar que omita ciertos endpoints que no requieren grocery ID
     c.OperationFilter<GroceryIdHeaderOperationFilter>();
 });
 
-// AutoMapper
 builder.Services.AddAutoMapper(cfg =>
 {
+    cfg.LicenseKey = builder.Configuration["AutoMapperLicense"];
     cfg.AddProfile<CategoryProfile>();
     cfg.AddProfile<ProductProfile>();
     cfg.AddProfile<InventoryProfile>();
@@ -79,27 +120,26 @@ builder.Services.AddAutoMapper(cfg =>
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ITenantProvider, HeaderTenantProvider>();
 
-// Database configuration - Support for both SQLite and PostgreSQL
-var databaseProvider = builder.Configuration["DatabaseProvider"];
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+Console.WriteLine($"Environment: {builder.Environment.EnvironmentName}");
+Console.WriteLine($"Connection string found: {!string.IsNullOrWhiteSpace(conn)}");
+Console.WriteLine($"Connection string (masked): {(string.IsNullOrWhiteSpace(conn) ? "NULL" : conn.Substring(0, Math.Min(20, conn.Length)) + "...")}");
 
-builder.Services.AddDbContext<GroceryManagmentContext>(options =>
+if (string.IsNullOrWhiteSpace(conn))
 {
-    if (databaseProvider?.ToLower() == "postgresql")
+    Console.WriteLine("Available configuration keys:");
+    foreach (var key in builder.Configuration.AsEnumerable())
     {
-        options.UseNpgsql(connectionString);
+        Console.WriteLine($"  {key.Key}: {(key.Value?.Contains("password", StringComparison.OrdinalIgnoreCase) == true ? "***" : key.Value)}");
     }
-    else
-    {
-        // Default to SQLite for development
-        options.UseSqlite(connectionString ?? builder.Configuration["ConnectionStrings:GroceryManagmentDBConnectionString"]);
-    }
-});
+    throw new InvalidOperationException("No se encontró ninguna cadena de conexión configurada.");
+}
 
-// Repository pattern - Base repository
+builder.Services.AddDbContext<GroceryManagmentContext>(opt =>
+    opt.UseNpgsql(conn));
+
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
+
 builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
-
-// Specific repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
@@ -109,7 +149,6 @@ builder.Services.AddScoped<IGroceryRepository, GroceryRepository>();
 builder.Services.AddScoped<IRecentActivityRepository, RecentActivityRepository>();
 builder.Services.AddScoped<IPurchaseRepository, PurchaseRepository>();
 
-// Services
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
@@ -120,35 +159,52 @@ builder.Services.AddScoped<IRecentActivityService, RecentActivityService>();
 builder.Services.AddScoped<IPurchaseService, PurchaseService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IReportService, ReportService>();
-
-// Password hasher
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 
 var app = builder.Build();
 
-// Global Exception Handling Middleware
-app.UseMiddleware<GlobalExceptionMiddleware>();
-
-if (app.Environment.IsDevelopment())
+using (var scope = app.Services.CreateScope())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    try
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Grocery Management API v1");
-        c.RoutePrefix = ""; 
+        var db = scope.ServiceProvider.GetRequiredService<GroceryManagmentContext>();
         
-        // Configuraci�n adicional para una mejor experiencia de usuario
-        c.DisplayRequestDuration();
-        c.EnableDeepLinking();
-        c.EnableFilter();
-        c.ShowExtensions();
-        c.EnableValidator();
-    });
+        Console.WriteLine("Verificando conexión a la base de datos...");
+        await db.Database.CanConnectAsync();
+        Console.WriteLine("Conexión a la base de datos exitosa.");
+        
+        Console.WriteLine("Aplicando migraciones...");
+        await db.Database.MigrateAsync();
+        logger.LogInformation($"Migraciones aplicadas correctamente en {app.Environment.EnvironmentName}.");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, $"Error al conectar o aplicar migraciones en {app.Environment.EnvironmentName}");
+        Console.WriteLine($"Error detallado: {ex.Message}");
+        if (ex.InnerException != null)
+        {
+            Console.WriteLine($"Inner exception: {ex.InnerException.Message}");
+        }
+        throw;
+    }
 }
 
+app.UseMiddleware<GlobalExceptionMiddleware>();
+
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Grocery Management API v1");
+    c.RoutePrefix = "";
+    c.DisplayRequestDuration();
+    c.EnableDeepLinking();
+    c.EnableFilter();
+    c.ShowExtensions();
+    c.EnableValidator();
+});
+
 app.UseCors("AllowAllOrigins");
-
 app.UseHttpsRedirection();
-
 app.MapControllers();
 app.Run();

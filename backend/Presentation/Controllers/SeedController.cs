@@ -29,14 +29,9 @@ namespace Presentation.Controllers
             _inventoryService = inventoryService;
         }
 
-        /// <summary>
-        /// Crear datos de prueba para un grocery específico
-        /// Requiere header X-Grocery-Id
-        /// </summary>
         [HttpPost("sample-data")]
         public async Task<ActionResult<ApiResponse>> CreateSampleData()
         {
-            // Crear categorías
             var categorias = new[]
             {
                 new CategoryForCreateDto { Name = "Frutas Tropicales", Icon = "??" },
@@ -59,11 +54,9 @@ namespace Presentation.Controllers
                 }
                 catch (Domain.Exceptions.DuplicateException)
                 {
-                    // Ya existe, continuar
                 }
             }
 
-            // Buscar categorías existentes
             var todasCategorias = await _categoryService.GetAll();
             var frutasTropicales = todasCategorias.FirstOrDefault(c => c.Name == "Frutas Tropicales");
             var frutasCitricas = todasCategorias.FirstOrDefault(c => c.Name == "Frutas Cítricas");
@@ -71,7 +64,6 @@ namespace Presentation.Controllers
 
             if (frutasTropicales != null)
             {
-                // Crear algunos productos de ejemplo
                 var productos = new[]
                 {
                     new ProductForCreateDto 
@@ -112,7 +104,6 @@ namespace Presentation.Controllers
                         var created = await _productService.Create(producto);
                         productosCreados.Add(created);
 
-                        // Crear inventario para cada producto
                         await _inventoryService.Create(new InventoryItemForCreateDto
                         {
                             ProductId = created.Id,
@@ -121,7 +112,6 @@ namespace Presentation.Controllers
                     }
                     catch (Domain.Exceptions.DuplicateException)
                     {
-                        // Ya existe, continuar
                     }
                 }
             }
@@ -129,9 +119,6 @@ namespace Presentation.Controllers
             return Ok(ApiResponse.SuccessResponse("Datos de prueba creados exitosamente"));
         }
 
-        /// <summary>
-        /// Crear un grocery de prueba (no requiere header)
-        /// </summary>
         [HttpPost("grocery")]
         public async Task<ActionResult<ApiResponse<GroceryForResponseDto>>> CreateTestGrocery([FromBody] GroceryForCreateDto dto)
         {

@@ -16,8 +16,7 @@
         public Grocery Grocery { get; set; } = null!;
 
         public Promotion Promotion { get; set; } = new Promotion();
-        
-        // Relación con inventario
+
         public ICollection<InventoryItem> InventoryItems { get; set; } = new List<InventoryItem>();
     }
 }

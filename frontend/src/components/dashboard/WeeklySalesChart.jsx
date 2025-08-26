@@ -3,7 +3,6 @@ import "./dashboard.css";
 import Card from "../ui/card/Card";
 
 const WeeklySalesChart = ({ weeklySales = [] }) => {
-  // Datos por defecto si no hay datos del backend
   const defaultData = [
     { day: 'Lun', sales: 0 },
     { day: 'Mar', sales: 0 },

@@ -1,0 +1,99 @@
+name: Build and deploy .NET application to container app grocery-manager-api
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'backend/**'
+      - '.github/workflows/grocery-manager-api.yml'
+  workflow_dispatch:
+
+env:
+  CONTAINER_APP_CONTAINER_NAME: grocery-manager-api
+  CONTAINER_APP_NAME: grocery-manager-api
+  CONTAINER_APP_RESOURCE_GROUP_NAME: GroceryManager
+  CONTAINER_REGISTRY_LOGIN_SERVER: grocerymanagerregistry.azurecr.io
+  DOCKER_FILE_PATH: backend/Dockerfile
+  DOCKER_BUILD_CONTEXT: backend
+  PROJECT_NAME_FOR_DOCKER: presentation
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout to the branch
+        uses: actions/checkout@v4
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Log in to container registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.CONTAINER_REGISTRY_LOGIN_SERVER }}
+          username: ${{ secrets.GroceryManagerRegistry_USERNAME_ECAA }}
+          password: ${{ secrets.GroceryManagerRegistry_PASSWORD_ECAA }}
+      - name: Build and push container image to registry
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ env.DOCKER_BUILD_CONTEXT }}
+          file: ${{ env.DOCKER_FILE_PATH }}
+          push: true
+          tags: ${{ env.CONTAINER_REGISTRY_LOGIN_SERVER }}/${{ env.PROJECT_NAME_FOR_DOCKER }}:${{ github.sha }}
+
+  migrate:
+    runs-on: ubuntu-latest
+    needs: build
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '9.0.x'
+      - name: Install EF Core CLI
+        run: dotnet tool install --global dotnet-ef
+      - name: Add .NET tools to PATH
+        run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Apply EF Core migrations to Neon
+        env:
+          PGHOST: ep-quiet-band-a8hq2a14-pooler.eastus2.azure.neon.tech
+          PGPORT: 5432
+          PGDATABASE: grocerymanagerdb
+          PGUSER: grocerymanagerdb_owner
+          PGPASSWORD: ${{ secrets.NEON_DB_PASSWORD }}
+          PGSSLMODE: require
+        run: |
+          CONNECTION_STRING="Host=$PGHOST;Port=$PGPORT;Database=$PGDATABASE;Username=$PGUSER;Password=$PGPASSWORD;SSL Mode=$PGSSLMODE"
+          dotnet ef database update --project Infraestructure --startup-project Presentation --connection "$CONNECTION_STRING"
+
+  deploy:
+    runs-on: ubuntu-latest
+    needs: [build, migrate]
+    steps:
+      - name: Azure Login
+        uses: azure/login@v2
+        with:
+          creds: ${{ secrets.grocery_manager_api_SPN }}
+      - name: Configure Container App with Key Vault
+        run: |
+          # Verificar que la identidad administrada existe
+          PRINCIPAL_ID=$(az containerapp identity show --name grocery-manager-api --resource-group GroceryManager --query principalId -o tsv)
+          echo "Container App Principal ID: $PRINCIPAL_ID"
+          echo "Note: Key Vault role assignment should be configured manually:"
+          echo "Role: Key Vault Secrets User"
+          echo "Principal ID: $PRINCIPAL_ID"
+          
+      - name: Deploy to containerapp
+        uses: azure/CLI@v2
+        with:
+          inlineScript: |
+            az config set extension.use_dynamic_install=yes_without_prompt
+            az containerapp registry set --name ${{ env.CONTAINER_APP_NAME }} --resource-group ${{ env.CONTAINER_APP_RESOURCE_GROUP_NAME }} --server ${{ env.CONTAINER_REGISTRY_LOGIN_SERVER }} --username ${{ secrets.GroceryManagerRegistry_USERNAME_ECAA }} --password ${{ secrets.GroceryManagerRegistry_PASSWORD_ECAA }}
+            az containerapp update --name ${{ env.CONTAINER_APP_NAME }} --container-name ${{ env.CONTAINER_APP_CONTAINER_NAME }} --resource-group ${{ env.CONTAINER_APP_RESOURCE_GROUP_NAME }} --image ${{ env.CONTAINER_REGISTRY_LOGIN_SERVER }}/${{ env.PROJECT_NAME_FOR_DOCKER }}:${{ github.sha }} --set-env-vars "ASPNETCORE_ENVIRONMENT=Production"
+      - name: logout
+        run: az logout

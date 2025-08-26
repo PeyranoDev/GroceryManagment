@@ -18,9 +18,6 @@ namespace Presentation.Controllers
             _productService = productService;
         }
 
-        /// <summary>
-        /// Obtener todos los productos del grocery actual
-        /// </summary>
         [HttpGet]
         public async Task<ActionResult<ApiResponse<IReadOnlyList<ProductForResponseDto>>>> GetAll()
         {
@@ -31,9 +28,6 @@ namespace Presentation.Controllers
             ));
         }
 
-        /// <summary>
-        /// Obtener un producto por ID (validando que pertenezca al grocery actual)
-        /// </summary>
         [HttpGet("{id}")]
         public async Task<ActionResult<ApiResponse<ProductForResponseDto>>> GetById(int id)
         {
@@ -44,9 +38,6 @@ namespace Presentation.Controllers
             ));
         }
 
-        /// <summary>
-        /// Crear un nuevo producto en el grocery actual
-        /// </summary>
         [HttpPost]
         public async Task<ActionResult<ApiResponse<ProductForResponseDto>>> Create([FromBody] ProductForCreateDto dto)
         {
@@ -64,9 +55,6 @@ namespace Presentation.Controllers
             );
         }
 
-        /// <summary>
-        /// Actualizar un producto existente (validando que pertenezca al grocery actual)
-        /// </summary>
         [HttpPut("{id}")]
         public async Task<ActionResult<ApiResponse<ProductForResponseDto>>> Update(int id, [FromBody] ProductForUpdateDto dto)
         {
@@ -80,9 +68,6 @@ namespace Presentation.Controllers
             ));
         }
 
-        /// <summary>
-        /// Eliminar un producto (validando que pertenezca al grocery actual)
-        /// </summary>
         [HttpDelete("{id}")]
         public async Task<ActionResult<ApiResponse>> Delete(int id)
         {

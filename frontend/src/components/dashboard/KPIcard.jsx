@@ -1,20 +1,19 @@
 import Card from "../ui/card/Card";
-import "./dashboard.css";
 
 const KPIcard = ({
   title,
   value,
   comparisonText,
-  valueColor = "kpiCardValueDefault",
-  comparisonColor = "kpiCardComparisonDefault",
+  valueColor = "text-text",
+  comparisonColor = "text-text-secondary",
 }) => {
   return (
     <Card>
       <div className="p-3">
-        <p className="kpiCardTitle">{title}</p>
-        <p className={`kpiCardValue ${valueColor}`}>{value}</p>
+        <p className="text-sm text-text-secondary font-medium mb-2">{title}</p>
+        <p className={`text-2xl font-bold ${valueColor}`}>{value}</p>
       </div>
-      <div className={`kpiCardComparison ${comparisonColor}`}>
+      <div className={`px-3 pb-3 text-sm ${comparisonColor}`}>
         {comparisonText}
       </div>
     </Card>
