@@ -30,6 +30,21 @@
   --color-border: #1C1B19;
 }
 
+/* Global transitions for all elements */
+* {
+  @apply transition-all duration-200 ease-in-out;
+}
+
+/* Specific transitions for common interactive elements */
+button, input, select, textarea, a {
+  @apply transition-all duration-200 ease-in-out;
+}
+
+/* Hover and focus transitions */
+*:hover, *:focus {
+  @apply transition-all duration-200 ease-in-out;
+}
+
 body {
   @apply bg-[var(--color-bg)] min-h-screen text-[var(--color-text)] font-sans transition-colors duration-300;
 }
@@ -42,12 +57,15 @@ main {
   font-semibold
   cursor-pointer
   py-2 px-4
-  transition-colors
+  transition-all
   duration-200
   rounded-lg 
   flex items-center gap-2 justify-center
   bg-[var(--color-primary)]
-  hover:bg-[var(--color-primary-dark)];
+  hover:bg-[var(--color-primary-dark)]
+  hover:scale-105
+  hover:shadow-lg
+  active:scale-95;
 }
 
 .btn-secondary {
@@ -55,14 +73,32 @@ main {
   font-semibold 
   cursor-pointer
   py-2 px-4 
-  transition-colors 
+  transition-all 
   duration-200
   rounded-lg
   flex items-center gap-2 justify-center
   bg-[var(--color-secondary)] 
-  hover:bg-[var(--color-secondary-dark)];
+  hover:bg-[var(--color-secondary-dark)]
+  hover:scale-105
+  hover:shadow-lg
+  active:scale-95;
 }
 
 .flex-center {
   @apply flex justify-center items-center text-center;
+}
+
+/* Table row transitions */
+tbody tr {
+  @apply transition-all duration-200 hover:bg-[var(--color-bg-secondary)]/30;
+}
+
+/* General interactive element transitions */
+.interactive-item {
+  @apply transition-all duration-200 hover:scale-[1.02] hover:shadow-md;
+}
+
+/* Select element transitions */
+select {
+  @apply transition-all duration-200 hover:border-[var(--color-primary)]/50 focus:scale-[1.02];
 }

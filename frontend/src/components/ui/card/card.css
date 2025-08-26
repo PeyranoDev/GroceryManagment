@@ -2,15 +2,17 @@
 
 .card {
   @apply rounded-lg shadow-md border 
-         bg-[var(--color-bg-secondary)] border-[var(--color-border)];
+         bg-[var(--color-bg-secondary)] border-[var(--color-border)]
+         transition-all duration-300 hover:shadow-lg hover:scale-[1.02]
+         hover:border-[var(--color-primary)]/30;
 }
 
 .card-header {
   @apply p-3 sm:p-4 flex justify-between items-center border-b 
-         border-[var(--color-border)];
+         border-[var(--color-border)] transition-all duration-200;
 }
 
 .card-title {
   @apply flex items-center gap-2 text-lg sm:text-xl font-semibold 
-         text-[var(--color-text)];
+         text-[var(--color-text)] transition-all duration-200;
 }

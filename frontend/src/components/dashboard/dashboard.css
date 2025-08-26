@@ -37,7 +37,7 @@
 }
 
 .weeklySalesChart__bar {
-  @apply flex items-center justify-center w-full bg-green-800/50 rounded-t-md hover:bg-green-700 transition-all;
+  @apply flex items-center justify-center w-full bg-green-800/50 rounded-t-md hover:bg-green-700 transition-all duration-300 hover:scale-105 hover:shadow-lg;
 }
 
 .weeklySalesChart__barValue {
@@ -55,11 +55,11 @@
 }
 
 .recentActivity__item {
-  @apply flex items-start gap-3;
+  @apply flex items-start gap-3 transition-all duration-200 hover:bg-[var(--color-bg-secondary)]/50 hover:scale-[1.02] rounded-lg p-2 -m-2;
 }
 
 .recentActivity__iconContainer {
-  @apply p-2 bg-gray-700 rounded-full;
+  @apply p-2 bg-gray-700 rounded-full transition-all duration-200 hover:scale-110 hover:shadow-md;
 }
 
 .recentActivity__description {
