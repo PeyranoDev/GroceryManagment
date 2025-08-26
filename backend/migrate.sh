@@ -1,17 +1,11 @@
-#!/bin/bash
-
-# Script para manejar migraciones de Entity Framework
-# Uso: ./migrate.sh [add|update] [nombre_migracion]
 
 set -e
 
-# Colores para output
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
-NC='\033[0m' # No Color
+NC='\033[0m'
 
-# Función para imprimir mensajes con color
 print_info() {
     echo -e "${GREEN}[INFO]${NC} $1"
 }
@@ -24,13 +18,11 @@ print_error() {
     echo -e "${RED}[ERROR]${NC} $1"
 }
 
-# Verificar si estamos en el directorio correcto
 if [ ! -f "backend.sln" ]; then
     print_error "Este script debe ejecutarse desde el directorio backend/"
     exit 1
 fi
 
-# Función para agregar migración
 add_migration() {
     local migration_name=$1
     if [ -z "$migration_name" ]; then
@@ -50,18 +42,11 @@ add_migration() {
     fi
 }
 
-# Función para aplicar migraciones
 update_database() {
     print_info "Aplicando migraciones a la base de datos..."
     
-    # Verificar si estamos usando PostgreSQL
-    if [ "$DATABASE_PROVIDER" = "postgresql" ]; then
-        print_info "Usando PostgreSQL"
-        dotnet ef database update --project Infraestructure --startup-project Presentation
-    else
-        print_info "Usando SQLite (desarrollo local)"
-        dotnet ef database update --project Infraestructure --startup-project Presentation
-    fi
+    print_info "Usando PostgreSQL"
+    dotnet ef database update --project Infraestructure --startup-project Presentation
     
     if [ $? -eq 0 ]; then
         print_info "Base de datos actualizada exitosamente"
@@ -71,7 +56,6 @@ update_database() {
     fi
 }
 
-# Función para resetear la base de datos
 reset_database() {
     print_warning "¿Estás seguro de que quieres resetear la base de datos? Esto eliminará todos los datos. (y/N)"
     read -r response
@@ -85,13 +69,11 @@ reset_database() {
     fi
 }
 
-# Función para mostrar información de la base de datos
 info_database() {
     print_info "Información de la base de datos:"
     dotnet ef migrations list --project Infraestructure --startup-project Presentation
 }
 
-# Procesar argumentos
 case "${1:-}" in
     "add")
         add_migration "$2"

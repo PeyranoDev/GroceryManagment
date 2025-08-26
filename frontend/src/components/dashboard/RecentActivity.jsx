@@ -5,7 +5,6 @@ import { Clock } from "lucide-react";
 import Card from "../ui/card/Card";
 
 const RecentActivity = ({ recentActivities = [] }) => {
-  // Función para formatear el tiempo relativo
   const getTimeAgo = (dateString) => {
     if (!dateString) return 'Sin fecha';
     

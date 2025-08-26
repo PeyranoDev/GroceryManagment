@@ -28,7 +28,6 @@ namespace Application.Mapping
             CreateMap<Sale, SaleForResponseDto>();
             CreateMap<SaleItem, SaleItemForResponseDto>();
             
-            // Mapeos adicionales para DTOs de frontend
             CreateMap<SaleDetailsDto, Sale>()
                 .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.Date))
                 .ForMember(dest => dest.Id, opt => opt.Ignore())

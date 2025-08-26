@@ -12,7 +12,6 @@ namespace Application.Schemas.Products
 
         public DateTime? ExpirationDate { get; set; }
 
-        // Para promociones tipo "2x$3500"
         [Range(1, int.MaxValue, ErrorMessage = "La cantidad de promoción debe ser mayor a 0")]
         public int? PromotionQuantity { get; set; }
 

@@ -31,10 +31,8 @@ namespace Application.Services.Implementations
             var purchase = _mapper.Map<Purchase>(purchaseDto);
             purchase.GroceryId = groceryId;
             
-            // Calcular total
             purchase.Total = purchase.Items.Sum(item => item.Quantity * item.UnitCost);
             
-            // Asignar GroceryId a cada item
             foreach (var item in purchase.Items)
             {
                 item.GroceryId = groceryId;
@@ -44,10 +42,8 @@ namespace Application.Services.Implementations
             var purchaseId = await _purchaseRepository.Create(purchase);
             await _purchaseRepository.SaveChanges();
 
-            // Actualizar inventario
             await UpdateInventoryFromPurchase(purchase);
 
-            // Registrar actividad reciente
             await _recentActivityService.LogActivityAsync(
                 $"Compra de \"{purchaseDto.Supplier}\" registrada", 
                 groceryId);
@@ -132,7 +128,6 @@ namespace Application.Services.Implementations
                 }
                 else
                 {
-                    // Crear nuevo item de inventario si no existe
                     var newInventoryItem = new InventoryItem
                     {
                         ProductId = item.ProductId,

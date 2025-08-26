@@ -1,4 +1,3 @@
-// src/components/Header/Header.jsx
 import { Leaf, LogIn, LogOut, Moon, Sun, UserCircle, Menu, X } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useState } from "react";

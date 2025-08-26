@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { productsAPI } from '../services/api';
 
-// Hook para gestión de productos (para ventas)
 export const useProducts = () => {
   const [products, setProducts] = useState([]);
   const [loading, setLoading] = useState(true);

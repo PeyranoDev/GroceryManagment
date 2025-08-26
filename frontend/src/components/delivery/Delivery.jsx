@@ -8,13 +8,11 @@ const Delivery = () => {
   const [selectedProducts, setSelectedProducts] = useState({});
   const [generatedOfferMessage, setGeneratedOfferMessage] = useState("");
 
-  // Productos disponibles para ofertas
   const availableProducts = useMemo(
     () => mockSaleProducts.filter((p) => p.stock > 0),
     []
   );
 
-  // Inicializar productos seleccionados para ofertas
   useEffect(() => {
     const initialSelection = {};
     availableProducts.forEach((p) => {
@@ -27,7 +25,6 @@ const Delivery = () => {
     setGeneratedOfferMessage("");
     setShowOfferGenerator(!showOfferGenerator);
   };
-  // Generar mensaje de ofertas
   const generateOfferMessage = () => {
     setShowOfferGenerator(false);
     const currentDate = new Date();
@@ -40,7 +37,6 @@ const Delivery = () => {
 
     let message = `🌿 Tomillo Verdulería\n🛒 Lista de precios - Envío ${formattedDate}\n📞 Pedidos al 3413632198\n\n`;
 
-    // Agrupar productos seleccionados por categoría
     const selectedProductsByCategory = {};
     availableProducts.forEach((product) => {
       if (selectedProducts[product.id]) {
@@ -51,7 +47,6 @@ const Delivery = () => {
       }
     });
 
-    // Orden específico de categorías según el ejemplo
     const categoryOrder = [
       "Frutas Tropicales",
       "Frutas Cítricas",
@@ -68,7 +63,6 @@ const Delivery = () => {
       "Fuego",
     ];
 
-    // Generar mensaje por categoría
     categoryOrder.forEach((category) => {
       if (
         selectedProductsByCategory[category] &&
@@ -80,7 +74,6 @@ const Delivery = () => {
           const priceFormatted = `$${product.salePrice.toLocaleString()}`;
           let productLine = `${product.emoji} ${product.name} (${product.unit}): ${priceFormatted}`;
 
-          // Agregar promoción si existe
           if (product.promotion) {
             const promoPrice = `$${product.promotion.price.toLocaleString()}`;
             productLine += ` | ${product.promotion.quantity}x${promoPrice}`;
@@ -158,7 +151,6 @@ const Delivery = () => {
               <div className="bg-[#141312] rounded-lg border border-black max-h-96 overflow-y-auto">
                 <div className="p-4 space-y-4">
                   {(() => {
-                    // Agrupar productos por categoría
                     const productsByCategory = availableProducts.reduce(
                       (acc, product) => {
                         const category = product.category || "Sin categoría";

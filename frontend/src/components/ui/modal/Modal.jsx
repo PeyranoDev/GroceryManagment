@@ -4,7 +4,6 @@ import { X } from 'lucide-react';
 const Modal = ({ isOpen, onClose, title, children }) => {
   if (!isOpen) return null;
 
-  // to fix 
   const handleKeyDown = (e) => {
     if (e.key === 'Escape') onClose();
   };

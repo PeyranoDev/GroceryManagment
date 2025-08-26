@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { reportsAPI } from '../services/api';
 
-// Hook para gestión de reportes
 export const useReports = () => {
   const [reports, setReports] = useState([]);
   const [loading, setLoading] = useState(false);

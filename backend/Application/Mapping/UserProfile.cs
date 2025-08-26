@@ -1,4 +1,4 @@
-﻿using Application.Schemas.Users;
+using Application.Schemas.Users;
 using AutoMapper;
 using Domain.Entities;
 

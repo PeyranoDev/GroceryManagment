@@ -102,6 +102,45 @@ docker-compose -f docker-compose.dev.yml up --build -d
 ./backend/migrate.sh update
 ```
 
+## ⚙️ Variables de Entorno
+
+### Configuración Automática
+```powershell
+# Windows - Desarrollo
+.\set-env.ps1 dev
+
+# Windows - Producción  
+.\set-env.ps1 prod
+
+# Linux/macOS - Desarrollo
+./set-env.sh dev
+
+# Linux/macOS - Producción
+./set-env.sh prod
+```
+
+### Variables Disponibles
+| Variable | Desarrollo | Producción | Descripción |
+|----------|------------|------------|-------------|
+| `POSTGRES_USER` | grocery_user | grocery_user | Usuario de PostgreSQL |
+| `POSTGRES_PASSWORD` | grocery_dev_pass123 | grocery_prod_pass456 | Contraseña de PostgreSQL |
+| `POSTGRES_DB` | grocery_management_dev | grocery_management_prod | Nombre de la base de datos |
+| `VITE_API_URL` | http://localhost:5001/api | - | URL API para desarrollo |
+| `REACT_APP_API_URL` | - | http://localhost:5000/api | URL API para producción |
+
+### Configuración Manual
+```powershell
+# Windows PowerShell
+$env:POSTGRES_PASSWORD="tu_password_seguro"
+$env:POSTGRES_DB="grocery_management_prod"
+docker-compose up --build -d
+
+# Linux/macOS Bash  
+export POSTGRES_PASSWORD="tu_password_seguro"
+export POSTGRES_DB="grocery_management_prod"
+docker-compose up --build -d
+```
+
 ## 📋 Comandos Útiles
 
 ### Scripts de Gestión
@@ -159,15 +198,17 @@ npm run dev
 
 ## 🗄️ Base de Datos
 
-- **Producción**: SQLite persistente en volumen Docker
-- **Desarrollo**: SQLite con Adminer para gestión visual
+- **Producción**: PostgreSQL persistente en volumen Docker
+- **Desarrollo**: PostgreSQL con Adminer para gestión visual
 - **Estructura**: Multi-tenant con soporte para múltiples verdulerías
 
 ## 🔧 Configuración Avanzada
 
 ### Variables de Entorno
-- **Backend**: `appsettings.json` y variables Docker
-- **Frontend**: `.env.development` y `.env.production`
+- **Método Recomendado**: Scripts de configuración (`set-env.ps1` / `set-env.sh`)
+- **Variables del Sistema**: Export manual de variables de entorno
+- **Docker Compose**: Variables con valores por defecto usando sintaxis `${VAR:-default}`
+- **Archivos de Configuración**: `appsettings.json` para configuraciones específicas de .NET
 
 ### Personalización de Puertos
 Editar `docker-compose.yml` para cambiar puertos por defecto.
@@ -194,7 +235,7 @@ Editar `docker-compose.yml` para cambiar puertos por defecto.
 ```
 ┌─────────────────┐    ┌─────────────────┐    ┌─────────────────┐
 │   Frontend      │    │    Backend      │    │   Database      │
-│   (React)       │────│   (.NET Core)   │────│   (SQLite)      │
+│   (React)       │────│   (.NET Core)   │────│  (PostgreSQL)   │
 │   Port: 80/5173 │    │   Port: 5000    │    │   Shared Volume │
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
