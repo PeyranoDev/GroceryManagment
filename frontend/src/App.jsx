@@ -8,6 +8,7 @@ import Reports from "./components/reports/Reports";
 import Delivery from "./components/delivery/Delivery";
 import { mockInventory } from "./data/products";
 import Header from "./components/ui/header/Header";
+import { ThemeProvider } from "./contexts/ThemeContext";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -40,8 +41,6 @@ function App() {
       ],
     },
   ]);
-
-  
 
   const handleLogin = () => setUser({ name: "Tomillo" });
   const handleLogout = () => setUser(null);
@@ -76,41 +75,47 @@ function App() {
   };
 
   return (
-    <>
-      <div className="app">
-        <Header
-          user={user}
-          onLogin={handleLogin}
-          onLogout={handleLogout}
-        />
+    <ThemeProvider>
+      <style>{`input[type="date"]::-webkit-calendar-picker-indicator { display: none; -webkit-appearance: none; }`}</style>
+      <div className="app bg-background text-text min-h-screen transition-colors duration-300">
+        <Header user={user} onLogin={handleLogin} onLogout={handleLogout} />
 
         <main>
-          <Routes>
-            <Route path="/" element={<Dashboard inventoryData={inventory} />} />
-            <Route path="/ventas" element={<Sales />} />
-            <Route path="/pedidos" element={<Delivery inventory={inventory} />} />
-            <Route
-              path="/compras"
-              element={
-                <Purchases
-                  products={purchaseProducts}
-                  onAddProduct={handleAddPurchaseProduct}
-                  onProductChange={handlePurchaseProductChange}
-                  onRemoveProduct={handleRemovePurchaseProduct}
-                />
-              }
-            />
-            <Route
-              path="/inventario"
-              element={
-                <Inventory inventory={inventory} onUpdateStock={handleUpdateStock} />
-              }
-            />
-            <Route path="/reportes" element={<Reports />} />
-          </Routes>
+            <Routes>
+              <Route
+                path="/"
+                element={<Dashboard inventoryData={inventory} />}
+              />
+              <Route path="/ventas" element={<Sales />} />
+              <Route
+                path="/pedidos"
+                element={<Delivery inventory={inventory} />}
+              />
+              <Route
+                path="/compras"
+                element={
+                  <Purchases
+                    products={purchaseProducts}
+                    onAddProduct={handleAddPurchaseProduct}
+                    onProductChange={handlePurchaseProductChange}
+                    onRemoveProduct={handleRemovePurchaseProduct}
+                  />
+                }
+              />
+              <Route
+                path="/inventario"
+                element={
+                  <Inventory
+                    inventory={inventory}
+                    onUpdateStock={handleUpdateStock}
+                  />
+                }
+              />
+              <Route path="/reportes" element={<Reports />} />
+            </Routes>
         </main>
       </div>
-    </>
+    </ThemeProvider>
   );
 }
 
