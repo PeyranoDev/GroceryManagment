@@ -33,7 +33,6 @@ namespace Application.Services.Implementations
         {
             var list = await _activities.GetAllByGroceryId(_tenantProvider.CurrentGroceryId);
             
-            // Asegurar que la lista no sea null
             if (list == null)
             {
                 return new List<RecentActivityForResponseDto>();
@@ -45,7 +44,6 @@ namespace Application.Services.Implementations
         public async Task<IReadOnlyList<RecentActivityForResponseDto>> GetRecent(int count = 10)
         {
             var list = await _activities.GetRecent(count);
-            // Filter by current grocery ID since the repository method might not do it
             var filteredList = list.Where(a => a.GroceryId == _tenantProvider.CurrentGroceryId).Take(count).ToList();
             return filteredList.Select(_mapper.Map<RecentActivityForResponseDto>).ToList();
         }

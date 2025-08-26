@@ -33,7 +33,6 @@ builder.Services.AddSwaggerGen(c =>
         Description = "API para administraci�n multi-tenant de groceries."
     });
 
-    // Agregar el header X-Grocery-Id como par�metro global
     c.AddSecurityDefinition("GroceryId", new OpenApiSecurityScheme
     {
         Type = SecuritySchemeType.ApiKey,
@@ -42,7 +41,6 @@ builder.Services.AddSwaggerGen(c =>
         Description = "ID del grocery/verduler�a para multi-tenancy (requerido para todas las operaciones)"
     });
 
-    // Hacer que el header X-Grocery-Id sea requerido para todas las operaciones
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
     {
         {
@@ -58,11 +56,9 @@ builder.Services.AddSwaggerGen(c =>
         }
     });
 
-    // Agregar operaci�n para filtrar que omita ciertos endpoints que no requieren grocery ID
     c.OperationFilter<GroceryIdHeaderOperationFilter>();
 });
 
-// AutoMapper
 builder.Services.AddAutoMapper(cfg =>
 {
     cfg.AddProfile<CategoryProfile>();
@@ -79,27 +75,19 @@ builder.Services.AddAutoMapper(cfg =>
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ITenantProvider, HeaderTenantProvider>();
 
-// Database configuration - Support for both SQLite and PostgreSQL
-var databaseProvider = builder.Configuration["DatabaseProvider"];
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
 builder.Services.AddDbContext<GroceryManagmentContext>(options =>
 {
-    if (databaseProvider?.ToLower() == "postgresql")
+    options.UseNpgsql(connectionString, npgsqlOptions =>
     {
-        options.UseNpgsql(connectionString);
-    }
-    else
-    {
-        // Default to SQLite for development
-        options.UseSqlite(connectionString ?? builder.Configuration["ConnectionStrings:GroceryManagmentDBConnectionString"]);
-    }
+        npgsqlOptions.EnableRetryOnFailure();
+    });
 });
 
-// Repository pattern - Base repository
-builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
-// Specific repositories
+builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
@@ -109,7 +97,6 @@ builder.Services.AddScoped<IGroceryRepository, GroceryRepository>();
 builder.Services.AddScoped<IRecentActivityRepository, RecentActivityRepository>();
 builder.Services.AddScoped<IPurchaseRepository, PurchaseRepository>();
 
-// Services
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
@@ -121,12 +108,10 @@ builder.Services.AddScoped<IPurchaseService, PurchaseService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IReportService, ReportService>();
 
-// Password hasher
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 
 var app = builder.Build();
 
-// Global Exception Handling Middleware
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment())
@@ -137,7 +122,6 @@ if (app.Environment.IsDevelopment())
         c.SwaggerEndpoint("/swagger/v1/swagger.json", "Grocery Management API v1");
         c.RoutePrefix = ""; 
         
-        // Configuraci�n adicional para una mejor experiencia de usuario
         c.DisplayRequestDuration();
         c.EnableDeepLinking();
         c.EnableFilter();

@@ -1,47 +1,31 @@
-# Dockerfile para desarrollo del Backend (.NET)
-
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS development
 
-# Instalar herramientas adicionales para desarrollo
 RUN apt-get update && \
     apt-get install -y \
     curl \
-    sqlite3 \
     postgresql-client \
     && rm -rf /var/lib/apt/lists/*
 
-# Instalar dotnet-ef para migraciones
 RUN dotnet tool install --global dotnet-ef
 ENV PATH="$PATH:/root/.dotnet/tools"
 
-# Establecer directorio de trabajo
 WORKDIR /app
 
-# Configurar variables de entorno para desarrollo
 ENV ASPNETCORE_ENVIRONMENT=Development
 ENV ASPNETCORE_URLS=http://+:5000
 ENV DOTNET_USE_POLLING_FILE_WATCHER=true
 ENV DOTNET_WATCH_SUPPRESS_BROWSER_REFRESH=true
-ENV DatabaseProvider=postgresql
 
-# Exponer puertos
 EXPOSE 5000
 
-# Crear directorio para la base de datos (por compatibilidad)
-RUN mkdir -p /app/data
-
-# Copiar archivo de solución y proyectos para aprovechar cache
 COPY *.sln ./
 COPY Domain/Domain.csproj ./Domain/
 COPY Application/Application.csproj ./Application/
 COPY Infraestructure/Infraestructure.csproj ./Infraestructure/
 COPY Presentation/Presentation.csproj ./Presentation/
 
-# Restaurar dependencias
 RUN dotnet restore
 
-# Copiar el resto del código
 COPY . .
 
-# Comando por defecto - ejecutar con dotnet watch para hot reload
 CMD ["dotnet", "watch", "run", "--project", "Presentation", "--urls", "http://0.0.0.0:5000"]

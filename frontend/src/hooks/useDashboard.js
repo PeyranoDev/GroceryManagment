@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { dashboardAPI, recentActivitiesAPI, inventoryAPI } from '../services/api';
 
-// Hook para datos del dashboard
 export const useDashboard = () => {
   const [stats, setStats] = useState(null);
   const [weeklySales, setWeeklySales] = useState([]);
@@ -14,14 +13,12 @@ export const useDashboard = () => {
     setError(null);
     
     try {
-      // Ejecutar todas las llamadas en paralelo
       const [statsResponse, weeklySalesResponse, activitiesResponse] = await Promise.all([
         dashboardAPI.getStats(),
         dashboardAPI.getWeeklySales(),
         recentActivitiesAPI.getRecent(4)
       ]);
 
-      // Extraer data de las respuestas (considerando la estructura ApiResponse)
       setStats(statsResponse.data || statsResponse);
       setWeeklySales(weeklySalesResponse.data || weeklySalesResponse);
       setRecentActivities(activitiesResponse.data || activitiesResponse);
@@ -47,7 +44,6 @@ export const useDashboard = () => {
   };
 };
 
-// Hook para inventario con bajo stock (para dashboard)
 export const useLowStockCount = () => {
   const [lowStockCount, setLowStockCount] = useState(0);
   

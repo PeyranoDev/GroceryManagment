@@ -1,4 +1,4 @@
-﻿using Domain.Tenancy;
+using Domain.Tenancy;
 using Microsoft.AspNetCore.Http;
 
 namespace Infraestructure.Tenancy

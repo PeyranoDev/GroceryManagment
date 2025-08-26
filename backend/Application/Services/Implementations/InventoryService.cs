@@ -33,7 +33,6 @@ namespace Application.Services.Implementations
         {
             var list = await _inventory.GetAllByGroceryId(_tenantProvider.CurrentGroceryId);
             
-            // Asegurar que la lista no sea null
             if (list == null)
             {
                 return new List<InventoryItemForResponseDto>();
@@ -45,7 +44,6 @@ namespace Application.Services.Implementations
         public async Task<IReadOnlyList<InventoryItemForResponseDto>> GetByProductId(int productId)
         {
             var list = await _inventory.GetByProductId(productId);
-            // Filter by current grocery ID since the repository method might not do it
             var filteredList = list.Where(i => i.GroceryId == _tenantProvider.CurrentGroceryId).ToList();
             return filteredList.Select(_mapper.Map<InventoryItemForResponseDto>).ToList();
         }

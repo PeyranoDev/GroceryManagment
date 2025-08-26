@@ -39,19 +39,16 @@ const Reports = () => {
       let reportData = [];
 
       if (reportType === 'ventas') {
-        // Obtener reportes de ventas
         reportData = await getFilteredReports({
           ...filters,
           type: 'sales'
         });
       } else if (reportType === 'compras') {
-        // Obtener reportes de compras
         reportData = await getFilteredReports({
           ...filters,
           type: 'purchases'
         });
       } else if (reportType === 'inventario') {
-        // Para inventario, obtener resumen de ventas como ejemplo
         reportData = await getSalesSummary();
       }
 
@@ -71,7 +68,6 @@ const Reports = () => {
   const handleExport = () => {
     if (!generatedReport || !generatedReport.data.length) return;
 
-    // Crear CSV simple
     const headers = Object.keys(generatedReport.data[0]).join(',');
     const rows = generatedReport.data.map(row => 
       Object.values(row).map(value => 

@@ -43,12 +43,10 @@ namespace Application.Services.Implementations
             if (await _products.ExistsByName(dto.Name))
                 throw new ProductAlreadyExistsException(dto.Name);
 
-            // Validar que la categoría existe y pertenece al grocery actual
             var categoryExists = await _categories.GetById(dto.CategoryId);
             if (categoryExists is null || categoryExists.GroceryId != _tenantProvider.CurrentGroceryId)
                 throw new CategoryNotValidException(dto.CategoryId);
 
-            // Validar precios
             if (dto.UnitPrice <= 0)
                 throw new InvalidPriceException("precio unitario");
             
@@ -77,12 +75,10 @@ namespace Application.Services.Implementations
                 && await _products.ExistsByName(dto.Name))
                 throw new ProductAlreadyExistsException(dto.Name);
 
-            // Validar que la categoría existe y pertenece al grocery actual
             var categoryExists = await _categories.GetById(dto.CategoryId);
             if (categoryExists is null || categoryExists.GroceryId != _tenantProvider.CurrentGroceryId)
                 throw new CategoryNotValidException(dto.CategoryId);
 
-            // Validar precios
             if (dto.UnitPrice <= 0)
                 throw new InvalidPriceException("precio unitario");
             

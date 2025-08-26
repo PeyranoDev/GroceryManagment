@@ -18,9 +18,6 @@ namespace Presentation.Controllers
             _inventoryService = inventoryService;
         }
 
-        /// <summary>
-        /// Obtener todos los items de inventario del grocery actual
-        /// </summary>
         [HttpGet]
         public async Task<ActionResult<ApiResponse<IReadOnlyList<InventoryItemForResponseDto>>>> GetAll()
         {
@@ -31,9 +28,6 @@ namespace Presentation.Controllers
             ));
         }
 
-        /// <summary>
-        /// Obtener inventario con filtros (para la página de inventario del frontend)
-        /// </summary>
         [HttpGet("filtered")]
         public async Task<ActionResult<ApiResponse<IReadOnlyList<InventoryItemForResponseDto>>>> GetFiltered(
             [FromQuery] string? searchTerm,
@@ -41,7 +35,6 @@ namespace Presentation.Controllers
         {
             var items = await _inventoryService.GetAll();
             
-            // Aplicar filtros
             if (!string.IsNullOrEmpty(searchTerm))
             {
                 items = items.Where(i => i.Product.Name.Contains(searchTerm, StringComparison.OrdinalIgnoreCase)).ToList();
@@ -63,9 +56,6 @@ namespace Presentation.Controllers
             ));
         }
 
-        /// <summary>
-        /// Obtener estado del stock para un producto
-        /// </summary>
         [HttpGet("{id}/status")]
         public async Task<ActionResult<ApiResponse<InventoryStatusDto>>> GetStockStatus(int id)
         {
@@ -78,9 +68,6 @@ namespace Presentation.Controllers
             ));
         }
 
-        /// <summary>
-        /// Ajustar stock de un producto (lógica del frontend)
-        /// </summary>
         [HttpPost("{id}/adjust-stock")]
         public async Task<ActionResult<ApiResponse<InventoryItemForResponseDto>>> AdjustStock(int id, [FromBody] StockAdjustmentDto dto)
         {
@@ -107,9 +94,6 @@ namespace Presentation.Controllers
             }
         }
 
-        /// <summary>
-        /// Obtener productos con bajo stock
-        /// </summary>
         [HttpGet("low-stock")]
         public async Task<ActionResult<ApiResponse<IReadOnlyList<InventoryItemForResponseDto>>>> GetLowStock([FromQuery] int threshold = 10)
         {
@@ -122,9 +106,6 @@ namespace Presentation.Controllers
             ));
         }
 
-        /// <summary>
-        /// Obtener productos sin stock
-        /// </summary>
         [HttpGet("out-of-stock")]
         public async Task<ActionResult<ApiResponse<IReadOnlyList<InventoryItemForResponseDto>>>> GetOutOfStock()
         {
@@ -137,9 +118,6 @@ namespace Presentation.Controllers
             ));
         }
 
-        /// <summary>
-        /// Obtener un item de inventario por ID (validando que pertenezca al grocery actual)
-        /// </summary>
         [HttpGet("{id}")]
         public async Task<ActionResult<ApiResponse<InventoryItemForResponseDto>>> GetById(int id)
         {
@@ -150,9 +128,6 @@ namespace Presentation.Controllers
             ));
         }
 
-        /// <summary>
-        /// Obtener items de inventario por ID de producto (del grocery actual)
-        /// </summary>
         [HttpGet("product/{productId}")]
         public async Task<ActionResult<ApiResponse<IReadOnlyList<InventoryItemForResponseDto>>>> GetByProductId(int productId)
         {
@@ -163,9 +138,6 @@ namespace Presentation.Controllers
             ));
         }
 
-        /// <summary>
-        /// Crear un nuevo item de inventario en el grocery actual
-        /// </summary>
         [HttpPost]
         public async Task<ActionResult<ApiResponse<InventoryItemForResponseDto>>> Create([FromBody] InventoryItemForCreateDto dto)
         {
@@ -183,9 +155,6 @@ namespace Presentation.Controllers
             );
         }
 
-        /// <summary>
-        /// Actualizar un item de inventario existente (validando que pertenezca al grocery actual)
-        /// </summary>
         [HttpPut("{id}")]
         public async Task<ActionResult<ApiResponse<InventoryItemForResponseDto>>> Update(int id, [FromBody] InventoryItemForUpdateDto dto)
         {
@@ -199,9 +168,6 @@ namespace Presentation.Controllers
             ));
         }
 
-        /// <summary>
-        /// Eliminar un item de inventario (validando que pertenezca al grocery actual)
-        /// </summary>
         [HttpDelete("{id}")]
         public async Task<ActionResult<ApiResponse>> Delete(int id)
         {

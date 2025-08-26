@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { purchasesAPI, recentActivitiesAPI } from '../services/api';
 
-// Hook para gestión de compras
 export const usePurchases = () => {
   const [purchases, setPurchases] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -30,7 +29,6 @@ export const usePurchases = () => {
       const response = await purchasesAPI.create(purchaseData);
       const newPurchase = response.data || response;
       
-      // Agregar actividad reciente
       await recentActivitiesAPI.create({
         type: 'Compra',
         description: `Compra de "${purchaseData.supplier}" registrada`,

@@ -1,4 +1,4 @@
-﻿using Domain.Entities;
+using Domain.Entities;
 using Domain.Tenancy;
 using Microsoft.EntityFrameworkCore;
 
@@ -31,13 +31,11 @@ namespace Infraestructure
         {
             base.OnModelCreating(mb);
 
-            // User configuration
             mb.Entity<User>()
                 .Property(u => u.PasswordHash)
                 .HasMaxLength(100)
                 .IsRequired();
 
-            // UserGrocery configuration
             mb.Entity<UserGrocery>(b =>
             {
                 b.HasKey(x => x.Id);
@@ -54,13 +52,11 @@ namespace Infraestructure
                  .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // Grocery configuration
             mb.Entity<Grocery>(b =>
             {
                 b.Property(g => g.Name).IsRequired().HasMaxLength(200);
             });
 
-            // Category configuration
             mb.Entity<Category>(b =>
             {
                 b.Property(c => c.Name).IsRequired().HasMaxLength(100);
@@ -68,7 +64,6 @@ namespace Infraestructure
                 b.HasIndex(c => new { c.GroceryId, c.Name }).IsUnique();
             });
 
-            // Product configuration
             mb.Entity<Product>(b =>
             {
                 b.Property(p => p.Name).IsRequired().HasMaxLength(200);
@@ -84,7 +79,6 @@ namespace Infraestructure
                  .HasForeignKey(p => p.CategoryId)
                  .OnDelete(DeleteBehavior.Restrict);
 
-                // Configure Promotion as owned entity
                 b.OwnsOne(p => p.Promotion, promo =>
                 {
                     promo.Property(pr => pr.DiscountPercent).HasColumnType("decimal(5,2)");
@@ -93,7 +87,6 @@ namespace Infraestructure
                 });
             });
 
-            // InventoryItem configuration
             mb.Entity<InventoryItem>(b =>
             {
                 b.HasOne(i => i.Product)
@@ -101,7 +94,6 @@ namespace Infraestructure
                  .HasForeignKey(i => i.ProductId)
                  .OnDelete(DeleteBehavior.Cascade);
 
-                // Configure Promotion as owned entity
                 b.OwnsOne(i => i.Promotion, promo =>
                 {
                     promo.Property(pr => pr.DiscountPercent).HasColumnType("decimal(5,2)");
@@ -110,7 +102,6 @@ namespace Infraestructure
                 });
             });
 
-            // Purchase configuration
             mb.Entity<Purchase>(b =>
             {
                 b.Property(p => p.Supplier).IsRequired().HasMaxLength(200);
@@ -123,7 +114,6 @@ namespace Infraestructure
                  .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // PurchaseItem configuration
             mb.Entity<PurchaseItem>(b =>
             {
                 b.Property(pi => pi.UnitCost).HasColumnType("decimal(18,2)");
@@ -135,7 +125,6 @@ namespace Infraestructure
                  .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // Sale configuration
             mb.Entity<Sale>(b =>
             {
                 b.Property(s => s.Total).HasColumnType("decimal(18,2)");
@@ -151,7 +140,6 @@ namespace Infraestructure
                  .OnDelete(DeleteBehavior.Cascade);
             });
 
-            // SaleItem configuration
             mb.Entity<SaleItem>(b =>
             {
                 b.Property(si => si.Price).HasColumnType("decimal(18,2)");
@@ -162,13 +150,11 @@ namespace Infraestructure
                  .OnDelete(DeleteBehavior.Restrict);
             });
 
-            // RecentActivity configuration
             mb.Entity<RecentActivity>(b =>
             {
                 b.Property(ra => ra.Action).IsRequired().HasMaxLength(500);
             });
 
-            // Query filters for multi-tenancy
             mb.Entity<Category>().HasQueryFilter(e => e.GroceryId == _tenant.CurrentGroceryId);
             mb.Entity<Product>().HasQueryFilter(e => e.GroceryId == _tenant.CurrentGroceryId);
             mb.Entity<InventoryItem>().HasQueryFilter(e => e.GroceryId == _tenant.CurrentGroceryId);
