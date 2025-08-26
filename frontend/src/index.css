@@ -1,104 +1,185 @@
 @import "tailwindcss";
-@theme {
-  /* Colores primarios */
-  --color-primary: #00a63e;
-  --color-primary-dark: #008236;
-
-  /* Colores secundarios */
+:root {
+  /* Light theme colors */
+  --color-primary: #059669;
+  --color-primary-dark: #047857;
   --color-secondary: #2563eb;
-  --color-secondary-dark: #254487;
-  
-  /* color error */
-  --color-error: #FA412D;
-  --color-error-dark: #C92A19;
-  
-  /* color warning */
-  --color-warning: #FDC700;
-  --color-warning-dark: #FDBF00;
-
-  /* color success */
-  --color-success: #47A07C;
-  --color-success-dark: #3D8B6F;
-
-
-  /* otros */
-  --color-text: #fafafa;
-  --color-secondary-text: #e5e7eb;
-  --color-bg: #302E2B;
-  --color-bg-input: #141312;
-  --color-bg-secondary: #262422;
-  --color-border: #1C1B19;
+  --color-background: #f9fafb;
+  --color-surface: #ffffff;
+  --color-card: #ffffff;
+  --color-border: #e5e7eb;
+  --color-text: #0f172a;
+  --color-text-secondary: #374151;
+  --color-text-light: #6b7280;
+  --color-success: #059669;
+  --color-warning: #d97706;
+  --color-error: #dc2626;
+  --color-info: #2563eb;
 }
 
-/* Global transitions for all elements */
+/* Dark theme colors */
+.dark {
+  --color-primary: #10b981;
+  --color-primary-dark: #059669;
+  --color-secondary: #3b82f6;
+  --color-background: #111827;
+  --color-surface: #1f2937;
+  --color-card: #374151;
+  --color-border: #4b5563;
+  --color-text: #f9fafb;
+  --color-text-secondary: #d1d5db;
+  --color-text-light: #9ca3af;
+  --color-success: #10b981;
+  --color-warning: #f59e0b;
+  --color-error: #f87171;
+  --color-info: #60a5fa;
+}
+
+/* Global transitions */
 * {
-  @apply transition-all duration-200 ease-in-out;
+  transition: background-color 0.3s ease-in-out, color 0.3s ease-in-out, border-color 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
 }
 
 /* Specific transitions for common interactive elements */
 button, input, select, textarea, a {
-  @apply transition-all duration-200 ease-in-out;
-}
-
-/* Hover and focus transitions */
-*:hover, *:focus {
-  @apply transition-all duration-200 ease-in-out;
+  transition: all 0.15s ease-in-out;
 }
 
 body {
-  @apply bg-[var(--color-bg)] min-h-screen text-[var(--color-text)] font-sans transition-colors duration-300;
+  background-color: var(--color-background);
+  min-height: 100vh;
+  color: var(--color-text);
+  font-family: system-ui, -apple-system, sans-serif;
+  transition: background-color 0.3s, color 0.3s;
 }
+
 main {
-  @apply mb-0 pt-3 pb-0 px-4 sm:px-6 md:px-8 lg:px-16 xl:px-32 2xl:px-40;
+  margin-bottom: 0;
+  padding: 0.75rem 1rem 0 1rem;
+}
+
+@media (min-width: 640px) {
+  main {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+  }
+}
+
+@media (min-width: 768px) {
+  main {
+    padding-left: 2rem;
+    padding-right: 2rem;
+  }
+}
+
+@media (min-width: 1024px) {
+  main {
+    padding-left: 4rem;
+    padding-right: 4rem;
+  }
+}
+
+@media (min-width: 1280px) {
+  main {
+    padding-left: 8rem;
+    padding-right: 8rem;
+  }
+}
+
+@media (min-width: 1536px) {
+  main {
+    padding-left: 10rem;
+    padding-right: 10rem;
+  }
 }
 
 .btn-primary {
-  @apply text-white
-  font-semibold
-  cursor-pointer
-  py-2 px-4
-  transition-all
-  duration-200
-  rounded-lg 
-  flex items-center gap-2 justify-center
-  bg-[var(--color-primary)]
-  hover:bg-[var(--color-primary-dark)]
-  hover:scale-105
-  hover:shadow-lg
-  active:scale-95;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  transition: all 0.2s;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+  background-color: var(--color-primary);
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-dark);
+  transform: scale(1.05);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary:active {
+  transform: scale(0.95);
 }
 
 .btn-secondary {
-  @apply text-white 
-  font-semibold 
-  cursor-pointer
-  py-2 px-4 
-  transition-all 
-  duration-200
-  rounded-lg
-  flex items-center gap-2 justify-center
-  bg-[var(--color-secondary)] 
-  hover:bg-[var(--color-secondary-dark)]
-  hover:scale-105
-  hover:shadow-lg
-  active:scale-95;
+  color: white;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0.5rem 1rem;
+  transition: all 0.2s;
+  border-radius: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  justify-content: center;
+  background-color: var(--color-secondary);
+}
+
+.btn-secondary:hover {
+  opacity: 0.9;
+  transform: scale(1.05);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+}
+
+.btn-secondary:active {
+  transform: scale(0.95);
 }
 
 .flex-center {
-  @apply flex justify-center items-center text-center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
 }
 
 /* Table row transitions */
 tbody tr {
-  @apply transition-all duration-200 hover:bg-[var(--color-bg-secondary)]/30;
+  transition: all 0.2s;
+}
+
+tbody tr:hover {
+  background-color: rgba(248, 250, 252, 0.3);
+}
+
+.dark tbody tr:hover {
+  background-color: rgba(30, 41, 59, 0.3);
 }
 
 /* General interactive element transitions */
 .interactive-item {
-  @apply transition-all duration-200 hover:scale-[1.02] hover:shadow-md;
+  transition: all 0.2s;
+}
+
+.interactive-item:hover {
+  transform: scale(1.02);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 /* Select element transitions */
 select {
-  @apply transition-all duration-200 hover:border-[var(--color-primary)]/50 focus:scale-[1.02];
+  transition: all 0.2s;
+}
+
+select:hover {
+  border-color: rgba(0, 166, 62, 0.5);
+}
+
+select:focus {
+  transform: scale(1.02);
 }
