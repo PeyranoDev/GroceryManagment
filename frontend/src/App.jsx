@@ -6,13 +6,11 @@ import Sales from "./components/sales/Sales";
 import Inventory from "./components/inventory/Inventory";
 import Reports from "./components/reports/Reports";
 import Delivery from "./components/delivery/Delivery";
-import { mockInventory } from "./data/products";
 import Header from "./components/ui/header/Header";
 import { ThemeProvider } from "./contexts/ThemeContext";
 
 function App() {
-  const [user, setUser] = useState(null);
-  const [inventory, setInventory] = useState(mockInventory);
+  const [user, setUser] = useState({ name: "Admin", id: 1 });
 
   const [purchaseProducts, setPurchaseProducts] = useState([
     {
@@ -64,15 +62,6 @@ function App() {
     setPurchaseProducts((prev) =>
       prev.map((p) => (p.id === productId ? updatedProduct : p))
     );
-  const handleUpdateStock = (productId, newStock) => {
-    setInventory((prev) =>
-      prev.map((p) =>
-        p.id === productId
-          ? { ...p, stock: newStock, lastUpdated: new Date().toISOString() }
-          : p
-      )
-    );
-  };
 
   return (
     <ThemeProvider>
@@ -114,6 +103,7 @@ function App() {
               <Route path="/reportes" element={<Reports />} />
             </Routes>
         </main>
+        
       </div>
     </ThemeProvider>
   );
