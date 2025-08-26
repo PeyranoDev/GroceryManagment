@@ -14,7 +14,7 @@ function App() {
 
   const [purchaseProducts, setPurchaseProducts] = useState([]);
 
-  const handleLogin = () => setUser({ name: "Tomillo" });
+  const handleLogin = () => setUser({ name: "Admin", id: 1 });
   const handleLogout = () => setUser(null);
 
   const handleAddPurchaseProduct = () =>
@@ -44,38 +44,24 @@ function App() {
         <Header user={user} onLogin={handleLogin} onLogout={handleLogout} />
 
         <main>
-            <Routes>
-              <Route
-                path="/"
-                element={<Dashboard inventoryData={inventory} />}
-              />
-              <Route path="/ventas" element={<Sales />} />
-              <Route
-                path="/pedidos"
-                element={<Delivery inventory={inventory} />}
-              />
-              <Route
-                path="/compras"
-                element={
-                  <Purchases
-                    products={purchaseProducts}
-                    onAddProduct={handleAddPurchaseProduct}
-                    onProductChange={handlePurchaseProductChange}
-                    onRemoveProduct={handleRemovePurchaseProduct}
-                  />
-                }
-              />
-              <Route
-                path="/inventario"
-                element={
-                  <Inventory
-                    inventory={inventory}
-                    onUpdateStock={handleUpdateStock}
-                  />
-                }
-              />
-              <Route path="/reportes" element={<Reports />} />
-            </Routes>
+          <Routes>
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/ventas" element={<Sales />} />
+            <Route path="/pedidos" element={<Delivery />} />
+            <Route
+              path="/compras"
+              element={
+                <Purchases
+                  products={purchaseProducts}
+                  onAddProduct={handleAddPurchaseProduct}
+                  onProductChange={handlePurchaseProductChange}
+                  onRemoveProduct={handleRemovePurchaseProduct}
+                />
+              }
+            />
+            <Route path="/inventario" element={<Inventory />} />
+            <Route path="/reportes" element={<Reports />} />
+          </Routes>
         </main>
         
       </div>
