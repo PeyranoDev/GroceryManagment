@@ -24,11 +24,28 @@ RUN apt-get update && \
     curl \
     && rm -rf /var/lib/apt/lists/*
 
+RUN apt-get update && apt-get install -y dotnet-sdk-9.0
+RUN dotnet tool install --global dotnet-ef
+ENV PATH="$PATH:/root/.dotnet/tools"
+
+COPY --from=build-env /app/Domain ./Domain
+COPY --from=build-env /app/Application ./Application  
+COPY --from=build-env /app/Infraestructure ./Infraestructure
+COPY --from=build-env /app/Presentation ./Presentation
+COPY --from=build-env /app/*.sln ./
+
 COPY --from=build-env /app/out .
+
+COPY entrypoint.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 ENV ASPNETCORE_ENVIRONMENT=Production
 ENV ASPNETCORE_URLS=http://+:5000
+ENV POSTGRES_HOST=grocery-postgres
+ENV POSTGRES_PORT=5432
+ENV POSTGRES_USER=grocery_user
 
 EXPOSE 5000
 
-ENTRYPOINT ["dotnet", "Presentation.dll"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+CMD ["dotnet", "Presentation.dll"]

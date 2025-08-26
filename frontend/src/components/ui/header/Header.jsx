@@ -56,7 +56,6 @@ const Header = ({ user, onLogin, onLogout }) => {
             </nav>
           </div>
 
-          {/* Mobile Menu Button */}
           <button 
             className="mobile-menu-button md:hidden"
             onClick={toggleMobileMenu}
@@ -65,7 +64,6 @@ const Header = ({ user, onLogin, onLogout }) => {
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
 
-          {/* Usuario */}
           <div className="header-right-section">
             {user ? (
               <div className="user-info-container">
@@ -89,7 +87,6 @@ const Header = ({ user, onLogin, onLogout }) => {
           </div>
         </div>
 
-        {/* Mobile Navigation Menu */}
         {isMobileMenuOpen && (
           <div className="mobile-nav-overlay">
             <nav className="mobile-nav">
