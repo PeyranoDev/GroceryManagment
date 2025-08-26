@@ -27,12 +27,14 @@ const Header = ({ user, onLogin, onLogout }) => {
     <header className="header-container">
       <div className="header-inner">
         <div className="header-content-wrapper">
+          {/* Logo */}
           <div className="header-left-section">
             <div className="header-logo">
               <Leaf className="h-8 w-8 text-green-500" />
               <span className="header-logo-text">VerduSoft</span>
             </div>
 
+            {/* Navegación Desktop */}
             <nav className="header-nav">
               {navItems.map((item) => (
                 <NavLink
@@ -48,6 +50,7 @@ const Header = ({ user, onLogin, onLogout }) => {
             </nav>
           </div>
 
+          {/* Mobile Menu Button */}
           <button 
             className="mobile-menu-button md:hidden"
             onClick={toggleMobileMenu}
@@ -56,6 +59,7 @@ const Header = ({ user, onLogin, onLogout }) => {
             {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
           </button>
 
+          {/* Usuario */}
           <div className="header-right-section">
             {user ? (
               <div className="user-info-container">
@@ -79,6 +83,7 @@ const Header = ({ user, onLogin, onLogout }) => {
           </div>
         </div>
 
+        {/* Mobile Navigation Menu */}
         {isMobileMenuOpen && (
           <div className="mobile-nav-overlay">
             <nav className="mobile-nav">
@@ -95,6 +100,7 @@ const Header = ({ user, onLogin, onLogout }) => {
                 </NavLink>
               ))}
               
+              {/* Mobile Auth Section */}
               <div className="mobile-auth-section">
                 {user ? (
                   <div className="mobile-user-info">
