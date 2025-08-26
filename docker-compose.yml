@@ -35,6 +35,9 @@ services:
       - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Production}
       - ASPNETCORE_URLS=http://+:5000
       - ConnectionStrings__DefaultConnection=Host=grocery-postgres;Port=5432;Database=${POSTGRES_DB:-grocery_management_prod};Username=${POSTGRES_USER:-grocery_user};Password=${POSTGRES_PASSWORD:-grocery_password}
+      - POSTGRES_HOST=grocery-postgres
+      - POSTGRES_PORT=5432
+      - POSTGRES_USER=${POSTGRES_USER:-grocery_user}
     networks:
       - grocery-network
     depends_on:

@@ -15,6 +15,9 @@ ENV ASPNETCORE_ENVIRONMENT=Development
 ENV ASPNETCORE_URLS=http://+:5000
 ENV DOTNET_USE_POLLING_FILE_WATCHER=true
 ENV DOTNET_WATCH_SUPPRESS_BROWSER_REFRESH=true
+ENV POSTGRES_HOST=grocery-postgres-dev
+ENV POSTGRES_PORT=5432
+ENV POSTGRES_USER=grocery_user
 
 EXPOSE 5000
 
@@ -28,4 +31,8 @@ RUN dotnet restore
 
 COPY . .
 
+COPY entrypoint-dev.sh /usr/local/bin/
+RUN chmod +x /usr/local/bin/entrypoint-dev.sh
+
+ENTRYPOINT ["/usr/local/bin/entrypoint-dev.sh"]
 CMD ["dotnet", "watch", "run", "--project", "Presentation", "--urls", "http://0.0.0.0:5000"]

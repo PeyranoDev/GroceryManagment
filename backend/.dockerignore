@@ -31,3 +31,5 @@ docker-compose*
 
 .env
 .env.local
+
+!entrypoint*.sh

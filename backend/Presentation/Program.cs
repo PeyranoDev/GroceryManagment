@@ -16,9 +16,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins",
-        builder => builder.AllowAnyOrigin() // Allows all origins
-                          .AllowAnyMethod() // Allows all HTTP methods (GET, POST, PUT, DELETE, etc.)
-                          .AllowAnyHeader()); // Allows all headers
+        builder => builder.AllowAnyOrigin()
+                          .AllowAnyMethod()
+                          .AllowAnyHeader());
 });
 
 builder.Services.AddControllers();
@@ -30,7 +30,7 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = "Grocery Management API",
         Version = "v1",
-        Description = "API para administraci�n multi-tenant de groceries."
+        Description = "API para administración multi-tenant de groceries."
     });
 
     c.AddSecurityDefinition("GroceryId", new OpenApiSecurityScheme
@@ -38,7 +38,7 @@ builder.Services.AddSwaggerGen(c =>
         Type = SecuritySchemeType.ApiKey,
         In = ParameterLocation.Header,
         Name = "X-Grocery-Id",
-        Description = "ID del grocery/verduler�a para multi-tenancy (requerido para todas las operaciones)"
+        Description = "ID del grocery/verdulería para multi-tenancy (requerido para todas las operaciones)"
     });
 
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -59,6 +59,7 @@ builder.Services.AddSwaggerGen(c =>
     c.OperationFilter<GroceryIdHeaderOperationFilter>();
 });
 
+// AutoMapper
 builder.Services.AddAutoMapper(cfg =>
 {
     cfg.AddProfile<CategoryProfile>();
@@ -76,18 +77,15 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ITenantProvider, HeaderTenantProvider>();
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
-
 builder.Services.AddDbContext<GroceryManagmentContext>(options =>
 {
-    options.UseNpgsql(connectionString, npgsqlOptions =>
-    {
-        npgsqlOptions.EnableRetryOnFailure();
-    });
+    options.UseNpgsql(connectionString);
 });
 
-AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
-
+// Repository pattern - Base repository
 builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
+
+// Specific repositories
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
@@ -97,6 +95,7 @@ builder.Services.AddScoped<IGroceryRepository, GroceryRepository>();
 builder.Services.AddScoped<IRecentActivityRepository, RecentActivityRepository>();
 builder.Services.AddScoped<IPurchaseRepository, PurchaseRepository>();
 
+// Services
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
 builder.Services.AddScoped<IProductService, ProductService>();
@@ -108,10 +107,12 @@ builder.Services.AddScoped<IPurchaseService, PurchaseService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IReportService, ReportService>();
 
+// Password hasher
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 
 var app = builder.Build();
 
+// Global Exception Handling Middleware
 app.UseMiddleware<GlobalExceptionMiddleware>();
 
 if (app.Environment.IsDevelopment())
