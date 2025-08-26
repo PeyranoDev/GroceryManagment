@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { salesAPI, recentActivitiesAPI } from '../services/api';
 
-// Hook para gestión de ventas
 export const useSales = () => {
   const [sales, setSales] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -40,11 +39,9 @@ export const useSales = () => {
     try {
       setLoading(true);
       
-      // Crear la venta desde el carrito
       const response = await salesAPI.createFromCart(cartData);
       const newSale = response.data || response;
       
-      // Agregar actividad reciente
       await recentActivitiesAPI.create({
         type: 'Venta',
         description: `Venta #${newSale.id} finalizada`,
@@ -105,7 +102,6 @@ export const useSales = () => {
   };
 };
 
-// Hook para el carrito de ventas
 export const useCart = () => {
   const [cart, setCart] = useState([]);
 

@@ -18,9 +18,6 @@ namespace Presentation.Controllers
             _categoryService = categoryService;
         }
 
-        /// <summary>
-        /// Obtener todas las categorías del grocery actual
-        /// </summary>
         [HttpGet]
         public async Task<ActionResult<ApiResponse<IReadOnlyList<CategoryForResponseDto>>>> GetAll()
         {
@@ -31,9 +28,6 @@ namespace Presentation.Controllers
             ));
         }
 
-        /// <summary>
-        /// Obtener una categoría por ID (validando que pertenezca al grocery actual)
-        /// </summary>
         [HttpGet("{id}")]
         public async Task<ActionResult<ApiResponse<CategoryForResponseDto>>> GetById(int id)
         {
@@ -44,9 +38,6 @@ namespace Presentation.Controllers
             ));
         }
 
-        /// <summary>
-        /// Crear una nueva categoría en el grocery actual
-        /// </summary>
         [HttpPost]
         public async Task<ActionResult<ApiResponse<CategoryForResponseDto>>> Create([FromBody] CategoryForCreateDto dto)
         {
@@ -64,9 +55,6 @@ namespace Presentation.Controllers
             );
         }
 
-        /// <summary>
-        /// Actualizar una categoría existente (validando que pertenezca al grocery actual)
-        /// </summary>
         [HttpPut("{id}")]
         public async Task<ActionResult<ApiResponse<CategoryForResponseDto>>> Update(int id, [FromBody] CategoryForUpdateDto dto)
         {
@@ -80,9 +68,6 @@ namespace Presentation.Controllers
             ));
         }
 
-        /// <summary>
-        /// Eliminar una categoría (validando que pertenezca al grocery actual)
-        /// </summary>
         [HttpDelete("{id}")]
         public async Task<ActionResult<ApiResponse>> Delete(int id)
         {

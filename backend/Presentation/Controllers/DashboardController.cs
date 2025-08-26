@@ -16,9 +16,6 @@ namespace Presentation.Controllers
             _dashboardService = dashboardService;
         }
 
-        /// <summary>
-        /// Obtener estadísticas del dashboard para el grocery actual
-        /// </summary>
         [HttpGet("stats")]
         public async Task<IActionResult> GetDashboardStats()
         {
@@ -33,9 +30,6 @@ namespace Presentation.Controllers
             }
         }
 
-        /// <summary>
-        /// Obtener ventas semanales para el grocery actual
-        /// </summary>
         [HttpGet("weekly-sales")]
         public async Task<IActionResult> GetWeeklySales()
         {

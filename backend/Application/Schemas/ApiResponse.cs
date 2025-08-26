@@ -27,7 +27,6 @@ namespace Application.Schemas
         }
     }
 
-    // Para respuestas sin data
     public class ApiResponse
     {
         public bool Success { get; set; }

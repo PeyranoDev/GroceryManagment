@@ -11,33 +11,7 @@ import Header from "./components/ui/header/Header";
 function App() {
   const [user, setUser] = useState({ name: "Admin", id: 1 });
 
-  const [purchaseProducts, setPurchaseProducts] = useState([
-    {
-      id: crypto.randomUUID(),
-      name: "Rúcula",
-      purchaseUnit: "atado",
-      quantity: 3,
-      unitLabel: "u",
-      totalPrice: 5000,
-      promotions: [
-        { id: crypto.randomUUID(), quantity: 1, unit: "u", price: 1000 },
-        { id: crypto.randomUUID(), quantity: 2, unit: "u", price: 1500 },
-        { id: crypto.randomUUID(), quantity: 3, unit: "u", price: 2000 },
-      ],
-    },
-    {
-      id: crypto.randomUUID(),
-      name: "Kiwi",
-      purchaseUnit: "peso",
-      quantity: 10,
-      unitLabel: "kg",
-      totalPrice: 43000,
-      promotions: [
-        { id: crypto.randomUUID(), quantity: 1, unit: "kg", price: 6000 },
-        { id: crypto.randomUUID(), quantity: 2, unit: "kg", price: 10000 },
-      ],
-    },
-  ]);
+  const [purchaseProducts, setPurchaseProducts] = useState([]);
 
   const handleLogin = () => setUser({ name: "Admin", id: 1 });
   const handleLogout = () => setUser(null);

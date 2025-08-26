@@ -16,7 +16,6 @@ namespace Application.Mapping
             
             CreateMap<InventoryItem, InventoryItemForResponseDto>();
             
-            // Mapeo para ajuste de stock
             CreateMap<StockAdjustmentDto, InventoryItem>()
                 .ForMember(dest => dest.Stock, opt => opt.MapFrom(src => src.NewStock))
                 .ForMember(dest => dest.LastUpdated, opt => opt.MapFrom(src => DateTime.UtcNow))

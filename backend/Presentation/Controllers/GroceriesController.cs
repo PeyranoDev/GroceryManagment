@@ -21,9 +21,6 @@ namespace Presentation.Controllers
             _tenantProvider = tenantProvider;
         }
 
-        /// <summary>
-        /// Obtener todas las verdulerías
-        /// </summary>
         [HttpGet]
         public async Task<ActionResult<ApiResponse<IReadOnlyList<GroceryForResponseDto>>>> GetAll()
         {
@@ -34,9 +31,6 @@ namespace Presentation.Controllers
             ));
         }
 
-        /// <summary>
-        /// Obtener el grocery actual del tenant
-        /// </summary>
         [HttpGet("current")]
         [RequireGroceryHeader]
         public async Task<ActionResult<ApiResponse<GroceryForResponseDto>>> GetCurrent()
@@ -48,9 +42,6 @@ namespace Presentation.Controllers
             ));
         }
 
-        /// <summary>
-        /// Obtener una verdulería por ID
-        /// </summary>
         [HttpGet("{id}")]
         public async Task<ActionResult<ApiResponse<GroceryForResponseDto>>> GetById(int id)
         {
@@ -61,9 +52,6 @@ namespace Presentation.Controllers
             ));
         }
 
-        /// <summary>
-        /// Crear una nueva verdulería
-        /// </summary>
         [HttpPost]
         public async Task<ActionResult<ApiResponse<GroceryForResponseDto>>> Create([FromBody] GroceryForCreateDto dto)
         {
@@ -81,9 +69,6 @@ namespace Presentation.Controllers
             );
         }
 
-        /// <summary>
-        /// Actualizar una verdulería existente
-        /// </summary>
         [HttpPut("{id}")]
         public async Task<ActionResult<ApiResponse<GroceryForResponseDto>>> Update(int id, [FromBody] GroceryForUpdateDto dto)
         {
@@ -97,9 +82,6 @@ namespace Presentation.Controllers
             ));
         }
 
-        /// <summary>
-        /// Eliminar una verdulería
-        /// </summary>
         [HttpDelete("{id}")]
         public async Task<ActionResult<ApiResponse>> Delete(int id)
         {

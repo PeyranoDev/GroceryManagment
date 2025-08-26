@@ -17,4 +17,4 @@ namespace Infraestructure.Repositories
             => _ctx.Groceries.AsNoTracking().FirstOrDefaultAsync(g => g.Name == name);
     }
 }
-
+

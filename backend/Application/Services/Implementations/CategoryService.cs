@@ -34,7 +34,6 @@ namespace Application.Services.Implementations
         {
             var list = await _categories.GetAllByGroceryId(_tenantProvider.CurrentGroceryId);
             
-            // Asegurar que la lista no sea null
             if (list == null)
             {
                 return new List<CategoryForResponseDto>();
@@ -81,10 +80,6 @@ namespace Application.Services.Implementations
             var entity = await _categories.GetById(id);
             if (entity is null || entity.GroceryId != _tenantProvider.CurrentGroceryId) 
                 throw new CategoryNotFoundException(id);
-            
-            // TODO: Verificar si tiene productos asociados
-            // if (entity.Products.Any())
-            //     throw new CategoryHasProductsException(entity.Name);
             
             await _categories.Delete(entity);
             await _categories.SaveChanges();

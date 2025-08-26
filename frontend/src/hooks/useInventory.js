@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { inventoryAPI } from '../services/api';
 
-// Hook para gestión de inventario
 export const useInventory = () => {
   const [inventory, setInventory] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -32,7 +31,6 @@ export const useInventory = () => {
       const response = await inventoryAPI.adjustStock(productId, newStock);
       const updatedItem = response.data || response;
       
-      // Actualizar el item en el estado local
       setInventory(prev => 
         prev.map(item => 
           item.id === productId 

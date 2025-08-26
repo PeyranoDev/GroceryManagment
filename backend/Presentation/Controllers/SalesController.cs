@@ -18,9 +18,6 @@ namespace Presentation.Controllers
             _saleService = saleService;
         }
 
-        /// <summary>
-        /// Obtener todas las ventas del grocery actual
-        /// </summary>
         [HttpGet]
         public async Task<ActionResult<ApiResponse<IReadOnlyList<SaleForResponseDto>>>> GetAll()
         {
@@ -31,9 +28,6 @@ namespace Presentation.Controllers
             ));
         }
 
-        /// <summary>
-        /// Obtener una venta por ID (validando que pertenezca al grocery actual)
-        /// </summary>
         [HttpGet("{id}")]
         public async Task<ActionResult<ApiResponse<SaleForResponseDto>>> GetById(int id)
         {
@@ -44,9 +38,6 @@ namespace Presentation.Controllers
             ));
         }
 
-        /// <summary>
-        /// Obtener ventas por rango de fechas (del grocery actual)
-        /// </summary>
         [HttpGet("date-range")]
         public async Task<ActionResult<ApiResponse<IReadOnlyList<SaleForResponseDto>>>> GetByDateRange(
             [FromQuery] DateTime startDate, 
@@ -59,9 +50,6 @@ namespace Presentation.Controllers
             ));
         }
 
-        /// <summary>
-        /// Obtener ventas por ID de usuario (del grocery actual)
-        /// </summary>
         [HttpGet("user/{userId}")]
         public async Task<ActionResult<ApiResponse<IReadOnlyList<SaleForResponseDto>>>> GetByUserId(int userId)
         {
@@ -72,9 +60,6 @@ namespace Presentation.Controllers
             ));
         }
 
-        /// <summary>
-        /// Crear una nueva venta en el grocery actual
-        /// </summary>
         [HttpPost]
         public async Task<ActionResult<ApiResponse<SaleForResponseDto>>> Create([FromBody] SaleForCreateDto dto)
         {
@@ -92,9 +77,6 @@ namespace Presentation.Controllers
             );
         }
 
-        /// <summary>
-        /// Crear venta con carrito (lógica del frontend)
-        /// </summary>
         [HttpPost("cart")]
         public async Task<ActionResult<ApiResponse<SaleForResponseDto>>> CreateSaleFromCart([FromBody] CreateSaleFromCartDto dto)
         {
@@ -103,7 +85,6 @@ namespace Presentation.Controllers
 
             try
             {
-                // Convertir el carrito a SaleForCreateDto
                 var saleDto = new SaleForCreateDto
                 {
                     UserId = dto.UserId,
@@ -134,9 +115,6 @@ namespace Presentation.Controllers
             }
         }
 
-        /// <summary>
-        /// Generar mensaje de WhatsApp para una venta
-        /// </summary>
         [HttpPost("{id}/whatsapp")]
         public async Task<ActionResult<ApiResponse<WhatsAppMessageDto>>> GenerateWhatsAppMessage(int id, [FromBody] SaleDetailsDto details)
         {
@@ -171,9 +149,6 @@ namespace Presentation.Controllers
             }
         }
 
-        /// <summary>
-        /// Eliminar una venta (validando que pertenezca al grocery actual)
-        /// </summary>
         [HttpDelete("{id}")]
         public async Task<ActionResult<ApiResponse>> Delete(int id)
         {
@@ -239,7 +214,6 @@ namespace Presentation.Controllers
         }
     }
 
-    // DTO para crear venta desde carrito
     public class CreateSaleFromCartDto
     {
         public int UserId { get; set; }

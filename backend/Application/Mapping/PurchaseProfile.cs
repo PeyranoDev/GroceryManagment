@@ -42,7 +42,6 @@ namespace Application.Mapping
             
             CreateMap<PurchaseItem, PurchaseItemForResponseDto>();
             
-            // Mapeo para reportes
             CreateMap<Purchase, ReportDataDto>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => $"C-{src.Id:D4}"))
                 .ForMember(dest => dest.Type, opt => opt.MapFrom(src => "Compra"))

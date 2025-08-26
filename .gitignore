@@ -30,10 +30,7 @@ docker-compose.override.yml
 .env.*.local
 .env.postgresql.*
 
-# Base de datos
-*.db
-*.db-shm
-*.db-wal
+# Base de datos PostgreSQL
 pgdata/
 
 # Certificados y llaves

@@ -1,10 +1,8 @@
 export const mockSaleProducts = [
-  // Frutas Tropicales
   { id: 1, name: 'Mango', stock: 25, unit: 'u', unitPrice: 2000, salePrice: 2000, category: 'Frutas Tropicales', emoji: '🥭', promotion: { quantity: 2, price: 3500 } },
   { id: 2, name: 'Banana Bolivia', stock: 30, unit: 'kg', unitPrice: 1500, salePrice: 1500, category: 'Frutas Tropicales', emoji: '🍌', promotion: { quantity: 2, price: 2500 } },
   { id: 3, name: 'Banana Ecuador', stock: 20, unit: 'kg', unitPrice: 2500, salePrice: 2500, category: 'Frutas Tropicales', emoji: '🍌', promotion: { quantity: 2, price: 4500 } },
 
-  // Frutas Cítricas
   { id: 4, name: 'Limón', stock: 40, unit: 'kg', unitPrice: 1500, salePrice: 1500, category: 'Frutas Cítricas', emoji: '🍋', promotion: null },
   { id: 5, name: 'Lima', stock: 15, unit: '1/2 kg', unitPrice: 2500, salePrice: 2500, category: 'Frutas Cítricas', emoji: '🍈', promotion: null },
   { id: 6, name: 'Mandarina', stock: 35, unit: 'kg', unitPrice: 1500, salePrice: 2000, category: 'Frutas Cítricas', emoji: '🍊', promotion: null },
@@ -12,7 +10,6 @@ export const mockSaleProducts = [
   { id: 8, name: 'Naranja ombligo chica', stock: 45, unit: 'kg', unitPrice: 1000, salePrice: 1000, category: 'Frutas Cítricas', emoji: '🍊', promotion: { quantity: 2, price: 1500 } },
   { id: 9, name: 'Naranja ombligo grande', stock: 30, unit: 'kg', unitPrice: 1500, salePrice: 1500, category: 'Frutas Cítricas', emoji: '🍊', promotion: null },
 
-  // Frutas de Huerta
   { id: 10, name: 'Ciruela', stock: 20, unit: 'kg', unitPrice: 4000, salePrice: 4000, category: 'Frutas de Huerta', emoji: '🍇', promotion: null },
   { id: 11, name: 'Manzana a granel', stock: 60, unit: 'kg', unitPrice: 1000, salePrice: 1000, category: 'Frutas de Huerta', emoji: '🍎', promotion: { quantity: 2, price: 1500 } },
   { id: 12, name: 'Manzana Romme', stock: 25, unit: 'kg', unitPrice: 3000, salePrice: 3000, category: 'Frutas de Huerta', emoji: '🍎', promotion: { quantity: 2, price: 5000 } },
@@ -20,10 +17,8 @@ export const mockSaleProducts = [
   { id: 14, name: 'Manzana verde', stock: 30, unit: 'kg', unitPrice: 3000, salePrice: 3000, category: 'Frutas de Huerta', emoji: '🍏', promotion: { quantity: 2, price: 5000 } },
   { id: 15, name: 'Pera', stock: 35, unit: 'kg', unitPrice: 2000, salePrice: 2000, category: 'Frutas de Huerta', emoji: '🍐', promotion: { quantity: 2, price: 3000 } },
 
-  // Frutas Exóticas
   { id: 16, name: 'Kiwi', stock: 22, unit: 'kg', unitPrice: 6000, salePrice: 6000, category: 'Frutas Exóticas', emoji: '🥝', promotion: null },
 
-  // Otros
   { id: 17, name: 'Ajo', stock: 100, unit: 'u', unitPrice: 1000, salePrice: 1000, category: 'Otros', emoji: '🧄', promotion: null },
   { id: 18, name: 'Albahaca', stock: 15, unit: 'planta', unitPrice: 1000, salePrice: 1000, category: 'Otros', emoji: '🌿', promotion: null },
   { id: 19, name: 'Brotes de soja', stock: 10, unit: 'bandeja', unitPrice: 3000, salePrice: 3000, category: 'Otros', emoji: '🌱', promotion: null },
@@ -38,7 +33,6 @@ export const mockSaleProducts = [
   { id: 28, name: 'Palta seleccionada', stock: 25, unit: 'u', unitPrice: 1500, salePrice: 1500, category: 'Otros', emoji: '🥑', promotion: { quantity: 2, price: 2500 } },
   { id: 29, name: 'Sopa', stock: 10, unit: 'bandeja', unitPrice: 2500, salePrice: 2500, category: 'Otros', emoji: '🥣', promotion: null },
 
-  // Verduras y Hortalizas
   { id: 30, name: 'Berenjena', stock: 25, unit: 'kg', unitPrice: 1500, salePrice: 1500, category: 'Verduras y Hortalizas', emoji: '🍆', promotion: { quantity: 2, price: 2500 } },
   { id: 31, name: 'Berenjena rayada', stock: 15, unit: 'kg', unitPrice: 2500, salePrice: 2500, category: 'Verduras y Hortalizas', emoji: '🍆', promotion: null },
   { id: 32, name: 'Cabutia', stock: 30, unit: 'kg', unitPrice: 1500, salePrice: 1500, category: 'Verduras y Hortalizas', emoji: '🎃', promotion: null },
@@ -51,16 +45,13 @@ export const mockSaleProducts = [
   { id: 39, name: 'Zapallito', stock: 25, unit: 'kg', unitPrice: 1500, salePrice: 1500, category: 'Verduras y Hortalizas', emoji: '🥒', promotion: { quantity: 2, price: 2500 } },
   { id: 40, name: 'Zucchini', stock: 20, unit: 'kg', unitPrice: 2000, salePrice: 2000, category: 'Verduras y Hortalizas', emoji: '🥒', promotion: null },
 
-  // Pimiento
   { id: 41, name: 'Pimiento Rojo', stock: 15, unit: 'kg', unitPrice: 5000, salePrice: 5000, category: 'Pimiento', emoji: '🌶', promotion: null },
   { id: 42, name: 'Pimiento Verde', stock: 20, unit: 'kg', unitPrice: 3000, salePrice: 3000, category: 'Pimiento', emoji: '🫑', promotion: null },
   { id: 43, name: 'Pimiento Amarillo', stock: 12, unit: 'kg', unitPrice: 6000, salePrice: 6000, category: 'Pimiento', emoji: '🟡', promotion: null },
 
-  // Frutas (adicionales)
   { id: 44, name: 'Uva rosada sin semilla', stock: 18, unit: 'kg', unitPrice: 6000, salePrice: 6000, category: 'Frutas', emoji: '🍇', promotion: null },
   { id: 45, name: 'Frutilla', stock: 15, unit: 'bandeja', unitPrice: 3500, salePrice: 3500, category: 'Frutas', emoji: '🍓', promotion: { quantity: 2, price: 6000 } },
 
-  // Verduras Raíz
   { id: 46, name: 'Papa', stock: 47, unit: 'kg', unitPrice: 1000, salePrice: 1000, category: 'Verduras Raíz', emoji: '🥔', promotion: { quantity: 2, price: 1500 } },
   { id: 47, name: 'Papa lavada', stock: 30, unit: 'kg', unitPrice: 2000, salePrice: 2000, category: 'Verduras Raíz', emoji: '🥔', promotion: null },
   { id: 48, name: 'Papines blancos', stock: 20, unit: '800gr', unitPrice: 3500, salePrice: 3500, category: 'Verduras Raíz', emoji: '🥔', promotion: null },
@@ -69,7 +60,6 @@ export const mockSaleProducts = [
   { id: 51, name: 'Zanahoria', stock: 19, unit: 'kg', unitPrice: 1500, salePrice: 1500, category: 'Verduras Raíz', emoji: '🥕', promotion: { quantity: 2, price: 2000 } },
   { id: 52, name: 'Remolacha', stock: 15, unit: 'atado', unitPrice: 2000, salePrice: 2000, category: 'Verduras Raíz', emoji: '🫜', promotion: null },
 
-  // Verduras de Hoja
   { id: 53, name: 'Apio', stock: 12, unit: 'u', unitPrice: 3000, salePrice: 3000, category: 'Verduras de Hoja', emoji: '🥬', promotion: null },
   { id: 54, name: 'Acelga', stock: 25, unit: 'atado', unitPrice: 1000, salePrice: 1000, category: 'Verduras de Hoja', emoji: '🌿', promotion: { quantity: 2, price: 1500 } },
   { id: 55, name: 'Lechuga arrepollada', stock: 20, unit: 'kg', unitPrice: 3000, salePrice: 3000, category: 'Verduras de Hoja', emoji: '🥬', promotion: null },
@@ -79,18 +69,15 @@ export const mockSaleProducts = [
   { id: 59, name: 'Repollo morado', stock: 15, unit: 'kg', unitPrice: 2000, salePrice: 2000, category: 'Verduras de Hoja', emoji: '🥬', promotion: null },
   { id: 60, name: 'Rúcula', stock: 8, unit: 'atado', unitPrice: 1000, salePrice: 1000, category: 'Verduras de Hoja', emoji: '🌿', promotion: { quantity: 3, price: 2000 } },
 
-  // Verduras de Tallo
   { id: 61, name: 'Cebolla', stock: 35, unit: 'kg', unitPrice: 750, salePrice: 750, category: 'Verduras de Tallo', emoji: '🧅', promotion: { quantity: 2, price: 1000 } },
   { id: 62, name: 'Cebolla de verdeo', stock: 40, unit: '100gr', unitPrice: 500, salePrice: 500, category: 'Verduras de Tallo', emoji: '🧅', promotion: null },
   { id: 63, name: 'Cebolla morada', stock: 20, unit: 'kg', unitPrice: 1500, salePrice: 1500, category: 'Verduras de Tallo', emoji: '🧅', promotion: null },
   { id: 64, name: 'Puerro', stock: 15, unit: '100gr', unitPrice: 500, salePrice: 500, category: 'Verduras de Tallo', emoji: '🧅', promotion: null },
 
-  // Verduras de Flor
   { id: 65, name: 'Brócoli', stock: 18, unit: 'u', unitPrice: 3500, salePrice: 3500, category: 'Verduras de Flor', emoji: '🥦', promotion: null },
   { id: 66, name: 'Coliflor', stock: 15, unit: 'u', unitPrice: 3000, salePrice: 3000, category: 'Verduras de Flor', emoji: '🥦', promotion: null },
   { id: 67, name: 'Repollito de Br.', stock: 10, unit: 'bandeja', unitPrice: 3500, salePrice: 3500, category: 'Verduras de Flor', emoji: '🥦', promotion: null },
 
-  // Fuego
   { id: 68, name: 'Carbón', stock: 25, unit: '4 kg', unitPrice: 3500, salePrice: 3500, category: 'Fuego', emoji: '🔥', promotion: { quantity: 2, price: 6000 } }
 ];
 

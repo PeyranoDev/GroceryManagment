@@ -34,27 +34,21 @@ namespace Application.Services.Implementations
             var lastMonthStart = monthStart.AddMonths(-1);
             var lastMonthEnd = monthStart.AddDays(-1);
 
-            // Ventas de hoy
             var todaySales = await _saleRepository.GetSalesByDateRangeAndGrocery(today, today.AddDays(1), groceryId);
             var todaySalesCount = todaySales.Count;
 
-            // Ventas de ayer para comparación
             var yesterdaySales = await _saleRepository.GetSalesByDateRangeAndGrocery(yesterday, today, groceryId);
             var yesterdaySalesCount = yesterdaySales.Count;
 
-            // Ingresos del mes
             var monthSales = await _saleRepository.GetSalesByDateRangeAndGrocery(monthStart, DateTime.Now, groceryId);
             var monthlyRevenue = monthSales.Sum(s => s.Total);
 
-            // Ingresos del mes anterior para comparación
             var lastMonthSales = await _saleRepository.GetSalesByDateRangeAndGrocery(lastMonthStart, lastMonthEnd.AddDays(1), groceryId);
             var lastMonthRevenue = lastMonthSales.Sum(s => s.Total);
 
-            // Productos con bajo stock (10 o menos)
             var lowStockItems = await _inventoryRepository.GetLowStock(10, groceryId);
             var lowStockCount = lowStockItems.Count;
 
-            // Ticket promedio
             var averageTicket = todaySalesCount > 0 ? todaySales.Average(s => s.Total) : 0;
             var yesterdayAverageTicket = yesterdaySalesCount > 0 ? yesterdaySales.Average(s => s.Total) : 0;
 

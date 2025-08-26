@@ -30,11 +30,9 @@ namespace Application.Services.Implementations
             var groceryId = _tenantProvider.CurrentGroceryId;
             var reports = new List<ReportDataDto>();
 
-            // Fechas por defecto si no se especifican
             var startDate = filter.StartDate ?? DateTime.Today.AddDays(-30);
             var endDate = filter.EndDate ?? DateTime.Today.AddDays(1);
 
-            // Obtener ventas si se solicitan
             if (filter.ReportType == "sales" || filter.ReportType == "all" || string.IsNullOrEmpty(filter.ReportType))
             {
                 var sales = await _saleRepository.GetSalesByDateRangeAndGrocery(startDate, endDate, groceryId);
@@ -42,7 +40,6 @@ namespace Application.Services.Implementations
                 reports.AddRange(salesReports);
             }
 
-            // Obtener compras si se solicitan
             if (filter.ReportType == "purchases" || filter.ReportType == "all" || string.IsNullOrEmpty(filter.ReportType))
             {
                 var purchases = await _purchaseRepository.GetByDateRangeAndGrocery(startDate, endDate, groceryId);
@@ -50,13 +47,11 @@ namespace Application.Services.Implementations
                 reports.AddRange(purchaseReports);
             }
 
-            // Filtrar por usuario si se especifica
             if (!string.IsNullOrEmpty(filter.UserId))
             {
                 reports = reports.Where(r => r.User.Contains(filter.UserId)).ToList();
             }
 
-            // Filtrar por proveedor si se especifica
             if (!string.IsNullOrEmpty(filter.SupplierId))
             {
                 reports = reports.Where(r => r.Supplier != null && r.Supplier.Contains(filter.SupplierId)).ToList();
