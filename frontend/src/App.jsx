@@ -7,6 +7,7 @@ import Inventory from "./components/inventory/Inventory";
 import Reports from "./components/reports/Reports";
 import Delivery from "./components/delivery/Delivery";
 import Header from "./components/ui/header/Header";
+import { ThemeProvider } from "./contexts/ThemeContext";
 
 function App() {
   const [user, setUser] = useState({ name: "Admin", id: 1 });
@@ -37,13 +38,10 @@ function App() {
     );
 
   return (
-    <>
-      <div className="app">
-        <Header
-          user={user}
-          onLogin={handleLogin}
-          onLogout={handleLogout}
-        />
+    <ThemeProvider>
+      <style>{`input[type="date"]::-webkit-calendar-picker-indicator { display: none; -webkit-appearance: none; }`}</style>
+      <div className="app bg-background text-text min-h-screen transition-colors duration-300">
+        <Header user={user} onLogin={handleLogin} onLogout={handleLogout} />
 
         <main>
           <Routes>
@@ -67,7 +65,7 @@ function App() {
         </main>
         
       </div>
-    </>
+    </ThemeProvider>
   );
 }
 

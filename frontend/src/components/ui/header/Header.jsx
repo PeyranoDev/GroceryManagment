@@ -1,6 +1,8 @@
-import { Leaf, LogIn, LogOut, Moon, Sun, UserCircle, Menu, X } from "lucide-react";
+// src/components/Header/Header.jsx
+import { Leaf, LogIn, LogOut, UserCircle, Menu, X } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useState } from "react";
+import ThemeToggle from "../ThemeToggle";
 import "./Header.css";
 
 const Header = ({ user, onLogin, onLogout }) => {
@@ -27,11 +29,15 @@ const Header = ({ user, onLogin, onLogout }) => {
     <header className="header-container">
       <div className="header-inner">
         <div className="header-content-wrapper">
-          {/* Logo */}
+          {/* Logo and Theme Toggle */}
           <div className="header-left-section">
             <div className="header-logo">
               <Leaf className="h-8 w-8 text-green-500" />
               <span className="header-logo-text">VerduSoft</span>
+            </div>
+            
+            <div className="ml-4">
+              <ThemeToggle />
             </div>
 
             {/* Navegación Desktop */}
@@ -100,6 +106,7 @@ const Header = ({ user, onLogin, onLogout }) => {
                 </NavLink>
               ))}
               
+
               {/* Mobile Auth Section */}
               <div className="mobile-auth-section">
                 {user ? (
