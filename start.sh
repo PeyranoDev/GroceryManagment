@@ -39,7 +39,7 @@ show_help() {
     echo ""
     echo "Comandos disponibles:"
     echo "  prod     - Iniciar en modo producción (puerto 80 y 5000)"
-    echo "  dev      - Iniciar en modo desarrollo con hot-reload (puerto 5173 y 5000)"
+    echo "  dev      - Iniciar en modo desarrollo con hot-reload (puerto 3001 y 5001)"
     echo "  build    - Construir las imágenes sin ejecutar"
     echo "  stop     - Detener todos los servicios"
     echo "  clean    - Limpiar contenedores, imágenes y volúmenes"
@@ -76,8 +76,8 @@ start_development() {
     
     print_message "✅ Aplicación de desarrollo iniciada!" $GREEN
     echo ""
-    print_message "📱 Frontend (Vite) disponible en: http://localhost:5173" $BLUE
-    print_message "🔌 Backend API disponible en: http://localhost:5000" $BLUE
+    print_message "📱 Frontend (Vite) disponible en: http://localhost:3001" $BLUE
+    print_message "🔌 Backend API disponible en: http://localhost:5001" $BLUE
     print_message "🗄️  Adminer (DB Admin) disponible en: http://localhost:8080" $BLUE
     echo ""
     print_message "💡 Hot-reload habilitado para ambos servicios" $YELLOW
