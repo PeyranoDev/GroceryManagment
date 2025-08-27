@@ -8,7 +8,7 @@ env:
   CONTAINER_APP_NAME: grocery-manager-api
   CONTAINER_APP_RESOURCE_GROUP_NAME: GroceryManager
   CONTAINER_REGISTRY_LOGIN_SERVER: grocerymanagerregistry.azurecr.io
-  DOCKER_FILE_PATH: Presentation/Dockerfile
+  DOCKER_FILE_PATH: Dockerfile
   PROJECT_NAME_FOR_DOCKER: presentation
 jobs:
   build:
@@ -50,3 +50,4 @@ jobs:
     - name: logout
       run: >
         az logout
+
