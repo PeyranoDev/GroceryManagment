@@ -1,0 +1,60 @@
+name: Build & Deploy Frontend (Container Apps)
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'frontend/**'
+      - '.github/workflows/frontend.yml'
+  workflow_dispatch:
+
+permissions:
+  id-token: write
+  contents: read
+env:
+  REGISTRY: grocerymanagerregistry.azurecr.io
+  IMAGE_NAME: grocery-frontend
+  RESOURCE_GROUP: GroceryManager
+  CONTAINER_APP_NAME: grocery-frontend
+  API_URL: https://grocery-manager-api.salmonground-d5b02f2a.brazilsouth.azurecontainerapps.io
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - name: Get ACR access token
+        run: |
+          echo "ACR_TOKEN=$(az acr login --name grocerymanagerregistry --expose-token --query accessToken -o tsv)" >> $GITHUB_ENV
+
+      - name: Docker login to ACR with token
+        run: |
+          echo "${ACR_TOKEN}" | docker login ${{ env.REGISTRY }} -u 00000000-0000-0000-0000-000000000000 --password-stdin
+
+      - name: Build & Push image
+        uses: docker/build-push-action@v6
+        with:
+          context: ./frontend
+          file: ./frontend/Dockerfile
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }}
+
+      - name: Update Container App (image + env)
+        run: |
+          az containerapp update \
+            --resource-group ${{ env.RESOURCE_GROUP }} \
+            --name ${{ env.CONTAINER_APP_NAME }} \
+            --image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+            --set-env-vars API_URL=${{ env.API_URL }}

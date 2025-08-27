@@ -3,7 +3,7 @@ import { Leaf, LogIn, LogOut, UserCircle, Menu, X } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useState } from "react";
 import ThemeToggle from "../ThemeToggle";
-import "./Header.css";
+import "./header.css";
 
 const Header = ({ user, onLogin, onLogout }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);

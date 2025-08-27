@@ -27,8 +27,8 @@ RUN apt-get update && \
 COPY --from=build-env /app/out .
 
 ENV ASPNETCORE_ENVIRONMENT=Production
-ENV ASPNETCORE_URLS=http://+:5000
+ENV ASPNETCORE_URLS=http://0.0.0.0:8080
 
-EXPOSE 5000
+EXPOSE 8080
 
 ENTRYPOINT ["dotnet", "Presentation.dll"]

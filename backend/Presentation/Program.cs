@@ -13,16 +13,18 @@ using Presentation.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins",
-        builder => builder.AllowAnyOrigin() // Allows all origins
-                          .AllowAnyMethod() // Allows all HTTP methods (GET, POST, PUT, DELETE, etc.)
-                          .AllowAnyHeader()); // Allows all headers
+        p => p.AllowAnyOrigin()
+              .AllowAnyMethod()
+              .AllowAnyHeader());
 });
 
 builder.Services.AddControllers();
 
+// Swagger
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
@@ -30,7 +32,7 @@ builder.Services.AddSwaggerGen(c =>
     {
         Title = "Grocery Management API",
         Version = "v1",
-        Description = "API para administraci�n multi-tenant de groceries."
+        Description = "API para administración multi-tenant de groceries."
     });
 
     c.AddSecurityDefinition("GroceryId", new OpenApiSecurityScheme
@@ -38,7 +40,7 @@ builder.Services.AddSwaggerGen(c =>
         Type = SecuritySchemeType.ApiKey,
         In = ParameterLocation.Header,
         Name = "X-Grocery-Id",
-        Description = "ID del grocery/verduler�a para multi-tenancy (requerido para todas las operaciones)"
+        Description = "ID del grocery (requerido)"
     });
 
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -52,13 +54,14 @@ builder.Services.AddSwaggerGen(c =>
                     Id = "GroceryId"
                 }
             },
-            new string[] { }
+            Array.Empty<string>()
         }
     });
 
     c.OperationFilter<GroceryIdHeaderOperationFilter>();
 });
 
+// AutoMapper
 builder.Services.AddAutoMapper(cfg =>
 {
     cfg.AddProfile<CategoryProfile>();
@@ -75,18 +78,18 @@ builder.Services.AddAutoMapper(cfg =>
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ITenantProvider, HeaderTenantProvider>();
 
-var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
+var conn = builder.Configuration.GetConnectionString("Default")
+           ?? builder.Configuration.GetConnectionString("DefaultConnection");
 
-builder.Services.AddDbContext<GroceryManagmentContext>(options =>
-{
-    options.UseNpgsql(connectionString, npgsqlOptions =>
-    {
-        npgsqlOptions.EnableRetryOnFailure();
-    });
-});
+if (string.IsNullOrWhiteSpace(conn))
+    throw new InvalidOperationException("No se encontró ninguna cadena de conexión configurada.");
+
+builder.Services.AddDbContext<GroceryManagmentContext>(opt =>
+    opt.UseNpgsql(conn));
 
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
+// Repos & services
 builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<ICategoryRepository, CategoryRepository>();
@@ -107,32 +110,42 @@ builder.Services.AddScoped<IRecentActivityService, RecentActivityService>();
 builder.Services.AddScoped<IPurchaseService, PurchaseService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IReportService, ReportService>();
-
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 
 var app = builder.Build();
 
-app.UseMiddleware<GlobalExceptionMiddleware>();
-
 if (app.Environment.IsDevelopment())
 {
-    app.UseSwagger();
-    app.UseSwaggerUI(c =>
+    using var scope = app.Services.CreateScope();
+    var logger = scope.ServiceProvider.GetRequiredService<ILogger<Program>>();
+    try
     {
-        c.SwaggerEndpoint("/swagger/v1/swagger.json", "Grocery Management API v1");
-        c.RoutePrefix = ""; 
-        
-        c.DisplayRequestDuration();
-        c.EnableDeepLinking();
-        c.EnableFilter();
-        c.ShowExtensions();
-        c.EnableValidator();
-    });
+        var db = scope.ServiceProvider.GetRequiredService<GroceryManagmentContext>();
+        db.Database.Migrate();
+        logger.LogInformation("Migraciones aplicadas correctamente en Development.");
+    }
+    catch (Exception ex)
+    {
+        logger.LogError(ex, "Error al aplicar migraciones en Development");
+        throw;
+    }
 }
 
+app.UseMiddleware<GlobalExceptionMiddleware>();
+
+app.UseSwagger();
+app.UseSwaggerUI(c =>
+{
+    c.SwaggerEndpoint("/swagger/v1/swagger.json", "Grocery Management API v1");
+    c.RoutePrefix = "";
+    c.DisplayRequestDuration();
+    c.EnableDeepLinking();
+    c.EnableFilter();
+    c.ShowExtensions();
+    c.EnableValidator();
+});
+
 app.UseCors("AllowAllOrigins");
-
 app.UseHttpsRedirection();
-
 app.MapControllers();
 app.Run();

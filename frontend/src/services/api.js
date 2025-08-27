@@ -1,12 +1,25 @@
 import { useState } from 'react';
 
-const API_BASE_URL = import.meta.env.MODE === 'production' 
-  ? 'http://localhost:5000/api' 
-  : import.meta.env.VITE_API_URL || 'http://localhost:5001/api';
+
+const runtimeEnv = (typeof window !== 'undefined' && window.__APP_ENV__) || {};
+const runtimeApi = runtimeEnv.API_URL; 
+
+const viteApi = import.meta.env.VITE_API_URL; 
+
+const normalizeApi = (url) => {
+  if (!url || typeof url !== 'string') return undefined;
+  const trimmed = url.replace(/\/+$/, '');
+  return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`;
+};
+
+const API_BASE_URL =
+  normalizeApi(runtimeApi) ||
+  normalizeApi(viteApi) ||
+  'http://localhost:5001/api';
 
 const getHeaders = () => ({
   'Content-Type': 'application/json',
-  'GroceryId': '1', // Por ahora usaremos un ID fijo, luego se puede hacer dinámico
+  'GroceryId': '1', 
 });
 
 const apiRequest = async (endpoint, options = {}) => {
