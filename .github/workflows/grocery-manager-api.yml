@@ -40,24 +40,9 @@ jobs:
           push: true
           tags: ${{ env.CONTAINER_REGISTRY_LOGIN_SERVER }}/${{ env.PROJECT_NAME_FOR_DOCKER }}:${{ github.sha }}
 
-  create-keyvault-secret:
-    runs-on: ubuntu-latest
-    needs: build
-    steps:
-      - name: Azure Login
-        uses: azure/login@v2
-        with:
-          creds: ${{ secrets.grocery_manager_api_SPN }}
-      - name: Create/Update Key Vault secret
-        run: |
-          # Actualizar el secreto en el Key Vault existente
-          az keyvault secret set --vault-name grocerymanagerkv --name NeonConnectionString --value "Host=ep-quiet-band-a8hq2a14-pooler.eastus2.azure.neon.tech;Database=grocerymanagerdb;Username=grocerymanagerdb_owner;Password=${{ secrets.NEON_DB_PASSWORD }};SSL Mode=VerifyFull;Channel Binding=Require"
-      - name: logout
-        run: az logout
-
   migrate:
     runs-on: ubuntu-latest
-    needs: [build, create-keyvault-secret]
+    needs: build
     defaults:
       run:
         working-directory: backend
@@ -88,7 +73,7 @@ jobs:
 
   deploy:
     runs-on: ubuntu-latest
-    needs: [build, create-keyvault-secret, migrate]
+    needs: [build, migrate]
     steps:
       - name: Azure Login
         uses: azure/login@v2
