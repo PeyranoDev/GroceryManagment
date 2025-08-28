@@ -60,9 +60,7 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
       - name: Apply EF Core migrations to Neon
-        env:
-          ConnectionStrings__Default: ${{ secrets.NEON_CONNECTION_STRING }}
-        run: dotnet ef database update --project Infraestructure --startup-project Presentation
+        run: dotnet ef database update --project Infraestructure --startup-project Presentation --connection "${{ secrets.NEON_CONNECTION_STRING }}"
 
   deploy:
     runs-on: ubuntu-latest
