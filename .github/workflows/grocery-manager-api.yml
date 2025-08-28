@@ -60,7 +60,16 @@ jobs:
       - name: Restore dependencies
         run: dotnet restore
       - name: Apply EF Core migrations to Neon
-        run: dotnet ef database update --project Infraestructure --startup-project Presentation --connection "${{ secrets.NEON_CONNECTION_STRING }}"
+        env:
+          PGHOST: ep-quiet-band-a8hq2a14-pooler.eastus2.azure.neon.tech
+          PGPORT: 5432
+          PGDATABASE: grocerymanagerdb
+          PGUSER: grocerymanagerdb_owner
+          PGPASSWORD: ${{ secrets.NEON_DB_PASSWORD }}
+          PGSSLMODE: require
+        run: |
+          CONNECTION_STRING="Host=$PGHOST;Port=$PGPORT;Database=$PGDATABASE;Username=$PGUSER;Password=$PGPASSWORD;SSL Mode=$PGSSLMODE"
+          dotnet ef database update --project Infraestructure --startup-project Presentation --connection "$CONNECTION_STRING"
 
   deploy:
     runs-on: ubuntu-latest
