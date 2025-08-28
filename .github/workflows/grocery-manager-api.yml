@@ -85,6 +85,6 @@ jobs:
           inlineScript: |
             az config set extension.use_dynamic_install=yes_without_prompt
             az containerapp registry set --name ${{ env.CONTAINER_APP_NAME }} --resource-group ${{ env.CONTAINER_APP_RESOURCE_GROUP_NAME }} --server ${{ env.CONTAINER_REGISTRY_LOGIN_SERVER }} --username ${{ secrets.GroceryManagerRegistry_USERNAME_ECAA }} --password ${{ secrets.GroceryManagerRegistry_PASSWORD_ECAA }}
-            az containerapp update --name ${{ env.CONTAINER_APP_NAME }} --container-name ${{ env.CONTAINER_APP_CONTAINER_NAME }} --resource-group ${{ env.CONTAINER_APP_RESOURCE_GROUP_NAME }} --image ${{ env.CONTAINER_REGISTRY_LOGIN_SERVER }}/${{ env.PROJECT_NAME_FOR_DOCKER }}:${{ github.sha }}
+            az containerapp update --name ${{ env.CONTAINER_APP_NAME }} --container-name ${{ env.CONTAINER_APP_CONTAINER_NAME }} --resource-group ${{ env.CONTAINER_APP_RESOURCE_GROUP_NAME }} --image ${{ env.CONTAINER_REGISTRY_LOGIN_SERVER }}/${{ env.PROJECT_NAME_FOR_DOCKER }}:${{ github.sha }} --set-env-vars "ConnectionStrings__DefaultConnection=Host=ep-quiet-band-a8hq2a14-pooler.eastus2.azure.neon.tech;Port=5432;Database=grocerymanagerdb;Username=grocerymanagerdb_owner;Password=${{ secrets.NEON_DB_PASSWORD }};SSL Mode=Require" "ASPNETCORE_ENVIRONMENT=Production"
       - name: logout
         run: az logout
