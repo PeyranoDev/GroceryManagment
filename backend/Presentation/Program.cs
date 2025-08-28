@@ -17,8 +17,17 @@ var builder = WebApplication.CreateBuilder(args);
 // Configurar Azure Key Vault en producción
 if (builder.Environment.IsProduction())
 {
-    var keyVaultEndpoint = new Uri("https://grocerymanagerkv.vault.azure.net/");
-    builder.Configuration.AddAzureKeyVault(keyVaultEndpoint, new DefaultAzureCredential());
+    try
+    {
+        var keyVaultEndpoint = new Uri("https://grocerymanagerkv.vault.azure.net/");
+        builder.Configuration.AddAzureKeyVault(keyVaultEndpoint, new DefaultAzureCredential());
+        Console.WriteLine("Key Vault configurado correctamente.");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error configurando Key Vault: {ex.Message}");
+        throw;
+    }
 }
 
 // CORS
@@ -88,10 +97,22 @@ builder.Services.AddScoped<ITenantProvider, HeaderTenantProvider>();
 
 var conn = builder.Configuration.GetConnectionString("Default")
            ?? builder.Configuration.GetConnectionString("DefaultConnection")
-           ?? builder.Configuration["NeonConnectionString"]; 
+           ?? builder.Configuration["NeonConnectionString"]; // Key Vault secret
+
+Console.WriteLine($"Environment: {builder.Environment.EnvironmentName}");
+Console.WriteLine($"Connection string found: {!string.IsNullOrWhiteSpace(conn)}");
+Console.WriteLine($"Connection string (masked): {(string.IsNullOrWhiteSpace(conn) ? "NULL" : conn.Substring(0, Math.Min(20, conn.Length)) + "...")}");
 
 if (string.IsNullOrWhiteSpace(conn))
+{
+    // Log all configuration keys for debugging
+    Console.WriteLine("Available configuration keys:");
+    foreach (var key in builder.Configuration.AsEnumerable())
+    {
+        Console.WriteLine($"  {key.Key}: {(key.Value?.Contains("password", StringComparison.OrdinalIgnoreCase) == true ? "***" : key.Value)}");
+    }
     throw new InvalidOperationException("No se encontró ninguna cadena de conexión configurada.");
+}
 
 builder.Services.AddDbContext<GroceryManagmentContext>(opt =>
     opt.UseNpgsql(conn));
