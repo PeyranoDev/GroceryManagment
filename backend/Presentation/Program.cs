@@ -14,7 +14,6 @@ using Azure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configurar Azure Key Vault en producción
 if (builder.Environment.IsProduction())
 {
     try
@@ -22,6 +21,7 @@ if (builder.Environment.IsProduction())
         var keyVaultEndpoint = new Uri("https://grocerymanagerkv.vault.azure.net/");
         builder.Configuration.AddAzureKeyVault(keyVaultEndpoint, new DefaultAzureCredential());
         Console.WriteLine("Key Vault configurado correctamente.");
+        Console.WriteLine(builder.Configuration["NeonConnectionString"]);
     }
     catch (Exception ex)
     {
@@ -97,7 +97,7 @@ builder.Services.AddScoped<ITenantProvider, HeaderTenantProvider>();
 
 var conn = builder.Configuration.GetConnectionString("Default")
            ?? builder.Configuration.GetConnectionString("DefaultConnection")
-           ?? builder.Configuration["NeonConnectionString"]; // Key Vault secret
+           ?? builder.Configuration["NeonConnectionString"]; 
 
 Console.WriteLine($"Environment: {builder.Environment.EnvironmentName}");
 Console.WriteLine($"Connection string found: {!string.IsNullOrWhiteSpace(conn)}");
