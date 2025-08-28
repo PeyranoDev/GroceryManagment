@@ -10,8 +10,16 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Presentation.Filters;
 using Presentation.Middleware;
+using Azure.Identity;
 
 var builder = WebApplication.CreateBuilder(args);
+
+// Configurar Azure Key Vault en producción
+if (builder.Environment.IsProduction())
+{
+    var keyVaultEndpoint = new Uri("https://grocerymanagerkv.vault.azure.net/");
+    builder.Configuration.AddAzureKeyVault(keyVaultEndpoint, new DefaultAzureCredential());
+}
 
 // CORS
 builder.Services.AddCors(options =>
@@ -79,7 +87,8 @@ builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ITenantProvider, HeaderTenantProvider>();
 
 var conn = builder.Configuration.GetConnectionString("Default")
-           ?? builder.Configuration.GetConnectionString("DefaultConnection");
+           ?? builder.Configuration.GetConnectionString("DefaultConnection")
+           ?? builder.Configuration["NeonConnectionString"]; 
 
 if (string.IsNullOrWhiteSpace(conn))
     throw new InvalidOperationException("No se encontró ninguna cadena de conexión configurada.");
