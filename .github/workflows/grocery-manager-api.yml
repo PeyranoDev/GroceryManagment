@@ -81,22 +81,12 @@ jobs:
           creds: ${{ secrets.grocery_manager_api_SPN }}
       - name: Configure Container App with Key Vault
         run: |
-          # Habilitar identidad administrada del sistema (si no existe)
-          PRINCIPAL_ID=$(az containerapp identity assign --name grocery-manager-api --resource-group GroceryManager --system-assigned --query principalId -o tsv) || true
-          
-          # Si ya existe, obtener el Principal ID
-          if [ -z "$PRINCIPAL_ID" ] || [ "$PRINCIPAL_ID" = "null" ]; then
-            PRINCIPAL_ID=$(az containerapp identity show --name grocery-manager-api --resource-group GroceryManager --query principalId -o tsv)
-          fi
-          
+          # Verificar que la identidad administrada existe
+          PRINCIPAL_ID=$(az containerapp identity show --name grocery-manager-api --resource-group GroceryManager --query principalId -o tsv)
           echo "Container App Principal ID: $PRINCIPAL_ID"
-          
-          # Usar RBAC en lugar de Access Policies para Key Vault
-          # Asignar rol "Key Vault Secrets User" al Container App
-          az role assignment create \
-            --role "Key Vault Secrets User" \
-            --assignee $PRINCIPAL_ID \
-            --scope "/subscriptions/$(az account show --query id -o tsv)/resourceGroups/GroceryManager/providers/Microsoft.KeyVault/vaults/grocerymanagerkv" || echo "Role assignment may already exist"
+          echo "Note: Key Vault role assignment should be configured manually:"
+          echo "Role: Key Vault Secrets User"
+          echo "Principal ID: $PRINCIPAL_ID"
           
       - name: Deploy to containerapp
         uses: azure/CLI@v2
