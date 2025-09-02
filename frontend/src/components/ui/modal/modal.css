@@ -16,7 +16,7 @@
 }
 
 .modal {
-  @apply bg-[var(--color-bg)] rounded-lg shadow-xl w-full max-w-lg mx-2 sm:mx-0
+  @apply bg-black/75 rounded-lg shadow-xl w-full max-w-lg mx-2 sm:mx-0
          transition-all duration-300 ease-in-out;
   animation: slideIn 0.3s ease-out;
 }
@@ -38,7 +38,7 @@
   animation: slideIn 0.3s ease-out;
 }
 
-.modal-header { 
+.modal-header {
   @apply p-3 sm:p-4 border-b border-[var(--color-border)] flex justify-between items-center
          transition-all duration-200;
 }
