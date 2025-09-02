@@ -15,6 +15,13 @@ namespace Infraestructure.Repositories
 
         public Task<Grocery?> GetByName(string name)
             => _ctx.Groceries.AsNoTracking().FirstOrDefaultAsync(g => g.Name == name);
+
+        public override async Task<int> Create(Grocery entity)
+        {
+            var entry = await _ctx.Set<Grocery>().AddAsync(entity);
+            await _ctx.SaveChangesAsync();
+            
+            return entry.Entity.Id;
+        }
     }
 }
-

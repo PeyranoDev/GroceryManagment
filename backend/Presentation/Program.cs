@@ -82,7 +82,7 @@ builder.Services.AddSwaggerGen(c =>
         Type = SecuritySchemeType.ApiKey,
         In = ParameterLocation.Header,
         Name = "X-Grocery-Id",
-        Description = "ID del grocery (requerido)"
+        Description = "ID del grocery (requerido para la mayoría de endpoints)"
     });
 
     c.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -160,6 +160,7 @@ builder.Services.AddScoped<IPurchaseService, PurchaseService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
+builder.Services.AddScoped<ISeedService, SeedService>();
 
 var app = builder.Build();
 

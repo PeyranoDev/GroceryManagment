@@ -43,10 +43,12 @@ namespace Infraestructure.Repositories
 
         public virtual async Task<int> Create(T entity)
         {
-            if (entity is IHasGrocery hg)
+
+            if (entity is IHasGrocery hg && _tenant.HasTenant)
                 hg.GroceryId = _tenant.CurrentGroceryId;   
 
             var entry = await _ctx.Set<T>().AddAsync(entity);
+            await _ctx.SaveChangesAsync();
             
             return entry.Entity.Id;
         }

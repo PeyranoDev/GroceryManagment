@@ -22,8 +22,10 @@ namespace Infraestructure.Tenancy
                 {
                     return groceryId;
                 }
-                return 1; // Valor por defecto
+                return 0; // Cambiado de 1 a 0 para indicar que no hay tenant
             }
         }
+
+        public bool HasTenant => CurrentGroceryId > 0;
     }
 }
