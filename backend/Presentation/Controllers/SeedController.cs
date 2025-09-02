@@ -29,6 +29,20 @@ namespace Presentation.Controllers
             _inventoryService = inventoryService;
         }
 
+        [HttpPost("grocery")]
+        public async Task<ActionResult<ApiResponse<GroceryForResponseDto>>> CreateTestGrocery([FromBody] GroceryForCreateDto dto)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest(ApiResponse<GroceryForResponseDto>.ErrorResponse("Datos de entrada inválidos."));
+
+            var grocery = await _groceryService.Create(dto);
+            
+            return Ok(ApiResponse<GroceryForResponseDto>.SuccessResponse(
+                grocery, 
+                $"Grocery '{grocery.Name}' creado exitosamente con ID {grocery.Id}. Usa el header 'X-Grocery-Id: {grocery.Id}' en las próximas llamadas."
+            ));
+        }
+
         [HttpPost("sample-data")]
         public async Task<ActionResult<ApiResponse>> CreateSampleData()
         {
@@ -117,20 +131,6 @@ namespace Presentation.Controllers
             }
 
             return Ok(ApiResponse.SuccessResponse("Datos de prueba creados exitosamente"));
-        }
-
-        [HttpPost("grocery")]
-        public async Task<ActionResult<ApiResponse<GroceryForResponseDto>>> CreateTestGrocery([FromBody] GroceryForCreateDto dto)
-        {
-            if (!ModelState.IsValid)
-                return BadRequest(ApiResponse<GroceryForResponseDto>.ErrorResponse("Datos de entrada inválidos."));
-
-            var grocery = await _groceryService.Create(dto);
-            
-            return Ok(ApiResponse<GroceryForResponseDto>.SuccessResponse(
-                grocery, 
-                $"Grocery '{grocery.Name}' creado exitosamente. Usa el header 'X-Grocery-Id: {grocery.Id}' en las próximas llamadas."
-            ));
         }
     }
 }
