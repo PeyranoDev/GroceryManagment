@@ -5,12 +5,30 @@ import { PromotionsModal } from "./PromotionsModal";
 import Input from "../ui/input/Input";
 import Card from "../ui/card/Card";
 
-const Purchases = ({
-  products,
-  onAddProduct,
-  onProductChange,
-  onRemoveProduct,
-}) => {
+const Purchases = () => {
+  const [products, setProducts] = useState([]);
+  
+  const handleAddProduct = () =>
+    setProducts((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        name: "",
+        unitType: "peso",
+        quantity: "",
+        unitLabel: "",
+        totalPrice: "",
+        promotions: [],
+      },
+    ]);
+  
+  const handleRemoveProduct = (productId) =>
+    setProducts((prev) => prev.filter((p) => p.id !== productId));
+  
+  const handleProductChange = (productId, updatedProduct) =>
+    setProducts((prev) =>
+      prev.map((p) => (p.id === productId ? updatedProduct : p))
+    );
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
   const [selectedProductForPromos, setSelectedProductForPromos] =
@@ -29,7 +47,7 @@ const Purchases = ({
   };
   const handleClosePromoModal = () => setIsPromoModalOpen(false);
   const handleSavePromotions = (productId, newPromotions) => {
-    onProductChange(productId, {
+    handleProductChange(productId, {
       ...products.find((p) => p.id === productId),
       promotions: newPromotions,
     });
@@ -79,7 +97,7 @@ const Purchases = ({
           title="Productos Registrados"
           actions={
             <button
-              onClick={onAddProduct}
+              onClick={handleAddProduct}
               className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-[var(--color-text)] font-semibold py-2 px-4 rounded-md"
             >
               <Plus size={18} /> Agregar Producto
@@ -105,8 +123,8 @@ const Purchases = ({
                   <ProductRow
                     key={p.id}
                     product={p}
-                    onProductChange={onProductChange}
-                    onRemoveProduct={onRemoveProduct}
+                    onProductChange={handleProductChange}
+                    onRemoveProduct={handleRemoveProduct}
                     onOpenPromoModal={handleOpenPromoModal}
                   />
                 ))}
@@ -120,8 +138,8 @@ const Purchases = ({
               <ProductRow
                 key={p.id}
                 product={p}
-                onProductChange={onProductChange}
-                onRemoveProduct={onRemoveProduct}
+                onProductChange={handleProductChange}
+                onRemoveProduct={handleRemoveProduct}
                 onOpenPromoModal={handleOpenPromoModal}
                 isMobile={true}
               />
