@@ -37,7 +37,7 @@ const Dashboard = () => {
           value={stats?.monthlyRevenue ? `$${stats.monthlyRevenue.toFixed(2)}` : "$0.00"}
           comparisonText={stats?.monthlyRevenueComparison || "Sin datos de comparación"}
           comparisonColor={stats?.monthlyRevenueComparison?.includes('+') ? "text-green-400" : "text-red-400"}
-          valueColor={"text-white"}
+          valueColor={"text-[var(--color-text)]"}
         />
         <KPIcard
           title={"Bajo Stock"}
@@ -50,7 +50,7 @@ const Dashboard = () => {
           title={"Ticket Promedio"}
           value={stats?.averageTicket ? `$${stats.averageTicket.toFixed(2)}` : "$0.00"}
           comparisonText={stats?.averageTicketComparison || "Sin datos de comparación"}
-          valueColor={"text-white"}
+          valueColor={"text-[var(--color-text)]"}
           comparisonColor={stats?.averageTicketComparison?.includes('+') ? "text-green-400" : "text-red-400"}
         />
       </div>

@@ -22,14 +22,14 @@ const SalesHeader = ({ details, onDetailChange }) => {
       }
       actions={
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4">
-          <span className="font-medium text-gray-300 text-sm sm:text-base">Tipo de Venta:</span>
+          <span className="font-medium text-[var(--color-secondary-text)] text-sm sm:text-base">Tipo de Venta:</span>
           <div className="flex items-center gap-2">
             <button
               onClick={() => onDetailChange("isOnline", false)}
               className={`flex items-center gap-2 px-3 py-2 rounded-md font-medium transition-colors ${
                 !details.isOnline
                   ? "bg-green-900/50 text-green-300"
-                  : " bg-gray-600 text-gray-300 hover:bg-gray-500"
+                  : "bg-gray-600 text-[var(--color-secondary-text)] hover:bg-gray-500"
               }`}
             >
               <Store size={16} /> Presencial
@@ -39,7 +39,7 @@ const SalesHeader = ({ details, onDetailChange }) => {
               className={`flex items-center gap-2 px-3 py-2 rounded-md font-medium transition-colors ${
                 details.isOnline
                   ? "bg-blue-900/50 text-blue-300"
-                  : "bg-gray-600 text-gray-300 hover:bg-gray-500"
+                  : "bg-gray-600 text-[var(--color-secondary-text)] hover:bg-gray-500"
               }`}
             >
               <Smartphone size={16} /> Online (WhatsApp)

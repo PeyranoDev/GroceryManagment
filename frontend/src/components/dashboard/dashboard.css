@@ -15,7 +15,7 @@
 }
 
 .kpiCardComparison {
-  @apply bg-[#141312] px-4 py-2 text-xs;
+  @apply bg-[var(--color-bg-input)] px-4 py-2 text-xs;
 }
 
 .kpiCardComparisonDefault {

@@ -1,7 +1,7 @@
 @import 'tailwindcss';
 
 .header-container {
-  @apply bg-[#262422] shadow-md border-b border-[#141312] sticky top-0 z-10 transition-all duration-300;
+  @apply bg-[var(--color-bg-secondary)] shadow-md border-b border-[var(--color-bg-input)] sticky top-0 z-10 transition-all duration-300;
 }
 
 .header-inner {
@@ -37,7 +37,7 @@
 }
 
 .nav-item-inactive {
-  @apply text-gray-300 hover:bg-gray-700 hover:shadow-md;
+  @apply text-[var(--color-secondary-text)] hover:bg-gray-700 hover:shadow-md;
 }
 
 .header-right-section {
@@ -62,7 +62,7 @@
 }
 
 .login-button {
-  @apply flex items-center gap-2 text-sm font-semibold text-gray-300 hover:text-green-400 py-2 px-3 rounded-md transition-all duration-200 hover:scale-105;
+  @apply flex items-center gap-2 text-sm font-semibold text-[var(--color-secondary-text)] hover:text-green-400 py-2 px-3 rounded-md transition-all duration-200 hover:scale-105;
 }
 
 .register-button {
@@ -71,11 +71,11 @@
 
 /* Mobile Menu Styles */
 .mobile-menu-button {
-  @apply p-2 rounded-md text-gray-300 hover:bg-gray-700 hover:text-white transition-all duration-200 hover:scale-110;
+  @apply p-2 rounded-md text-[var(--color-secondary-text)] hover:bg-gray-700 hover:text-white transition-all duration-200 hover:scale-110;
 }
 
 .mobile-nav-overlay {
-  @apply md:hidden absolute top-full left-0 right-0 bg-[#262422] border-t border-[#141312] shadow-lg z-50 transition-all duration-300 ease-in-out;
+  @apply md:hidden absolute top-full left-0 right-0 bg-[var(--color-bg-secondary)] border-t border-[var(--color-bg-input)] shadow-lg z-50 transition-all duration-300 ease-in-out;
 }
 
 .mobile-nav {
@@ -83,7 +83,7 @@
 }
 
 .mobile-nav-item {
-  @apply block px-6 py-3 text-base font-medium transition-all duration-200 border-b border-[#141312]/50 hover:translate-x-2;
+  @apply block px-6 py-3 text-base font-medium transition-all duration-200 border-b border-[var(--color-bg-input)]/50 hover:translate-x-2;
 }
 
 .mobile-nav-item-active {
@@ -91,11 +91,11 @@
 }
 
 .mobile-nav-item-inactive {
-  @apply text-gray-300 hover:bg-gray-700 hover:text-white hover:shadow-md;
+  @apply text-[var(--color-secondary-text)] hover:bg-gray-700 hover:text-white hover:shadow-md;
 }
 
 .mobile-auth-section {
-  @apply mt-4 pt-4 px-6 border-t border-[#141312];
+  @apply mt-4 pt-4 px-6 border-t border-[var(--color-bg-input)];
 }
 
 .mobile-user-info {
@@ -111,7 +111,7 @@
 }
 
 .mobile-login-button {
-  @apply flex items-center justify-center gap-2 w-full px-4 py-2 text-sm font-semibold text-gray-300 hover:text-green-400 border border-gray-600 rounded-md transition-all duration-200 hover:scale-105 hover:shadow-md;
+  @apply flex items-center justify-center gap-2 w-full px-4 py-2 text-sm font-semibold text-[var(--color-secondary-text)] hover:text-green-400 border border-[var(--color-border)] rounded-md transition-all duration-200 hover:scale-105 hover:shadow-md;
 }
 
 .mobile-register-button {

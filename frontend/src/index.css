@@ -20,6 +20,14 @@
   --color-success: #47A07C;
   --color-success-dark: #3D8B6F;
 
+  /* color info */
+  --color-info: #1976d2;
+
+  /* colores adicionales */
+  --color-bg-dark: #1f2937;
+  --color-border-light: #374151;
+  --color-text-muted: #9ca3af;
+  --color-secondary-darker: #2d445a;
 
   /* otros */
   --color-text: #fafafa;

@@ -58,7 +58,7 @@ export const PromotionsModal = ({ isOpen, onClose, product, onSave }) => {
                   handlePromotionChange(index, "quantity", e.target.value)
                 }
               />
-              <span className="font-semibold text-gray-300 text-sm sm:text-base">
+              <span className="font-semibold text-[var(--color-secondary-text)] text-sm sm:text-base">
                 {displayUnit}
               </span>
               <span className="text-gray-400">=</span>
@@ -85,7 +85,7 @@ export const PromotionsModal = ({ isOpen, onClose, product, onSave }) => {
         ))}
         <button
           onClick={handleAddPromotion}
-          className="w-full mt-2 bg-gray-700 hover:bg-gray-600 text-gray-300 font-semibold text-sm py-2 px-4 rounded-md flex items-center justify-center gap-2"
+          className="w-full mt-2 bg-gray-700 hover:bg-gray-600 text-[var(--color-secondary-text)] font-semibold text-sm py-2 px-4 rounded-md flex items-center justify-center gap-2"
         >
           <Plus size={16} />
           <span>Agregar Promoción</span>

@@ -10,7 +10,7 @@ const SalesCart = ({
 }) => {
   return (
     <Card
-      className="lg:col-span-2 h-fit min-h-[400px]"
+      className="lg:col-span-2 h-fit "
       title="Productos en la Venta"
       actions={productSearchComponent} // Usar el componente pasado como prop
     >

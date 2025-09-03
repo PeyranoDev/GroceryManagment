@@ -24,7 +24,7 @@ const SaleItemRow = ({
       <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg p-4 space-y-3">
         <div className="flex justify-between items-start">
           <div className="flex-1">
-            <p className="font-medium text-white">{item.product.name}</p>
+            <p className="font-medium text-[var(--color-text)]">{item.product.name}</p>
             <p className="text-sm text-gray-400">
               Stock: {item.product.stock} {item.product.unit}
             </p>
@@ -51,15 +51,15 @@ const SaleItemRow = ({
           </div>
           <div>
             <span className="text-gray-400">Unidad:</span>
-            <p className="text-gray-300 mt-1">{item.product.unit}</p>
+            <p className="text-[var(--color-secondary-text)] mt-1">{item.product.unit}</p>
           </div>
           <div>
             <span className="text-gray-400">Precio Unit.:</span>
-            <p className="text-gray-300 mt-1">${item.product.unitPrice.toFixed(2)}</p>
+            <p className="text-[var(--color-secondary-text)] mt-1">${item.product.unitPrice.toFixed(2)}</p>
           </div>
           <div>
             <span className="text-gray-400">Total:</span>
-            <p className="font-semibold text-white mt-1">${total.toFixed(2)}</p>
+            <p className="font-semibold text-[var(--color-text)] mt-1">${total.toFixed(2)}</p>
           </div>
         </div>
         
@@ -70,7 +70,7 @@ const SaleItemRow = ({
               className={`px-3 py-1 text-xs font-bold rounded-full transition-colors ${
                 item.promotionApplied
                   ? "bg-green-900/50 text-green-300"
-                  : "bg-gray-600 text-gray-300"
+                  : "bg-gray-600 text-[var(--color-secondary-text)]"
               }`}
             >
               Promoción: {item.promotionApplied ? "Activada" : "Desactivada"}
@@ -84,7 +84,7 @@ const SaleItemRow = ({
   return (
     <tr className="border-b border-[var(--color-border)]">
       <td className="p-3">
-        <p className="font-medium text-white">{item.product.name}</p>
+        <p className="font-medium text-[var(--color-text)]">{item.product.name}</p>
         <p className="text-sm text-gray-400">
           Stock: {item.product.stock} {item.product.unit}
         </p>
@@ -99,11 +99,11 @@ const SaleItemRow = ({
           className="!w-20 text-center"
         />
       </td>
-      <td className="p-3 text-gray-300">{item.product.unit}</td>
-      <td className="p-3 text-gray-300">
+      <td className="p-3 text-[var(--color-secondary-text)]">{item.product.unit}</td>
+      <td className="p-3 text-[var(--color-secondary-text)]">
         ${item.product.unitPrice.toFixed(2)}
       </td>
-      <td className="p-3 font-semibold text-white">${total.toFixed(2)}</td>
+      <td className="p-3 font-semibold text-[var(--color-text)]">${total.toFixed(2)}</td>
       <td className="p-3">
         {item.product.promotion ? (
           <button
@@ -111,7 +111,7 @@ const SaleItemRow = ({
             className={`px-2 py-1 text-xs font-bold rounded-full flex items-center gap-1 transition-colors ${
               item.promotionApplied
                 ? "bg-green-900/50 text-green-300"
-                : "bg-gray-600 text-gray-300"
+                : "bg-gray-600 text-[var(--color-secondary-text)]"
             }`}
           >
             <span>{item.promotionApplied ? "Activada" : "Desactivada"}</span>

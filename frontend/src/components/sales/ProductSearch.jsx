@@ -18,7 +18,7 @@ const ProductSearch = ({
           className="!w-75"
         />
         {searchResults.length > 0 && (
-          <div className="absolute z-10 w-full mt-1 bg-[#141312] border border-[#1C1B19] rounded-md shadow-lg max-h-60 overflow-y-auto">
+          <div className="absolute z-10 w-full mt-1 bg-[var(--color-bg-input)] border border-[var(--color-border)] rounded-md shadow-lg max-h-60 overflow-y-auto">
             <ul>
               {searchResults.map((p) => (
                 <li

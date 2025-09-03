@@ -128,7 +128,7 @@ const Inventory = () => {
                   <td className="p-3 font-medium text-[var(--color-text)]">
                     {item.product?.name || item.name || 'Producto sin nombre'}
                   </td>
-                  <td className="p-3 font-mono text-gray-300">
+                  <td className="p-3 font-mono text-[var(--color-secondary-text)]">
                     {item.stock || 0} {item.product?.unit || item.unit || 'u'}
                   </td>
                   <td className="p-3">

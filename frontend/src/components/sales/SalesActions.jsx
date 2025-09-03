@@ -13,7 +13,7 @@ const SalesActions = ({
   const canGenerateMessage = cart.length > 0 && details?.isOnline;
 
   return (
-    <Card title="Acciones">
+    <Card title="Acciones" className="">
       <div className="flex flex-col gap-3">
         <button
           onClick={onSave}
@@ -38,7 +38,7 @@ const SalesActions = ({
         <button
           onClick={onClear}
           disabled={cart.length === 0}
-          className="w-full bg-red-600 hover:bg-red-700 text-white py-2 px-4 rounded-md transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full bg-red-600 hover:bg-red-700 text-[var(--color-text)] py-2 px-4 rounded-md transition-colors flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <Trash2 size={18} />
           Limpiar Carrito

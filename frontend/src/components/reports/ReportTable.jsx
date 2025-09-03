@@ -13,7 +13,7 @@ const ReportTable = ({ type, data }) => {
         <tbody>
           {data.map((row) => (
             <tr key={row.id} className="border-b border-[var(--color-border)]">
-              <td className="p-3 font-medium text-white whitespace-nowrap">
+              <td className="p-3 font-medium text-[var(--color-text)] whitespace-nowrap">
                 {row.id}
               </td>
               <td className="p-3 text-[var(--color-text)]">{new Date(row.date).toLocaleDateString("es-AR")}</td>

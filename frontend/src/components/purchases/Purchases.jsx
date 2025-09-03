@@ -39,7 +39,7 @@ const Purchases = ({
       <div className="space-y-6">
         <div className="bg-[var(--color-bg-secondary)] p-4 rounded-lg border border-[var(--color-border)] space-y-4">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-white">
+            <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-text)]">
               Registro de Compras
             </h1>
             <p className="text-gray-400 text-sm sm:text-base">
@@ -62,13 +62,13 @@ const Purchases = ({
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
               <button
                 onClick={handleSave}
-                className="flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-md"
+                className="flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 text-[var(--color-text)] font-semibold py-2 px-4 rounded-md"
               >
                 <Save size={18} /> Guardar
               </button>
               <button
                 onClick={handleExport}
-                className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md"
+                className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-[var(--color-text)] font-semibold py-2 px-4 rounded-md"
               >
                 <Download size={18} /> Exportar
               </button>
@@ -80,7 +80,7 @@ const Purchases = ({
           actions={
             <button
               onClick={onAddProduct}
-              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md"
+              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-[var(--color-text)] font-semibold py-2 px-4 rounded-md"
             >
               <Plus size={18} /> Agregar Producto
             </button>

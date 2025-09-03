@@ -20,14 +20,14 @@ const AdjustStockModal = ({ isOpen, onClose, product, onSave }) => {
       title={`Ajustar Stock de ${product?.name}`}
     >
       <div className="flex flex-col gap-4 p-3 sm:p-4">
-        <p className="text-gray-300 text-sm sm:text-base">
+        <p className="text-[var(--color-secondary-text)] text-sm sm:text-base">
           Stock actual:{" "}
           <strong >
             {product?.stock} {product?.unit}
           </strong>
         </p>
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-1">
-          <label className="block text-sm font-medium text-gray-300">
+          <label className="block text-sm font-medium text-[var(--color-secondary-text)]">
             Nuevo Stock
           </label>
           <Input
@@ -40,13 +40,13 @@ const AdjustStockModal = ({ isOpen, onClose, product, onSave }) => {
         <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-4">
           <button
             onClick={onClose}
-            className="bg-gray-600 hover:bg-gray-500 text-white font-semibold py-2 px-4 rounded-md text-sm sm:text-base"
+            className="bg-gray-600 hover:bg-gray-500 text-[var(--color-text)] font-semibold py-2 px-4 rounded-md text-sm sm:text-base"
           >
             Cancelar
           </button>
           <button
             onClick={handleSave}
-            className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md text-sm sm:text-base"
+            className="bg-blue-600 hover:bg-blue-700 text-[var(--color-text)] font-semibold py-2 px-4 rounded-md text-sm sm:text-base"
           >
             Guardar Ajuste
           </button>
