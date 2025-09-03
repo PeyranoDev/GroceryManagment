@@ -5,7 +5,7 @@ import SalesHeader from "./SalesHeader";
 import ProductSearch from "./ProductSearch";
 import SalesSummary from "./SalesSummary";
 import SalesActions from "./SalesActions";
-import WhatsAppMessage from "./WhatsappMessage";
+import WhatsAppMessage from "./WhatsAppMessage";
 import SalesCart from "./SalesCart";
 
 const Sales = () => {
