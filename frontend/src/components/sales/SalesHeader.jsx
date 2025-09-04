@@ -37,7 +37,11 @@ const SalesHeader = ({ details, onDetailChange }) => {
               <Store size={16} /> Presencial
             </button>
             <button
-              onClick={() => onDetailChange("isOnline", true)}
+              onClick={() => {
+                onDetailChange("isOnline", true);
+                // Preseleccionar "Entrega a domicilio" cuando se selecciona Online
+                onDetailChange("deliveryMethod", "Entrega a domicilio");
+              }}
               className={`flex items-center gap-2 px-3 py-2 rounded-md font-medium transition-colors ${
                 details.isOnline
                   ? "bg-blue-900/50 text-blue-300"
@@ -52,7 +56,7 @@ const SalesHeader = ({ details, onDetailChange }) => {
     >
       <form className="flex flex-col gap-4">
         {" "}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           {" "}
           <Input
             type="date"
