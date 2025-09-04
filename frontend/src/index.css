@@ -7,18 +7,18 @@
   /* Colores secundarios */
   --color-secondary: #2563eb;
   --color-secondary-dark: #254487;
-  
+
   /* color error */
-  --color-error: #FA412D;
-  --color-error-dark: #C92A19;
-  
+  --color-error: #fa412d;
+  --color-error-dark: #c92a19;
+
   /* color warning */
-  --color-warning: #FDC700;
-  --color-warning-dark: #FDBF00;
+  --color-warning: #fdc700;
+  --color-warning-dark: #fdbf00;
 
   /* color success */
-  --color-success: #47A07C;
-  --color-success-dark: #3D8B6F;
+  --color-success: #47a07c;
+  --color-success-dark: #3d8b6f;
 
   /* color info */
   --color-info: #1976d2;
@@ -32,10 +32,10 @@
   /* otros */
   --color-text: #fafafa;
   --color-secondary-text: #e5e7eb;
-  --color-bg: #302E2B;
+  --color-bg: #302e2b;
   --color-bg-input: #141312;
   --color-bg-secondary: #262422;
-  --color-border: #1C1B19;
+  --color-border: #1c1b19;
 }
 
 /* Global transitions for all elements */
@@ -44,12 +44,17 @@
 }
 
 /* Specific transitions for common interactive elements */
-button, input, select, textarea, a {
+button,
+input,
+select,
+textarea,
+a {
   @apply transition-all duration-200 ease-in-out;
 }
 
 /* Hover and focus transitions */
-*:hover, *:focus {
+*:hover,
+*:focus {
   @apply transition-all duration-200 ease-in-out;
 }
 
@@ -109,4 +114,26 @@ tbody tr {
 /* Select element transitions */
 select {
   @apply transition-all duration-200 hover:border-[var(--color-primary)]/50 focus:scale-[1.02];
+}
+
+/* Quitar iconos nativos de date y time */
+input[type="date"]::-webkit-calendar-picker-indicator,
+input[type="time"]::-webkit-calendar-picker-indicator {
+  display: none;
+  -webkit-appearance: none;
+}
+
+input[type="date"]::-moz-inner-spin-button,
+input[type="time"]::-moz-inner-spin-button {
+  display: none;
+}
+
+input[type="date"]::-ms-clear,
+input[type="time"]::-ms-clear {
+  display: none;
+}
+
+input[type="date"]::-ms-expand,
+input[type="time"]::-ms-expand {
+  display: none;
 }
