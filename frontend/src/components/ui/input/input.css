@@ -2,7 +2,7 @@
 
 input {
   @apply py-2 w-full border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] 
-  bg-[#141312] border-[#141312] text-white placeholder-gray-400
+  bg-[var(--color-bg-input)] border-[var(--color-bg-input)] text-white placeholder-gray-400
   transition-all duration-200 ease-in-out
   hover:border-[var(--color-primary)]/50 hover:shadow-md
   focus:border-[var(--color-primary)] focus:shadow-lg focus:scale-[1.02];
@@ -18,6 +18,23 @@ input[type="number"]::-webkit-inner-spin-button {
 /* Para Firefox */
 input[type="number"] {
   -moz-appearance: textfield;
+}
+
+/* Estilos para el icono del calendario en input type="date" */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Ocultar el icono nativo en Firefox */
+input[type="date"]::-moz-calendar-picker {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Para navegadores que soportan color-scheme */
+input[type="date"] {
+  color-scheme: dark;
 }
 
 .icon {

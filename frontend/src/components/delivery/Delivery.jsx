@@ -148,7 +148,7 @@ const Delivery = () => {
                 </div>
               </div>
 
-              <div className="bg-[#141312] rounded-lg border border-black max-h-96 overflow-y-auto">
+              <div className="bg-[var(--color-bg-input)] rounded-lg border border-black max-h-96 overflow-y-auto">
                 <div className="p-4 space-y-4">
                   {(() => {
                     const productsByCategory = availableProducts.reduce(
@@ -168,12 +168,12 @@ const Delivery = () => {
                         <div key={category} className="pb-4 last:pb-0">
                           {/* Header de categoría */}
                           <div className="flex items-center justify-between mb-3">
-                            <h4 className="text-md font-semibold text-gray-300 flex items-center gap-2">
+                            <h4 className="text-md font-semibold text-[var(--color-secondary-text)] flex items-center gap-2">
                               <span className="text-lg">
                                 {products[0]?.emoji || "📦"}
                               </span>
                               {category}
-                              <span className="text-xs bg-green-800 text-white px-2 py-1 rounded-full">
+                              <span className="text-xs bg-green-800 text-[var(--color-text)] px-2 py-1 rounded-full">
                                 {products.length}
                               </span>
                             </h4>
@@ -203,7 +203,7 @@ const Delivery = () => {
                                   );
                                   setSelectedProducts(categoryDeselected);
                                 }}
-                                className="px-2 py-1 text-xs bg-gray-600 hover:bg-gray-500 text-gray-300 rounded transition-colors"
+                                className="px-2 py-1 text-xs bg-gray-600 hover:bg-gray-500 text-[var(--color-secondary-text)] rounded transition-colors"
                               >
                                 Ninguno
                               </button>
@@ -219,7 +219,7 @@ const Delivery = () => {
                                 className={`flex items-center gap-2 px-3 py-2 rounded-md border cursor-pointer transition-all duration-200 ${
                                   selectedProducts[p.id]
                                     ? "border-green-600 bg-green-900/20"
-                                    : "border-[#302E2B] bg-black hover:border-gray-800"
+                                    : "border-[var(--color-bg)] bg-black hover:border-gray-800"
                                 }`}
                               >
                                 <div className="flex-shrink-0">
@@ -232,7 +232,7 @@ const Delivery = () => {
                                   >
                                     {selectedProducts[p.id] && (
                                       <svg
-                                        className="w-2.5 h-2.5 text-white"
+                                        className="w-2.5 h-2.5 text-[var(--color-text)]"
                                         fill="currentColor"
                                         viewBox="0 0 20 20"
                                       >
@@ -278,7 +278,7 @@ const Delivery = () => {
               <button
                 onClick={generateOfferMessage}
                 disabled={Object.values(selectedProducts).every((v) => !v)}
-                className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-gray-400 disabled:to-gray-500 text-white font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 disabled:cursor-not-allowed"
+                className="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 disabled:from-gray-400 disabled:to-gray-500 text-[var(--color-text)] font-semibold rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 disabled:cursor-not-allowed"
               >
                 <MessageSquareQuote size={20} />
                 Generar Mensaje de Ofertas
@@ -293,7 +293,7 @@ const Delivery = () => {
               <Copy size={20} className="text-blue-400" />
               Mensaje generado
             </h3>
-            <div className="bg-[#141312] mb-4 rounded-lg  overflow-hidden">
+            <div className="bg-[var(--color-bg-input)] mb-4 rounded-lg  overflow-hidden">
               <textarea
                 readOnly
                 value={generatedOfferMessage}

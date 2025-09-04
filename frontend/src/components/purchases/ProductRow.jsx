@@ -67,21 +67,21 @@ export const ProductRow = ({
           
           <div className="bg-gray-800/50 p-3 rounded-md">
             <span className="text-sm text-gray-400">Precio Unitario:</span>
-            <p className="text-lg font-semibold text-white">${unitPrice} / {displayUnit}</p>
+            <p className="text-lg font-semibold text-[var(--color-text)]">${unitPrice} / {displayUnit}</p>
           </div>
         </div>
         
         <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-[var(--color-border)]">
           <button
             onClick={() => onOpenPromoModal(product)}
-            className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-3 rounded-md text-sm flex-1"
+            className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-[var(--color-text)] font-medium py-2 px-3 rounded-md text-sm flex-1"
           >
             <Settings2 size={14} />
             Promociones
           </button>
           <button
             onClick={() => onRemoveProduct(product.id)}
-            className="flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-white font-medium py-2 px-3 rounded-md text-sm flex-1"
+            className="flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-[var(--color-text)] font-medium py-2 px-3 rounded-md text-sm flex-1"
           >
             <Trash2 size={14} />
             Eliminar
@@ -92,7 +92,7 @@ export const ProductRow = ({
   }
 
   return (
-    <tr className="border-b border-[#141312]">
+    <tr className="border-b border-[var(--color-bg-input)]">
       <td className="p-2 w-1/4">
         <Input
           placeholder="Nombre del producto"
@@ -126,13 +126,13 @@ export const ProductRow = ({
           icon={<DollarSign size={14} className="text-gray-400" />}
         />
       </td>
-      <td className="p-2 w-[12%] text-center font-mono text-gray-300">
+      <td className="p-2 w-[12%] text-center font-mono text-[var(--color-secondary-text)]">
         ${unitPrice} / {displayUnit}
       </td>
       <td className="p-2 w-[15%] text-center">
         <button
           onClick={() => onOpenPromoModal(product)}
-          className="flex items-center justify-center w-full gap-2 bg-gray-700/50 text-gray-300 hover:bg-gray-700 font-semibold py-1 px-3 rounded-md text-xs"
+          className="flex items-center justify-center w-full gap-2 bg-gray-700/50 text-[var(--color-secondary-text)] hover:bg-gray-700 font-semibold py-1 px-3 rounded-md text-xs"
         >
           <Settings2 size={14} />
           <span>Gestionar ({product.promotions.length})</span>

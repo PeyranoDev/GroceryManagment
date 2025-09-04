@@ -41,7 +41,7 @@ const ProtectedRoute = ({ children, requiredRole = null, fallback = null }) => {
           onClick={login}
           style={{
             padding: '12px 24px',
-            backgroundColor: '#1976d2',
+            backgroundColor: 'var(--color-info)',
             color: 'white',
             border: 'none',
             borderRadius: '8px',

@@ -1,13 +1,14 @@
+import { forwardRef } from "react";
 import "./input.css";
 
-const Input = ({
+const Input = forwardRef(({
   type = "text",
   value,
   onChange,
   placeholder,
   className = "",
   icon,
-}) => {
+}, ref) => {
   return (
     <div className="relative w-full">
       {icon && (
@@ -16,6 +17,7 @@ const Input = ({
         </div>
       )}
       <input
+        ref={ref}
         type={type}
         value={value}
         onChange={onChange}
@@ -24,5 +26,8 @@ const Input = ({
       />
     </div>
   );
-};
+});
+
+Input.displayName = "Input";
+
 export default Input;

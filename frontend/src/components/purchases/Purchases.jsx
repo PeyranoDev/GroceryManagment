@@ -1,16 +1,35 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Calendar, Download, Plus, Save } from "lucide-react";
 import { ProductRow } from "./ProductRow";
 import { PromotionsModal } from "./PromotionsModal";
 import Input from "../ui/input/Input";
 import Card from "../ui/card/Card";
 
-const Purchases = ({
-  products,
-  onAddProduct,
-  onProductChange,
-  onRemoveProduct,
-}) => {
+const Purchases = () => {
+  const [products, setProducts] = useState([]);
+  const dateInputRef = useRef(null);
+  
+  const handleAddProduct = () =>
+    setProducts((prev) => [
+      ...prev,
+      {
+        id: crypto.randomUUID(),
+        name: "",
+        unitType: "peso",
+        quantity: "",
+        unitLabel: "",
+        totalPrice: "",
+        promotions: [],
+      },
+    ]);
+  
+  const handleRemoveProduct = (productId) =>
+    setProducts((prev) => prev.filter((p) => p.id !== productId));
+  
+  const handleProductChange = (productId, updatedProduct) =>
+    setProducts((prev) =>
+      prev.map((p) => (p.id === productId ? updatedProduct : p))
+    );
   const [date, setDate] = useState(new Date().toISOString().slice(0, 10));
   const [isPromoModalOpen, setIsPromoModalOpen] = useState(false);
   const [selectedProductForPromos, setSelectedProductForPromos] =
@@ -29,7 +48,7 @@ const Purchases = ({
   };
   const handleClosePromoModal = () => setIsPromoModalOpen(false);
   const handleSavePromotions = (productId, newPromotions) => {
-    onProductChange(productId, {
+    handleProductChange(productId, {
       ...products.find((p) => p.id === productId),
       promotions: newPromotions,
     });
@@ -39,7 +58,7 @@ const Purchases = ({
       <div className="space-y-6">
         <div className="bg-[var(--color-bg-secondary)] p-4 rounded-lg border border-[var(--color-border)] space-y-4">
           <div>
-            <h1 className="text-xl sm:text-2xl font-bold text-white">
+            <h1 className="text-xl sm:text-2xl font-bold text-[var(--color-text)]">
               Registro de Compras
             </h1>
             <p className="text-gray-400 text-sm sm:text-base">
@@ -50,9 +69,11 @@ const Purchases = ({
             <div className="relative w-full sm:w-auto">
               <Calendar
                 size={18}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-secondary-text)] cursor-pointer z-10"
+                onClick={() => dateInputRef.current?.showPicker?.()}
               />
               <Input
+                ref={dateInputRef}
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
@@ -62,13 +83,13 @@ const Purchases = ({
             <div className="flex flex-col sm:flex-row gap-2 sm:gap-4 w-full sm:w-auto">
               <button
                 onClick={handleSave}
-                className="flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 text-white font-semibold py-2 px-4 rounded-md"
+                className="flex items-center justify-center gap-2 bg-gray-700 hover:bg-gray-600 text-[var(--color-text)] font-semibold py-2 px-4 rounded-md"
               >
                 <Save size={18} /> Guardar
               </button>
               <button
                 onClick={handleExport}
-                className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-md"
+                className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-[var(--color-text)] font-semibold py-2 px-4 rounded-md"
               >
                 <Download size={18} /> Exportar
               </button>
@@ -79,8 +100,8 @@ const Purchases = ({
           title="Productos Registrados"
           actions={
             <button
-              onClick={onAddProduct}
-              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white font-semibold py-2 px-4 rounded-md"
+              onClick={handleAddProduct}
+              className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-[var(--color-text)] font-semibold py-2 px-4 rounded-md"
             >
               <Plus size={18} /> Agregar Producto
             </button>
@@ -105,8 +126,8 @@ const Purchases = ({
                   <ProductRow
                     key={p.id}
                     product={p}
-                    onProductChange={onProductChange}
-                    onRemoveProduct={onRemoveProduct}
+                    onProductChange={handleProductChange}
+                    onRemoveProduct={handleRemoveProduct}
                     onOpenPromoModal={handleOpenPromoModal}
                   />
                 ))}
@@ -120,8 +141,8 @@ const Purchases = ({
               <ProductRow
                 key={p.id}
                 product={p}
-                onProductChange={onProductChange}
-                onRemoveProduct={onRemoveProduct}
+                onProductChange={handleProductChange}
+                onRemoveProduct={handleRemoveProduct}
                 onOpenPromoModal={handleOpenPromoModal}
                 isMobile={true}
               />

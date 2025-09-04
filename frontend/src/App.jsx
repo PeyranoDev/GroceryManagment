@@ -11,30 +11,8 @@ import Header from "./components/ui/header/Header";
 function App() {
   const [user, setUser] = useState({ name: "Admin", id: 1 });
 
-  const [purchaseProducts, setPurchaseProducts] = useState([]);
-
   const handleLogin = () => setUser({ name: "Admin", id: 1 });
   const handleLogout = () => setUser(null);
-
-  const handleAddPurchaseProduct = () =>
-    setPurchaseProducts((prev) => [
-      ...prev,
-      {
-        id: crypto.randomUUID(),
-        name: "",
-        purchaseUnit: "peso",
-        quantity: "",
-        unitLabel: "",
-        totalPrice: "",
-        promotions: [],
-      },
-    ]);
-  const handleRemovePurchaseProduct = (productId) =>
-    setPurchaseProducts((prev) => prev.filter((p) => p.id !== productId));
-  const handlePurchaseProductChange = (productId, updatedProduct) =>
-    setPurchaseProducts((prev) =>
-      prev.map((p) => (p.id === productId ? updatedProduct : p))
-    );
 
   return (
     <>
@@ -50,17 +28,7 @@ function App() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/ventas" element={<Sales />} />
             <Route path="/pedidos" element={<Delivery />} />
-            <Route
-              path="/compras"
-              element={
-                <Purchases
-                  products={purchaseProducts}
-                  onAddProduct={handleAddPurchaseProduct}
-                  onProductChange={handlePurchaseProductChange}
-                  onRemoveProduct={handleRemovePurchaseProduct}
-                />
-              }
-            />
+            <Route path="/compras" element={<Purchases />} />
             <Route path="/inventario" element={<Inventory />} />
             <Route path="/reportes" element={<Reports />} />
           </Routes>

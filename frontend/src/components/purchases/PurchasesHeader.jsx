@@ -27,7 +27,7 @@ const PurchasesHeader = () => {
         <button className="flex items-center gap-2 border font-semibold py-2 px-4 rounded-md">
           <Save size={18} /> Guardar
         </button>
-        <button className="btn-primary flex items-center gap-2   rounded-md text-white bg-[#2563EB] hover:bg-[#2d445a]">
+        <button className="btn-primary flex items-center gap-2   rounded-md text-[var(--color-text)] bg-[var(--color-secondary)] hover:bg-[var(--color-secondary-darker)]">
           <Download size={18} /> Exportar
         </button>
       </div>
