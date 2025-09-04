@@ -1,6 +1,7 @@
 using Domain.Entities;
 using Domain.Tenancy;
 using Microsoft.EntityFrameworkCore;
+using BCrypt.Net;
 
 namespace Infraestructure
 {
