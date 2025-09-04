@@ -20,6 +20,23 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
+/* Estilos para el icono del calendario en input type="date" */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Ocultar el icono nativo en Firefox */
+input[type="date"]::-moz-calendar-picker {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Para navegadores que soportan color-scheme */
+input[type="date"] {
+  color-scheme: dark;
+}
+
 .icon {
   @apply absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none
   transition-all duration-200;
