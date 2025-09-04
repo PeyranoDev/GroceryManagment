@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useRef } from "react";
 import { Calendar, Download, Plus, Save } from "lucide-react";
 import { ProductRow } from "./ProductRow";
 import { PromotionsModal } from "./PromotionsModal";
@@ -7,6 +7,7 @@ import Card from "../ui/card/Card";
 
 const Purchases = () => {
   const [products, setProducts] = useState([]);
+  const dateInputRef = useRef(null);
   
   const handleAddProduct = () =>
     setProducts((prev) => [
@@ -68,9 +69,11 @@ const Purchases = () => {
             <div className="relative w-full sm:w-auto">
               <Calendar
                 size={18}
-                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none"
+                className="absolute left-3 top-1/2 -translate-y-1/2 text-[var(--color-secondary-text)] cursor-pointer z-10"
+                onClick={() => dateInputRef.current?.showPicker?.()}
               />
               <Input
+                ref={dateInputRef}
                 type="date"
                 value={date}
                 onChange={(e) => setDate(e.target.value)}
