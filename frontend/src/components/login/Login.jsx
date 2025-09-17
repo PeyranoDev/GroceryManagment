@@ -10,11 +10,12 @@ import {
 } from "lucide-react";
 import { useState } from "react";
 import { useLoginFormValidation } from "../../hooks/useLoginFormValidation";
+import { toast } from "react-toastify";
 
 const Login = () => {
   const {
     values: { email, password },
-
+    errors,
     handleChange,
     validateForm,
   } = useLoginFormValidation();
@@ -22,8 +23,14 @@ const Login = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    if (validateForm()) {
-      console.log("Form submitted:", { email, password });
+
+    validateForm();
+
+    if (Object.keys(errors).length === 0) {
+      // Peyran conecta el backend
+      toast.success("Inicio de sesión exitoso");
+    } else {
+      Object.values(errors).forEach((err) => toast.error(err));
     }
   };
 
@@ -55,7 +62,7 @@ const Login = () => {
           </p>
         </div>
 
-        <form className="space-y-6" onSubmit={handleSubmit}>
+        <form className="space-y-6" onSubmit={handleSubmit} noValidate>
           <fieldset className="space-y-4">
             <legend className="sr-only">Formulario de inicio de sesión</legend>
 

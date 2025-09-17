@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export function useLoginFormValidation(
   initialValues = { email: "", password: "" }
@@ -47,6 +47,11 @@ export function useLoginFormValidation(
     setErrors(newErrors);
     return newErrors;
   };
+
+  useEffect(() => {
+    validateForm(values);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return {
     values,
