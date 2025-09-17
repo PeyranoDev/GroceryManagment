@@ -9,9 +9,27 @@ import {
   Twitter,
 } from "lucide-react";
 import { useState } from "react";
+import { useLoginFormValidation } from "../../hooks/useLoginFormValidation";
 
 const Login = () => {
+  const {
+    values: { email, password },
+
+    handleChange,
+    validateForm,
+  } = useLoginFormValidation();
   const [showPassword, setShowPassword] = useState(false);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (validateForm()) {
+      console.log("Form submitted:", { email, password });
+    }
+  };
+
+  const handleChangePasswordView = () => {
+    setShowPassword((prev) => !prev);
+  };
 
   return (
     <main className="flex items-center justify-center p-4">
@@ -37,7 +55,7 @@ const Login = () => {
           </p>
         </div>
 
-        <form className="space-y-6">
+        <form className="space-y-6" onSubmit={handleSubmit}>
           <fieldset className="space-y-4">
             <legend className="sr-only">Formulario de inicio de sesión</legend>
 
@@ -48,7 +66,8 @@ const Login = () => {
               <div className="relative">
                 <User className="z-[1] absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
-                  id="email"
+                  value={email}
+                  onChange={handleChange}
                   type="email"
                   name="email"
                   autoComplete="username"
@@ -69,7 +88,8 @@ const Login = () => {
                   aria-hidden="true"
                 />
                 <input
-                  id="password"
+                  value={password}
+                  onChange={handleChange}
                   name="password"
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
@@ -82,7 +102,7 @@ const Login = () => {
                   aria-label={
                     showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
                   }
-                  onClick={() => setShowPassword(!showPassword)}
+                  onClick={handleChangePasswordView}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors cursor-pointer"
                 >
                   {showPassword ? (
