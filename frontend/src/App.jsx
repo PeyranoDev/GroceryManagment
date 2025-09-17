@@ -7,6 +7,7 @@ import Inventory from "./components/inventory/Inventory";
 import Reports from "./components/reports/Reports";
 import Delivery from "./components/delivery/Delivery";
 import Header from "./components/ui/header/Header";
+import Login from "./components/login/Login";
 
 function App() {
   const [user, setUser] = useState({ name: "Admin", id: 1 });
@@ -17,15 +18,12 @@ function App() {
   return (
     <>
       <div className="app">
-        <Header
-          user={user}
-          onLogin={handleLogin}
-          onLogout={handleLogout}
-        />
+        <Header user={user} onLogin={handleLogin} onLogout={handleLogout} />
 
         <main>
           <Routes>
             <Route path="/" element={<Dashboard />} />
+            <Route path="/login" element={<Login />} />
             <Route path="/ventas" element={<Sales />} />
             <Route path="/pedidos" element={<Delivery />} />
             <Route path="/compras" element={<Purchases />} />
@@ -33,7 +31,6 @@ function App() {
             <Route path="/reportes" element={<Reports />} />
           </Routes>
         </main>
-        
       </div>
     </>
   );
