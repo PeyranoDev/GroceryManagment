@@ -51,21 +51,21 @@ const SalesHeader = ({ details, onDetailChange }) => {
       }
     >
       <form className="flex flex-col gap-4">
-        {" "}
+        
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-          {" "}
+          
           <Input
             type="date"
             value={details.date}
             onChange={(e) => onDetailChange("date", e.target.value)}
             icon={<Calendar size={16} className="text-gray-400 z-[1]" />}
-          />{" "}
+          />
           <Input
             type="time"
             value={details.time}
             onChange={(e) => onDetailChange("time", e.target.value)}
             icon={<Clock size={16} className="text-gray-400 z-[1]" />}
-          />{" "}
+          />
           <Input
             placeholder={
               details.isOnline
@@ -75,31 +75,31 @@ const SalesHeader = ({ details, onDetailChange }) => {
             value={details.client}
             onChange={(e) => onDetailChange("client", e.target.value)}
             required={details.isOnline}
-          />{" "}
+          />
           <Select
             value={details.paymentMethod}
             onChange={(e) => onDetailChange("paymentMethod", e.target.value)}
           >
-            {" "}
-            <option>Efectivo</option> <option>Tarjeta</option>{" "}
-            <option>Transferencia</option>{" "}
-          </Select>{" "}
+            
+            <option>Efectivo</option> <option>Tarjeta</option>
+            <option>Transferencia</option>
+          </Select>
           {details.isOnline && (
             <>
-              {" "}
+              
               <Select
                 value={details.deliveryMethod}
                 onChange={(e) =>
                   onDetailChange("deliveryMethod", e.target.value)
                 }
               >
-                {" "}
-                <option>Retiro en tienda</option>{" "}
-                <option>Entrega a domicilio</option>{" "}
-              </Select>{" "}
+                
+                <option>Retiro en tienda</option>
+                <option>Entrega a domicilio</option>
+              </Select>
               {details.deliveryMethod === "Entrega a domicilio" && (
                 <>
-                  {" "}
+                  
                   <Input
                     type="number"
                     placeholder="Costo de envío"
@@ -110,16 +110,16 @@ const SalesHeader = ({ details, onDetailChange }) => {
                     icon={
                       <DollarSign size={16} className="text-gray-400 z-[1]" />
                     }
-                  />{" "}
+                  />
                   <Input
                     placeholder="Dirección de entrega"
                     value={details.address || ""}
                     onChange={(e) => onDetailChange("address", e.target.value)}
                     icon={<MapPin size={16} className="text-gray-400 z-[1]" />}
                     required
-                  />{" "}
+                  />
                 </>
-              )}{" "}
+              )}
               <Input
                 placeholder="Teléfono de contacto"
                 value={details.phone || ""}
@@ -131,10 +131,10 @@ const SalesHeader = ({ details, onDetailChange }) => {
                     ? "lg:col-span-2"
                     : ""
                 }
-              />{" "}
+              />
             </>
-          )}{" "}
-        </div>{" "}
+          )}
+        </div>
       </form>
     </Card>
   );

@@ -6,15 +6,14 @@ const SalesCart = ({
   onQuantityChange, 
   onRemove, 
   onTogglePromotion,
-  productSearchComponent // Recibir el componente como prop
+  productSearchComponent 
 }) => {
   return (
     <Card
       className="lg:col-span-2 h-fit "
       title="Productos en la Venta"
-      actions={productSearchComponent} // Usar el componente pasado como prop
+      actions={productSearchComponent}
     >
-      {/* Desktop Table View */}
       <div className="hidden md:block overflow-x-auto">
         <table className="w-full text-sm text-left">
           <thead className="text-xs text-gray-400 uppercase">
@@ -50,7 +49,6 @@ const SalesCart = ({
         </table>
       </div>
 
-      {/* Mobile Card View */}
       <div className="md:hidden space-y-4">
         {cart.length > 0 ? (
           cart.map((item) => (
