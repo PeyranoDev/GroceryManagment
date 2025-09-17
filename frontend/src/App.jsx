@@ -1,6 +1,8 @@
 import { Routes, Route } from "react-router-dom";
 import { useState } from "react";
-import { ToastContainer } from 'react-toastify';
+
+import { ToastContainer } from "react-toastify";
+
 import Purchases from "./components/purchases/Purchases";
 import Dashboard from "./components/dashboard/Dashboard";
 import Sales from "./components/sales/Sales";
@@ -33,6 +35,8 @@ function App() {
           </Routes>
         </main>
       </div>
+
+      <ToastContainer position="bottom-right" autoClose={3000} theme="dark" />
     </>
   );
 }
