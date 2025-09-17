@@ -1,7 +1,7 @@
 import { Leaf, LogIn, LogOut, Moon, Sun, UserCircle, Menu, X } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useState } from "react";
-import "./Header.css";
+import "./header.css";
 
 const Header = ({ user, onLogin, onLogout }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
