@@ -1,3 +1,7 @@
+import { useState } from "react";
+import { useFormValidation } from "../../hooks/useFormValidation";
+import { users } from "../../data/users";
+
 import {
   Leaf,
   User,
@@ -8,30 +12,41 @@ import {
   Chrome,
   Twitter,
 } from "lucide-react";
-import { useState } from "react";
-import { useLoginFormValidation } from "../../hooks/useLoginFormValidation";
 import { toast } from "react-toastify";
 
-const Login = () => {
+const Login = ({ handleLogin }) => {
   const {
     values: { email, password },
     errors,
     handleChange,
     validateForm,
-  } = useLoginFormValidation();
+  } = useFormValidation();
+
   const [showPassword, setShowPassword] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
 
-    validateForm();
+    const isValid = validateForm();
 
-    if (Object.keys(errors).length === 0) {
-      // Peyran conecta el backend
-      toast.success("Inicio de sesión exitoso");
-    } else {
-      Object.values(errors).forEach((err) => toast.error(err));
+    if (!isValid) {
+      Object.values(errors).forEach((error) => {
+        toast.error(error);
+      });
+
+      return;
     }
+
+    const user = users.find(
+      (u) => u.email === email && u.password === password
+    );
+
+    if (!user) {
+      toast.error("Credenciales inválidas");
+      return;
+    }
+
+    handleLogin(user);
   };
 
   const handleChangePasswordView = () => {
@@ -39,7 +54,7 @@ const Login = () => {
   };
 
   return (
-    <main className="flex items-center justify-center p-4">
+    <div className="flex items-center justify-center p-4">
       <section
         className="w-full max-w-md space-y-8 bg-[var(--color-bg-secondary)] shadow-xl shadow-black/40 rounded-xl p-8"
         aria-labelledby="login-title"
@@ -73,6 +88,7 @@ const Login = () => {
               <div className="relative">
                 <User className="z-[1] absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
                 <input
+                  id="email"
                   value={email}
                   onChange={handleChange}
                   type="email"
@@ -95,6 +111,7 @@ const Login = () => {
                   aria-hidden="true"
                 />
                 <input
+                  id="password"
                   value={password}
                   onChange={handleChange}
                   name="password"
@@ -172,7 +189,7 @@ const Login = () => {
           </ul>
         </form>
       </section>
-    </main>
+    </div>
   );
 };
 

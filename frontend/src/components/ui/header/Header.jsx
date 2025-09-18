@@ -1,11 +1,20 @@
-import { Leaf, LogIn, LogOut, Moon, Sun, UserCircle, Menu, X } from "lucide-react";
+import {
+  Leaf,
+  LogIn,
+  LogOut,
+  Moon,
+  Sun,
+  UserCircle,
+  Menu,
+  X,
+} from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useState } from "react";
 import "./header.css";
 
 const Header = ({ user, onLogin, onLogout }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  
+
   const navItems = [
     { name: "Dashboard", path: "/" },
     { name: "Ventas", path: "/ventas" },
@@ -34,21 +43,25 @@ const Header = ({ user, onLogin, onLogout }) => {
             </div>
 
             <nav className="header-nav">
-              {navItems.map((item) => (
-                <NavLink
-                  key={item.name}
-                  to={item.path}
-                  className={({ isActive }) =>
-                    `nav-item-base ${isActive ? "nav-item-active" : "nav-item-inactive"}`
-                  }
-                >
-                  {item.name}
-                </NavLink>
-              ))}
+              {navItems.map((item) =>
+                !user.isSuperAdmin && item.name === "Dashboard" ? null : (
+                  <NavLink
+                    key={item.name}
+                    to={item.path}
+                    className={({ isActive }) =>
+                      `nav-item-base ${
+                        isActive ? "nav-item-active" : "nav-item-inactive"
+                      }`
+                    }
+                  >
+                    {item.name}
+                  </NavLink>
+                )
+              )}
             </nav>
           </div>
 
-          <button 
+          <button
             className="mobile-menu-button md:hidden"
             onClick={toggleMobileMenu}
             aria-label="Toggle mobile menu"
@@ -60,10 +73,7 @@ const Header = ({ user, onLogin, onLogout }) => {
             {user ? (
               <div className="user-info-container">
                 <span className="user-name">{user.name}</span>
-                <UserCircle
-                  size={28}
-                  className="text-gray-400"
-                />
+                <UserCircle size={28} className="text-gray-400" />
                 <button onClick={onLogout} className="theme-toggle-button">
                   <LogOut size={20} />
                 </button>
@@ -87,14 +97,18 @@ const Header = ({ user, onLogin, onLogout }) => {
                   key={item.name}
                   to={item.path}
                   className={({ isActive }) =>
-                    `mobile-nav-item ${isActive ? "mobile-nav-item-active" : "mobile-nav-item-inactive"}`
+                    `mobile-nav-item ${
+                      isActive
+                        ? "mobile-nav-item-active"
+                        : "mobile-nav-item-inactive"
+                    }`
                   }
                   onClick={closeMobileMenu}
                 >
                   {item.name}
                 </NavLink>
               ))}
-              
+
               <div className="mobile-auth-section">
                 {user ? (
                   <div className="mobile-user-info">
@@ -102,11 +116,11 @@ const Header = ({ user, onLogin, onLogout }) => {
                       <UserCircle size={24} className="text-gray-400" />
                       <span className="text-gray-200">{user.name}</span>
                     </div>
-                    <button 
+                    <button
                       onClick={() => {
                         onLogout();
                         closeMobileMenu();
-                      }} 
+                      }}
                       className="mobile-logout-button"
                     >
                       <LogOut size={16} /> Cerrar Sesión
@@ -114,16 +128,16 @@ const Header = ({ user, onLogin, onLogout }) => {
                   </div>
                 ) : (
                   <div className="mobile-auth-buttons">
-                    <button 
+                    <button
                       onClick={() => {
                         onLogin();
                         closeMobileMenu();
-                      }} 
+                      }}
                       className="mobile-login-button"
                     >
                       <LogIn size={16} /> Iniciar Sesión
                     </button>
-                    <button 
+                    <button
                       onClick={closeMobileMenu}
                       className="mobile-register-button"
                     >
