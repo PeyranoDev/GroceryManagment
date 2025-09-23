@@ -4,7 +4,7 @@ import { mockSaleProducts } from "../../data/products";
 import Card from "../ui/card/Card";
 
 const Delivery = () => {
-  const [showOfferGenerator, setShowOfferGenerator] = useState(false);
+  const [showOfferGenerator, setShowOfferGenerator] = useState(true);
   const [selectedProducts, setSelectedProducts] = useState({});
   const [generatedOfferMessage, setGeneratedOfferMessage] = useState("");
 
@@ -108,14 +108,6 @@ const Delivery = () => {
               Difusión
             </div>
           </div>
-        }
-        actions={
-          <button
-            onClick={() => displayOfferGenerator()}
-            className="btn-secondary"
-          >
-            Generador de Ofertas
-          </button>
         }
       >
         {showOfferGenerator && (
