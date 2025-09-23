@@ -15,5 +15,8 @@ namespace Application.Schemas.Auth
         
         [Required, Compare("Password")]
         public string ConfirmPassword { get; set; } = string.Empty;
+
+        [Required]
+        public int GroceryId { get; set; }
     }
 }

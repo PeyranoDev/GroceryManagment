@@ -1,3 +1,5 @@
+using Domain.Common.Enums;
+
 namespace Application.Schemas.Auth
 {
     public class AuthResponseDto
@@ -13,5 +15,7 @@ namespace Application.Schemas.Auth
         public string Name { get; set; } = string.Empty;
         public string Email { get; set; } = string.Empty;
         public bool IsSuperAdmin { get; set; }
+        public GroceryRole? CurrentRole { get; set; }
+        public int? CurrentGroceryId { get; set; }
     }
 }

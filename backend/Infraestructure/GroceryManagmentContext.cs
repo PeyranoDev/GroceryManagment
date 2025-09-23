@@ -36,13 +36,25 @@ namespace Infraestructure
                 .HasMaxLength(100)
                 .IsRequired();
 
+            mb.Entity<User>()
+                .HasOne(u => u.Grocery)
+                .WithMany()
+                .HasForeignKey(u => u.GroceryId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            mb.Entity<User>()
+                .Property(u => u.Role)
+                .HasConversion<int>();
+
             mb.Entity<UserGrocery>(b =>
             {
                 b.HasKey(x => x.Id);
                 b.HasIndex(x => new { x.UserId, x.GroceryId }).IsUnique();
 
                 b.HasOne(x => x.User)
+#pragma warning disable CS0618 // Type or member is obsolete
                  .WithMany(u => u.UserGroceries)
+#pragma warning restore CS0618 // Type or member is obsolete
                  .HasForeignKey(x => x.UserId)
                  .OnDelete(DeleteBehavior.Cascade);
 

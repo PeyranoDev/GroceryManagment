@@ -2,9 +2,8 @@ using Application.Schemas.Users;
 using Application.Services.Interfaces;
 using AutoMapper;
 using Domain.Entities;
+using Domain.Exceptions;
 using Domain.Repositories;
-using System.Security.Cryptography;
-using System.Text;
 
 namespace Application.Services.Implementations
 {
@@ -12,11 +11,13 @@ namespace Application.Services.Implementations
     {
         private readonly IUserRepository _users;
         private readonly IMapper _mapper;
+        private readonly IPasswordHasher _passwordHasher;
 
-        public UserService(IUserRepository users, IMapper mapper)
+        public UserService(IUserRepository users, IMapper mapper, IPasswordHasher passwordHasher)
         {
             _users = users;
             _mapper = mapper;
+            _passwordHasher = passwordHasher;
         }
 
         public async Task<UserForResponseDto?> GetById(int id)
@@ -34,13 +35,14 @@ namespace Application.Services.Implementations
         public async Task<UserForResponseDto> Create(UserForCreateDto dto)
         {
             if (await _users.ExistsByEmail(dto.Email))
-                throw new InvalidOperationException("El email ya est· registrado.");
+                throw new DuplicateException($"El email {dto.Email} ya est√° registrado.");
 
             var entity = _mapper.Map<User>(dto);
-            entity.PasswordHash = Hash(dto.Password);
+            entity.PasswordHash = _passwordHasher.Hash(dto.Password);
             entity.IsSuperAdmin = dto.IsSuperAdmin;
 
             var id = await _users.Create(entity);
+            await _users.SaveChanges();
             var created = await _users.GetById(id)!;
             return _mapper.Map<UserForResponseDto>(created);
         }
@@ -48,18 +50,20 @@ namespace Application.Services.Implementations
         public async Task<UserForResponseDto?> Update(int id, UserForUpdateDto dto)
         {
             var entity = await _users.GetById(id);
-            if (entity is null) return null;
+            if (entity is null) 
+                throw new NotFoundException($"Usuario con ID {id} no encontrado.");
 
             if (!string.Equals(entity.Email, dto.Email, StringComparison.OrdinalIgnoreCase)
                 && await _users.ExistsByEmail(dto.Email))
-                throw new InvalidOperationException("El email ya est· registrado.");
+                throw new DuplicateException($"El email {dto.Email} ya est√° registrado.");
 
             _mapper.Map(dto, entity);
 
             if (!string.IsNullOrWhiteSpace(dto.NewPassword))
-                entity.PasswordHash = Hash(dto.NewPassword);
+                entity.PasswordHash = _passwordHasher.Hash(dto.NewPassword);
 
             await _users.Update(entity);
+            await _users.SaveChanges();
             return _mapper.Map<UserForResponseDto>(entity);
         }
 
@@ -75,18 +79,13 @@ namespace Application.Services.Implementations
         public async Task<UserForResponseDto?> SetSuperAdmin(int id, SetSuperAdminDto dto)
         {
             var entity = await _users.GetById(id);
-            if (entity is null) return null;
+            if (entity is null) 
+                throw new NotFoundException($"Usuario con ID {id} no encontrado.");
 
             await _users.SetSuperAdmin(id, dto.IsSuperAdmin);
             entity.IsSuperAdmin = dto.IsSuperAdmin;
 
             return _mapper.Map<UserForResponseDto>(entity);
-        }
-
-        private static string Hash(string input)
-        {
-            var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(input));
-            return Convert.ToHexString(bytes);
         }
     }
 }

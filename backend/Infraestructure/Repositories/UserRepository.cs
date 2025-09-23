@@ -10,8 +10,17 @@ namespace Infraestructure.Repositories
         public UserRepository(GroceryManagmentContext ctx, ITenantProvider tenant)
             : base(ctx, tenant) { }
 
+        public override Task<User?> GetById(int id)
+            => _ctx.Users
+                .AsNoTracking()
+                .Include(u => u.Grocery)
+                .FirstOrDefaultAsync(u => u.Id == id);
+
         public Task<User?> GetByEmail(string email)
-            => _ctx.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == email)!;
+            => _ctx.Users
+                .AsNoTracking()
+                .Include(u => u.Grocery)
+                .FirstOrDefaultAsync(u => u.Email == email)!;
 
         public Task<bool> ExistsByEmail(string email)
             => _ctx.Users.AsNoTracking().AnyAsync(u => u.Email == email);
