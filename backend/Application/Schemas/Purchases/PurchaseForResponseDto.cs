@@ -9,7 +9,6 @@ namespace Application.Schemas.Purchases
         public DateTime Date { get; set; }
         public decimal Total { get; set; }
         public string? Notes { get; set; }
-        public int GroceryId { get; set; }
         public List<PurchaseItemForResponseDto> Items { get; set; } = new List<PurchaseItemForResponseDto>();
     }
     

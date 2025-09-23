@@ -105,13 +105,6 @@ namespace Infraestructure
                  .WithMany(p => p.InventoryItems)
                  .HasForeignKey(i => i.ProductId)
                  .OnDelete(DeleteBehavior.Cascade);
-
-                b.OwnsOne(i => i.Promotion, promo =>
-                {
-                    promo.Property(pr => pr.DiscountPercent).HasColumnType("decimal(5,2)");
-                    promo.Property(pr => pr.DiscountAmount).HasColumnType("decimal(18,2)");
-                    promo.Property(pr => pr.PromotionPrice).HasColumnType("decimal(18,2)");
-                });
             });
 
             mb.Entity<Purchase>(b =>

@@ -11,7 +11,5 @@ namespace Domain.Entities
 
         public int GroceryId { get; set; }
         public Grocery Grocery { get; set; } = null!;
-
-        public Promotion Promotion { get; set; } = new Promotion();
     }
 }
