@@ -21,10 +21,6 @@ const Delivery = () => {
     setSelectedProducts(initialSelection);
   }, [availableProducts]);
 
-  const displayOfferGenerator = () => {
-    setGeneratedOfferMessage("");
-    setShowOfferGenerator(!showOfferGenerator);
-  };
   const generateOfferMessage = () => {
     setShowOfferGenerator(false);
     const currentDate = new Date();
