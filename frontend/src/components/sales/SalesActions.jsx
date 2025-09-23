@@ -9,7 +9,7 @@ const SalesActions = ({
   onShowWhatsApp,
   isLoading 
 }) => {
-  const canSave = cart.length > 0 && details?.customerName;
+  const canSave = cart.length > 0;
   const canGenerateMessage = cart.length > 0 && details?.isOnline;
 
   return (
