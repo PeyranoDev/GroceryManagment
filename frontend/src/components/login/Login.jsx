@@ -16,7 +16,7 @@ import { toast } from "react-toastify";
 
 const Login = ({ handleLogin }) => {
   const {
-    values: { email, password },
+    values: { email, password, remember },
     errors,
     handleChange,
     validateForm,
@@ -33,7 +33,6 @@ const Login = ({ handleLogin }) => {
       Object.values(errors).forEach((error) => {
         toast.error(error);
       });
-
       return;
     }
 
@@ -46,7 +45,7 @@ const Login = ({ handleLogin }) => {
       return;
     }
 
-    handleLogin(user);
+    handleLogin({ ...user, remember });
   };
 
   const handleChangePasswordView = () => {
@@ -138,6 +137,30 @@ const Login = ({ handleLogin }) => {
               </div>
             </div>
           </fieldset>
+
+          <div>
+            <label
+              htmlFor="remember"
+              className="text-gray-300 text-sm inline-flex items-center gap-2"
+            >
+              <input
+                id="remember"
+                name="remember"
+                type="checkbox"
+                checked={remember || false}
+                onChange={handleChange}
+                className="w-auto!"
+              />{" "}
+              Recuérdame
+            </label>
+
+            <a
+              href="#"
+              className="float-right text-sm text-gray-400 hover:underline"
+            >
+              ¿Olvidaste tu contraseña?
+            </a>
+          </div>
 
           <button
             type="submit"

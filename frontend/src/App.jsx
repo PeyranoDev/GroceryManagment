@@ -1,7 +1,5 @@
 import { Routes, Route, useNavigate } from "react-router-dom";
 import ProtectedRoute from "./routes/ProtectedRoute";
-import { useState } from "react";
-
 import { ToastContainer } from "react-toastify";
 
 import Purchases from "./components/purchases/Purchases";
@@ -13,23 +11,36 @@ import Delivery from "./components/delivery/Delivery";
 import Header from "./components/ui/header/Header";
 import Login from "./components/login/Login";
 
+import { useAuthStorage } from "./hooks/useAuthStorage";
+import { useEffect } from "react";
+
 function App() {
   const navigate = useNavigate();
-
-  const [user, setUser] = useState(null);
+  const { user, saveUser, clearUser, loading } = useAuthStorage();
 
   const handleLogin = (user) => {
-    setUser(user);
+    saveUser(user, user.remember);
     navigate("/ventas");
   };
-  const handleLogout = () => setUser(null);
+
+  const handleLogout = () => clearUser();
+
+  useEffect(() => {
+    if (!loading && user) {
+      navigate("/ventas");
+    }
+  }, [loading, user, navigate]);
+
+  if (loading) {
+    return (
+      <div className="text-center p-8 text-gray-300">Cargando sesión...</div>
+    );
+  }
 
   return (
     <>
       <div className="app">
-        {user && (
-          <Header user={user} onLogin={handleLogin} onLogout={handleLogout} />
-        )}
+        {user && <Header user={user} onLogout={handleLogout} />}
 
         <main>
           <Routes>

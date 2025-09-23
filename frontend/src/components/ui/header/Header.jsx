@@ -1,18 +1,9 @@
-import {
-  Leaf,
-  LogIn,
-  LogOut,
-  Moon,
-  Sun,
-  UserCircle,
-  Menu,
-  X,
-} from "lucide-react";
+import { Leaf, LogOut, UserCircle, Menu, X } from "lucide-react";
 import { NavLink } from "react-router-dom";
 import { useState } from "react";
 import "./header.css";
 
-const Header = ({ user, onLogin, onLogout }) => {
+const Header = ({ user, onLogout }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
@@ -70,22 +61,13 @@ const Header = ({ user, onLogin, onLogout }) => {
           </button>
 
           <div className="header-right-section">
-            {user ? (
-              <div className="user-info-container">
-                <span className="user-name">{user.name}</span>
-                <UserCircle size={28} className="text-gray-400" />
-                <button onClick={onLogout} className="theme-toggle-button">
-                  <LogOut size={20} />
-                </button>
-              </div>
-            ) : (
-              <div className="auth-button-group">
-                <button onClick={onLogin} className="login-button">
-                  <LogIn size={16} /> Iniciar Sesión
-                </button>
-                <button className="register-button">Registrarse</button>
-              </div>
-            )}
+            <div className="user-info-container">
+              <span className="user-name">{user.name}</span>
+              <UserCircle size={28} className="text-gray-400" />
+              <button onClick={onLogout} className="theme-toggle-button">
+                <LogOut size={20} />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -110,41 +92,21 @@ const Header = ({ user, onLogin, onLogout }) => {
               ))}
 
               <div className="mobile-auth-section">
-                {user ? (
-                  <div className="mobile-user-info">
-                    <div className="flex items-center gap-2 mb-4">
-                      <UserCircle size={24} className="text-gray-400" />
-                      <span className="text-gray-200">{user.name}</span>
-                    </div>
-                    <button
-                      onClick={() => {
-                        onLogout();
-                        closeMobileMenu();
-                      }}
-                      className="mobile-logout-button"
-                    >
-                      <LogOut size={16} /> Cerrar Sesión
-                    </button>
+                <div className="mobile-user-info">
+                  <div className="flex items-center gap-2 mb-4">
+                    <UserCircle size={24} className="text-gray-400" />
+                    <span className="text-gray-200">{user.name}</span>
                   </div>
-                ) : (
-                  <div className="mobile-auth-buttons">
-                    <button
-                      onClick={() => {
-                        onLogin();
-                        closeMobileMenu();
-                      }}
-                      className="mobile-login-button"
-                    >
-                      <LogIn size={16} /> Iniciar Sesión
-                    </button>
-                    <button
-                      onClick={closeMobileMenu}
-                      className="mobile-register-button"
-                    >
-                      Registrarse
-                    </button>
-                  </div>
-                )}
+                  <button
+                    onClick={() => {
+                      onLogout();
+                      closeMobileMenu();
+                    }}
+                    className="mobile-logout-button"
+                  >
+                    <LogOut size={16} /> Cerrar Sesión
+                  </button>
+                </div>
               </div>
             </nav>
           </div>
