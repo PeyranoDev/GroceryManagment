@@ -1,5 +1,17 @@
 import { useState } from 'react';
+import {
+  mockProductsAPI,
+  mockInventoryAPI,
+  mockSalesAPI,
+  mockDashboardAPI,
+  mockRecentActivitiesAPI,
+  mockPurchasesAPI,
+  mockReportsAPI,
+  mockCategoriesAPI
+} from './mockApi.js';
 
+// Always use mock data for demo
+const DEMO_MODE = true;
 
 const runtimeEnv = (typeof window !== 'undefined' && window.__APP_ENV__) || {};
 const runtimeApi = runtimeEnv.API_URL; 
@@ -44,7 +56,7 @@ const apiRequest = async (endpoint, options = {}) => {
   }
 };
 
-export const productsAPI = {
+export const productsAPI = DEMO_MODE ? mockProductsAPI : {
   getAll: () => apiRequest('/Products'),
   getById: (id) => apiRequest(`/Products/${id}`),
   create: (product) => apiRequest('/Products', {
@@ -60,7 +72,7 @@ export const productsAPI = {
   }),
 };
 
-export const inventoryAPI = {
+export const inventoryAPI = DEMO_MODE ? mockInventoryAPI : {
   getAll: () => apiRequest('/Inventory'),
   getFiltered: (params = {}) => {
     const queryString = new URLSearchParams(params).toString();
@@ -87,7 +99,7 @@ export const inventoryAPI = {
   }),
 };
 
-export const salesAPI = {
+export const salesAPI = DEMO_MODE ? mockSalesAPI : {
   getAll: () => apiRequest('/Sales'),
   getById: (id) => apiRequest(`/Sales/${id}`),
   getByDateRange: (startDate, endDate) => {
@@ -112,12 +124,12 @@ export const salesAPI = {
   }),
 };
 
-export const dashboardAPI = {
+export const dashboardAPI = DEMO_MODE ? mockDashboardAPI : {
   getStats: () => apiRequest('/Dashboard/stats'),
   getWeeklySales: () => apiRequest('/Dashboard/weekly-sales'),
 };
 
-export const recentActivitiesAPI = {
+export const recentActivitiesAPI = DEMO_MODE ? mockRecentActivitiesAPI : {
   getAll: () => apiRequest('/RecentActivities'),
   getRecent: (count = 10) => apiRequest(`/RecentActivities/recent?count=${count}`),
   getById: (id) => apiRequest(`/RecentActivities/${id}`),
@@ -130,7 +142,7 @@ export const recentActivitiesAPI = {
   }),
 };
 
-export const purchasesAPI = {
+export const purchasesAPI = DEMO_MODE ? mockPurchasesAPI : {
   getAll: () => apiRequest('/Purchases'),
   getById: (id) => apiRequest(`/Purchases/${id}`),
   getBySupplier: (supplier) => apiRequest(`/Purchases/supplier/${supplier}`),
@@ -151,7 +163,7 @@ export const purchasesAPI = {
   }),
 };
 
-export const reportsAPI = {
+export const reportsAPI = DEMO_MODE ? mockReportsAPI : {
   getFilteredReports: (filters) => apiRequest('/Reports', {
     method: 'POST',
     body: JSON.stringify(filters),
@@ -167,7 +179,7 @@ export const reportsAPI = {
   },
 };
 
-export const categoriesAPI = {
+export const categoriesAPI = DEMO_MODE ? mockCategoriesAPI : {
   getAll: () => apiRequest('/Categories'),
   getById: (id) => apiRequest(`/Categories/${id}`),
   create: (category) => apiRequest('/Categories', {

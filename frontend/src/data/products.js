@@ -86,7 +86,7 @@ export const mockInventory = mockSaleProducts.map(product => ({
   name: product.name,
   stock: product.stock,
   unit: product.unit,
-  lastUpdated: '2025-07-13T14:30:00Z', // Set default lastUpdated
+  lastUpdated: '2025-09-23T14:30:00Z', // Updated to today's date
   salePrice: product.salePrice,
   promotion: product.promotion
 }));
@@ -105,24 +105,24 @@ export const mockRecentActivity = [
 ];
 
 export const mockReportData = [
-  { id: "V-1024", date: "2025-07-13", total: 150.5, user: "Admin" },
-  { id: "V-1025", date: "2025-07-13", total: 88.0, user: "Admin" },
-  { id: "C-0056", date: "2025-07-12", total: 1200.0, supplier: "Proveedor A" },
-  { id: "V-1026", date: "2025-07-14", total: 230.75, user: "Empleado1" },
-  { id: "V-1027", date: "2025-07-14", total: 99.99, user: "Empleado2" },
-  { id: "C-0057", date: "2025-07-13", total: 800.0, supplier: "Proveedor B" },
-  { id: "V-1028", date: "2025-07-15", total: 342.0, user: "Admin" },
-  { id: "C-0058", date: "2025-07-15", total: 1500.5, supplier: "Proveedor A" },
-  { id: "V-1029", date: "2025-07-16", total: 410.0, user: "Empleado1" },
-  { id: "V-1030", date: "2025-07-17", total: 275.25, user: "Empleado2" },
-  { id: "C-0059", date: "2025-07-16", total: 920.0, supplier: "Proveedor C" },
-  { id: "V-1031", date: "2025-07-18", total: 198.5, user: "Admin" },
-  { id: "V-1032", date: "2025-07-18", total: 120.0, user: "Empleado1" },
-  { id: "C-0060", date: "2025-07-17", total: 1100.0, supplier: "Proveedor B" },
-  { id: "V-1033", date: "2025-07-19", total: 305.0, user: "Empleado2" },
-  { id: "V-1034", date: "2025-07-19", total: 89.99, user: "Admin" },
-  { id: "C-0061", date: "2025-07-19", total: 990.0, supplier: "Proveedor C" },
-  { id: "V-1035", date: "2025-07-20", total: 460.0, user: "Empleado1" },
-  { id: "C-0062", date: "2025-07-20", total: 760.0, supplier: "Proveedor A" },
-  { id: "V-1036", date: "2025-07-20", total: 189.75, user: "Empleado2" },
+  { id: "V-1024", date: "2025-09-23", total: 150.5, user: "Admin" },
+  { id: "V-1025", date: "2025-09-23", total: 88.0, user: "Admin" },
+  { id: "C-0056", date: "2025-09-22", total: 1200.0, supplier: "Proveedor A" },
+  { id: "V-1026", date: "2025-09-22", total: 230.75, user: "Empleado1" },
+  { id: "V-1027", date: "2025-09-22", total: 99.99, user: "Empleado2" },
+  { id: "C-0057", date: "2025-09-21", total: 800.0, supplier: "Proveedor B" },
+  { id: "V-1028", date: "2025-09-21", total: 342.0, user: "Admin" },
+  { id: "C-0058", date: "2025-09-21", total: 1500.5, supplier: "Proveedor A" },
+  { id: "V-1029", date: "2025-09-20", total: 410.0, user: "Empleado1" },
+  { id: "V-1030", date: "2025-09-20", total: 275.25, user: "Empleado2" },
+  { id: "C-0059", date: "2025-09-19", total: 920.0, supplier: "Proveedor C" },
+  { id: "V-1031", date: "2025-09-19", total: 198.5, user: "Admin" },
+  { id: "V-1032", date: "2025-09-19", total: 120.0, user: "Empleado1" },
+  { id: "C-0060", date: "2025-09-18", total: 1100.0, supplier: "Proveedor B" },
+  { id: "V-1033", date: "2025-09-18", total: 305.0, user: "Empleado2" },
+  { id: "V-1034", date: "2025-09-18", total: 89.99, user: "Admin" },
+  { id: "C-0061", date: "2025-09-17", total: 990.0, supplier: "Proveedor C" },
+  { id: "V-1035", date: "2025-09-17", total: 460.0, user: "Empleado1" },
+  { id: "C-0062", date: "2025-09-16", total: 760.0, supplier: "Proveedor A" },
+  { id: "V-1036", date: "2025-09-16", total: 189.75, user: "Empleado2" },
 ];
