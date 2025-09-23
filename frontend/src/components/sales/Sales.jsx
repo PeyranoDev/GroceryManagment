@@ -16,8 +16,12 @@ const Sales = () => {
     return `${hours}:${minutes}`;
   };
 
-  const { products, loading: productsLoading, searchProducts } = useProducts();
-  const { createSaleFromCart, generateWhatsAppMessage, loading: salesLoading } = useSales();
+  const { loading: productsLoading, searchProducts } = useProducts();
+  const {
+    createSaleFromCart,
+    generateWhatsAppMessage,
+    loading: salesLoading,
+  } = useSales();
   const {
     cart,
     addProductToCart,
@@ -25,7 +29,7 @@ const Sales = () => {
     updateQuantity,
     togglePromotion,
     clearCart,
-    calculateTotals
+    calculateTotals,
   } = useCart();
 
   const [details, setDetails] = useState({
@@ -101,18 +105,18 @@ const Sales = () => {
       const cartData = {
         userId: 1, // ID temporal, deberías usar el usuario actual
         cart: cart,
-        details: details
+        details: details,
       };
 
       const newSale = await createSaleFromCart(cartData);
       setLastSaleId(newSale.id);
-      
+
       alert(
-        `Venta ${
-          details.isOnline ? "online" : "presencial"
-        } #${newSale.id} finalizada exitosamente.`
+        `Venta ${details.isOnline ? "online" : "presencial"} #${
+          newSale.id
+        } finalizada exitosamente.`
       );
-      
+
       resetSale();
     } catch (error) {
       alert(`Error al finalizar la venta: ${error.message}`);
@@ -123,7 +127,9 @@ const Sales = () => {
     if (lastSaleId) {
       setShowWhatsAppModal(true);
     } else {
-      alert("Primero debes finalizar una venta para generar el mensaje de WhatsApp");
+      alert(
+        "Primero debes finalizar una venta para generar el mensaje de WhatsApp"
+      );
     }
   };
 
