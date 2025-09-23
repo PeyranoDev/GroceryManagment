@@ -1,6 +1,8 @@
 import { useState } from "react";
 
-export function useFormValidation(initialValues = { email: "", password: "" }) {
+export function useFormValidation(
+  initialValues = { email: "", password: "", remember: false }
+) {
   const [values, setValues] = useState(initialValues);
   const [errors, setErrors] = useState({});
 
@@ -15,13 +17,17 @@ export function useFormValidation(initialValues = { email: "", password: "" }) {
       if (value.length < 6) return "Debe tener al menos 6 caracteres";
       return null;
     },
+    // Para checkbox normalmente no hay error, pero podrías agregar reglas acá
+    remember: () => null,
   };
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setValues((prev) => ({ ...prev, [name]: value }));
+    const { name, type, value, checked } = e.target;
+    const fieldValue = type === "checkbox" ? checked : value;
 
-    const error = validateRules[name]?.(value) || "";
+    setValues((prev) => ({ ...prev, [name]: fieldValue }));
+
+    const error = validateRules[name]?.(fieldValue) || "";
     setErrors((prev) => ({ ...prev, [name]: error }));
   };
 
