@@ -35,11 +35,15 @@ function AppContent() {
   };
 
   useEffect(() => {
-    if (!loading && user && location.pathname === "/") {
-      if (user.isSuperAdmin) {
-        navigate("/dashboard");
-      } else {
-        navigate("/ventas");
+    if (!loading) {
+      if (user && location.pathname === "/") {
+        if (user.isSuperAdmin) {
+          navigate("/dashboard");
+        } else {
+          navigate("/ventas");
+        }
+      } else if (!user && location.pathname !== "/login") {
+        navigate("/login");
       }
     }
   }, [loading, user, navigate, location.pathname]);
