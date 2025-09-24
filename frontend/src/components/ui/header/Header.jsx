@@ -7,7 +7,7 @@ const Header = ({ user, onLogout }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
-    { name: "Dashboard", path: "/" },
+    { name: "Dashboard", path: "/dashboard" },
     { name: "Ventas", path: "/ventas" },
     { name: "Pedidos", path: "/pedidos" },
     { name: "Compras", path: "/compras" },

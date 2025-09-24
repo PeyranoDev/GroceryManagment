@@ -103,7 +103,7 @@ const Sales = () => {
 
     try {
       const cartData = {
-        userId: 1, // ID temporal, deberías usar el usuario actual
+        userId: 1,
         cart: cart,
         details: details,
       };
