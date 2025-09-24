@@ -32,7 +32,7 @@ export const usePurchases = () => {
       await recentActivitiesAPI.create({
         type: 'Compra',
         description: `Compra de "${purchaseData.supplier}" registrada`,
-        userId: 1 // ID temporal, deberías usar el usuario actual
+        userId: 1
       });
       
       setPurchases(prev => [newPurchase, ...prev]);

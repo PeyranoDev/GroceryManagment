@@ -18,7 +18,9 @@ const Login = ({ handleLogin }) => {
   const {
     values: { email, password, remember },
     errors,
+    touched,
     handleChange,
+    handleBlur,
     validateForm,
   } = useFormValidation();
 
@@ -45,7 +47,7 @@ const Login = ({ handleLogin }) => {
       return;
     }
 
-    handleLogin({ ...user, remember });
+    handleLogin({ email, password, remember });
   };
 
   const handleChangePasswordView = () => {
@@ -90,14 +92,22 @@ const Login = ({ handleLogin }) => {
                   id="email"
                   value={email}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   type="email"
                   name="email"
                   autoComplete="username"
                   required
-                  className="w-full bg-[var(--color-bg)] border border-[var(--color-bg-input)] text-gray-50 placeholder:text-gray-500 focus:border-green-500 focus:ring-1 focus:ring-green-500 pl-10 pr-3 py-2 rounded-md outline-none transition-colors"
+                  className={`w-full bg-[var(--color-bg)] border ${
+                    errors.email && touched.email 
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+                      : 'border-[var(--color-bg-input)] focus:border-green-500 focus:ring-green-500'
+                  } text-gray-50 placeholder:text-gray-500 focus:ring-1 pl-10 pr-3 py-2 rounded-md outline-none transition-colors`}
                   placeholder="tu@ejemplo.com"
                 />
               </div>
+              {errors.email && touched.email && (
+                <p className="text-red-400 text-sm mt-1">{errors.email}</p>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -113,11 +123,16 @@ const Login = ({ handleLogin }) => {
                   id="password"
                   value={password}
                   onChange={handleChange}
+                  onBlur={handleBlur}
                   name="password"
                   type={showPassword ? "text" : "password"}
                   autoComplete="current-password"
                   required
-                  className="w-full bg-[var(--color-bg)] border border-[var(--color-bg-input)] text-gray-50 placeholder:text-gray-500 focus:border-green-500 focus:ring-1 focus:ring-green-500 pl-10 pr-10 py-2 rounded-md outline-none transition-colors"
+                  className={`w-full bg-[var(--color-bg)] border ${
+                    errors.password && touched.password 
+                      ? 'border-red-500 focus:border-red-500 focus:ring-red-500' 
+                      : 'border-[var(--color-bg-input)] focus:border-green-500 focus:ring-green-500'
+                  } text-gray-50 placeholder:text-gray-500 focus:ring-1 pl-10 pr-10 py-2 rounded-md outline-none transition-colors`}
                   placeholder="••••••••"
                 />
                 <button
@@ -135,6 +150,9 @@ const Login = ({ handleLogin }) => {
                   )}
                 </button>
               </div>
+              {errors.password && touched.password && (
+                <p className="text-red-400 text-sm mt-1">{errors.password}</p>
+              )}
             </div>
           </fieldset>
 

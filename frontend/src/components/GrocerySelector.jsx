@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useMemo } from 'react';
 import { 
   Select, 
   MenuItem, 
@@ -15,40 +15,30 @@ const GrocerySelector = () => {
     user, 
     currentGroceryId, 
     setCurrentGroceryId, 
-    getUserGroceries, 
-    getGroceryRole,
-    isSuperAdmin 
+    getGroceryRole
   } = useAuth();
-  
-  const [availableGroceries, setAvailableGroceries] = useState([]);
+
+  const groceries = [
+    { id: 1, name: 'Verdulería Central', address: 'Av. Principal 123' },
+    { id: 2, name: 'Frutas del Valle', address: 'Calle Comercio 456' },
+    { id: 3, name: 'Mercado Fresh', address: 'Plaza Mayor 789' }
+  ];
+
+  const availableGroceries = useMemo(() => {
+    if (user?.isSuperAdmin) {
+      return groceries;
+    }
+    return groceries.filter(grocery => 
+      user?.roles?.some(role => role.groceryId === grocery.id)
+    );
+  }, [user, groceries]);
 
   useEffect(() => {
-    // Mock de groceries disponibles - en producción esto vendría de tu API
-    const mockGroceries = [
-      { id: 1, name: 'Verdulería Central', address: 'Av. Principal 123' },
-      { id: 2, name: 'Frutas del Valle', address: 'Calle Comercio 456' },
-      { id: 3, name: 'Mercado Fresh', address: 'Plaza Mayor 789' }
-    ];
-
-    if (isSuperAdmin()) {
-      // SuperAdmin ve todos los groceries
-      setAvailableGroceries(mockGroceries);
-    } else {
-      // Usuario normal solo ve los groceries donde tiene roles
-      const userGroceries = getUserGroceries();
-      if (Array.isArray(userGroceries)) {
-        const filtered = mockGroceries.filter(grocery => 
-          userGroceries.some(ug => ug.groceryId === grocery.id)
-        );
-        setAvailableGroceries(filtered);
-      }
-    }
-
     // Seleccionar el primer grocery por defecto si no hay ninguno seleccionado
     if (!currentGroceryId && availableGroceries.length > 0) {
       setCurrentGroceryId(availableGroceries[0].id);
     }
-  }, [user, isSuperAdmin, getUserGroceries, currentGroceryId, setCurrentGroceryId]);
+  }, [currentGroceryId, setCurrentGroceryId, availableGroceries]);
 
   const handleGroceryChange = (event) => {
     setCurrentGroceryId(event.target.value);
