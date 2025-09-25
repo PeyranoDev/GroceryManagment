@@ -12,8 +12,7 @@ namespace Application.Mapping
             CreateMap<RegisterDto, User>()
                 .ForMember(dest => dest.PasswordHash, opt => opt.Ignore()) // Se maneja por separado
                 .ForMember(dest => dest.IsSuperAdmin, opt => opt.MapFrom(src => false))
-                .ForMember(dest => dest.Id, opt => opt.Ignore())
-                .ForMember(dest => dest.UserGroceries, opt => opt.Ignore());
+                .ForMember(dest => dest.Id, opt => opt.Ignore());
             
             CreateMap<User, UserInfoDto>();
             

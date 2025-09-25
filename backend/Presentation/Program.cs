@@ -67,7 +67,6 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddControllers();
 
-// Configuración de autenticación JWT
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer("Bearer", options =>
     {
@@ -138,10 +137,6 @@ builder.Services.AddAutoMapper(cfg =>
 
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ITenantProvider, HeaderTenantProvider>();
-
-Console.WriteLine($"Environment: {builder.Environment.EnvironmentName}");
-Console.WriteLine($"Connection string found: {!string.IsNullOrWhiteSpace(conn)}");
-Console.WriteLine($"Connection string (masked): {(string.IsNullOrWhiteSpace(conn) ? "NULL" : conn.Substring(0, Math.Min(20, conn.Length)) + "...")}");
 
 if (string.IsNullOrWhiteSpace(conn))
 {
