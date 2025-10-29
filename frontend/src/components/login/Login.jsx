@@ -1,48 +1,37 @@
-import { useState } from "react";
-import { useFormValidation } from "../../hooks/useFormValidation";
+import { useEffect, useState } from "react";
+import { useLocation } from "react-router-dom";
 import { users } from "../../data/users";
 
-import {
-  Leaf,
-  User,
-  Key,
-  Eye,
-  EyeOff,
-  Github,
-  Chrome,
-  Twitter,
-} from "lucide-react";
-import { toast } from "react-toastify";
+import { Leaf, User, Key, Eye, EyeOff, AlertTriangle, Loader2 } from "lucide-react";
+import Input from "../ui/input/Input";
 
 const Login = ({ handleLogin }) => {
-  const {
-    values: { email, password },
-    errors,
-    handleChange,
-    validateForm,
-  } = useFormValidation();
+  const location = useLocation();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
+  const [authError, setAuthError] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+
+  useEffect(() => {
+    const u = location.state && location.state.user;
+    if (u && handleLogin) {
+      handleLogin(u);
+    }
+  }, [location.state, handleLogin]);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    const isValid = validateForm();
-
-    if (!isValid) {
-      Object.values(errors).forEach((error) => {
-        toast.error(error);
-      });
-
-      return;
-    }
-
+    setAuthError(false);
+    setSubmitting(true);
     const user = users.find(
       (u) => u.email === email && u.password === password
     );
 
     if (!user) {
-      toast.error("Credenciales inválidas");
+      setAuthError(true);
+      setSubmitting(false);
       return;
     }
 
@@ -61,65 +50,54 @@ const Login = ({ handleLogin }) => {
       >
         <header className="flex justify-center">
           <div className="w-16 h-16 bg-[var(--color-bg)] rounded-full flex items-center justify-center shadow-md shadow-black/50">
-            <Leaf className="w-8 h-8 text-green-500" aria-hidden="true" />
+            <Leaf className="w-8 h-8 text-[var(--color-primary)]" aria-hidden="true" />
           </div>
         </header>
 
         <div className="text-center space-y-2">
-          <h1 id="login-title" className="text-2xl font-semibold text-gray-50">
+          <h1 id="login-title" className="text-2xl font-semibold text-[var(--color-text)]">
             Bienvenido a <strong>VerduSoft</strong>
           </h1>
-          <p className="text-gray-400">
-            ¿No tienes una cuenta aún?{" "}
-            <a href="#" className="text-green-500 hover:underline">
-              Regístrate
-            </a>
-          </p>
         </div>
 
-        <form className="space-y-6" onSubmit={handleSubmit} noValidate>
+        <form className="space-y-6" onSubmit={handleSubmit} autoComplete="on" noValidate>
           <fieldset className="space-y-4">
             <legend className="sr-only">Formulario de inicio de sesión</legend>
+            <input type="text" name="username" autoComplete="username" value={email || ''} readOnly className="hidden" aria-hidden="true" />
 
             <div className="space-y-2">
-              <label htmlFor="email" className="text-gray-300 text-sm block">
+              <label htmlFor="email" className="text-[var(--color-secondary-text)] text-sm block">
                 Dirección de correo
               </label>
               <div className="relative">
-                <User className="z-[1] absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
-                <input
+                <Input
                   id="email"
-                  value={email}
-                  onChange={handleChange}
                   type="email"
-                  name="email"
-                  autoComplete="username"
+                  value={email}
+                  onChange={(e) => { setAuthError(false); setEmail(e.target.value); }}
                   required
-                  className="w-full bg-[var(--color-bg)] border border-[var(--color-bg-input)] text-gray-50 placeholder:text-gray-500 focus:border-green-500 focus:ring-1 focus:ring-green-500 pl-10 pr-3 py-2 rounded-md outline-none transition-colors"
-                  placeholder="tu@ejemplo.com"
+                  ariaLabel="Dirección de correo"
+                  icon={<User className="w-5 h-5 text-[var(--color-secondary-text)]" />}
+                  error={authError}
                 />
               </div>
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="password" className="text-gray-300 text-sm block">
+              <label htmlFor="password" className="text-[var(--color-secondary-text)] text-sm block">
                 Contraseña
               </label>
               <div className="relative">
-                <Key
-                  className="z-[1] absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400"
-                  aria-hidden="true"
-                />
-                <input
+                <Input
                   id="password"
                   value={password}
-                  onChange={handleChange}
-                  name="password"
+                  onChange={(e) => { setAuthError(false); setPassword(e.target.value); }}
                   type={showPassword ? "text" : "password"}
-                  autoComplete="current-password"
                   required
-                  className="w-full bg-[var(--color-bg)] border border-[var(--color-bg-input)] text-gray-50 placeholder:text-gray-500 focus:border-green-500 focus:ring-1 focus:ring-green-500 pl-10 pr-10 py-2 rounded-md outline-none transition-colors"
-                  placeholder="••••••••"
+                  ariaLabel="Contraseña"
+                  icon={<Key className="w-5 h-5 text-[var(--color-secondary-text)]" aria-hidden="true" />}
+                  inputClassName="pr-10"
+                  error={authError}
                 />
                 <button
                   type="button"
@@ -127,7 +105,7 @@ const Login = ({ handleLogin }) => {
                     showPassword ? "Ocultar contraseña" : "Mostrar contraseña"
                   }
                   onClick={handleChangePasswordView}
-                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-300 transition-colors cursor-pointer"
+                  className="absolute right-3 top-1/2 transform -translate-y-1/2 text-[var(--color-secondary-text)] hover:text-[var(--color-secondary-text)]/70 transition-colors cursor-pointer"
                 >
                   {showPassword ? (
                     <EyeOff className="w-5 h-5" aria-hidden="true" />
@@ -139,54 +117,20 @@ const Login = ({ handleLogin }) => {
             </div>
           </fieldset>
 
+          {authError && (
+            <div className="flex items-center gap-2 bg-[var(--color-error)] text-[var(--color-text)] text-sm px-4 py-2 rounded-md">
+              <AlertTriangle size={16} />
+              <span>Credenciales incorrectas. Verifique su correo y contraseña.</span>
+            </div>
+          )}
+
           <button
             type="submit"
-            className="w-full bg-green-500 hover:bg-green-600 text-white font-medium py-3 rounded-md transition-colors cursor-pointer shadow-md shadow-green-900/40"
+            disabled={submitting || !String(email || '').trim() || !String(password || '').trim()}
+            className={`w-full font-medium py-3 rounded-md transition-colors shadow-md ${submitting ? 'bg-[var(--color-primary)]/70 text-[var(--color-text)] cursor-wait' : (!String(email || '').trim() || !String(password || '').trim()) ? 'bg-[var(--color-primary)]/50 text-[var(--color-secondary-text)] cursor-not-allowed' : 'bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-white cursor-pointer'}`}
           >
-            Iniciar Sesión
+            {submitting ? <Loader2 className="w-5 h-5 animate-spin mx-auto" /> : 'Iniciar Sesión'}
           </button>
-
-          <div className="relative" role="separator" aria-label="o">
-            <div className="absolute inset-0 flex items-center">
-              <span className="w-full border-t border-[var(--color-bg-input)]" />
-            </div>
-            <div className="relative flex justify-center text-xs uppercase">
-              <span className="text-gray-400">o</span>
-            </div>
-          </div>
-
-          <ul
-            className="grid grid-cols-3 gap-3"
-            aria-label="Iniciar sesión con redes sociales"
-          >
-            <li>
-              <button
-                type="button"
-                className="w-full bg-[var(--color-bg)] border border-[var(--color-bg-input)] hover:bg-[var(--color-border)] text-white p-3 rounded-md transition-colors cursor-pointer shadow-sm"
-              >
-                <Github className="w-5 h-5 mx-auto" aria-hidden="true" />
-                <span className="sr-only">Iniciar con GitHub</span>
-              </button>
-            </li>
-            <li>
-              <button
-                type="button"
-                className="w-full bg-[var(--color-bg)] border border-[var(--color-bg-input)] hover:bg-[var(--color-border)] text-white p-3 rounded-md transition-colors cursor-pointer shadow-sm"
-              >
-                <Chrome className="w-5 h-5 mx-auto" aria-hidden="true" />
-                <span className="sr-only">Iniciar con Google</span>
-              </button>
-            </li>
-            <li>
-              <button
-                type="button"
-                className="w-full bg-[var(--color-bg)] border border-[var(--color-bg-input)] hover:bg-[var(--color-border)] text-white p-3 rounded-md transition-colors cursor-pointer shadow-sm"
-              >
-                <Twitter className="w-5 h-5 mx-auto" aria-hidden="true" />
-                <span className="sr-only">Iniciar con Twitter</span>
-              </button>
-            </li>
-          </ul>
         </form>
       </section>
     </div>

@@ -76,6 +76,45 @@ export const useInventory = () => {
     }
   };
 
+  const createItem = async (item) => {
+    try {
+      const response = await inventoryAPI.create(item);
+      const newItem = response.data || response;
+      setInventory(prev => {
+        const exists = prev.some(i => i.id === newItem.id);
+        return exists
+          ? prev.map(i => (i.id === newItem.id ? newItem : i))
+          : [...prev, newItem];
+      });
+      return newItem;
+    } catch (err) {
+      console.error('Error creating inventory item:', err);
+      throw err;
+    }
+  };
+
+  const updateItem = async (id, item) => {
+    try {
+      const response = await inventoryAPI.update(id, item);
+      const updated = response.data || response;
+      setInventory(prev => prev.map(i => i.id === id ? { ...i, ...item, lastUpdated: new Date().toISOString() } : i));
+      return updated;
+    } catch (err) {
+      console.error('Error updating inventory item:', err);
+      throw err;
+    }
+  };
+
+  const deleteItem = async (id) => {
+    try {
+      await inventoryAPI.delete(id);
+      setInventory(prev => prev.filter(i => i.id !== id));
+    } catch (err) {
+      console.error('Error deleting inventory item:', err);
+      throw err;
+    }
+  };
+
   useEffect(() => {
     fetchInventory();
   }, []);
@@ -86,9 +125,12 @@ export const useInventory = () => {
     error,
     fetchInventory,
     updateStock,
+    updateItem,
+    deleteItem,
     getStockStatus,
     getLowStockItems,
     getOutOfStockItems,
-    refresh: () => fetchInventory()
+    refresh: () => fetchInventory(),
+    createItem
   };
 };

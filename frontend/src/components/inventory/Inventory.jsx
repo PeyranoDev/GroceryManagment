@@ -1,67 +1,132 @@
-import { useMemo, useState } from "react";
-import { Edit, Package, Search } from "lucide-react";
+import { useEffect, useState, useCallback } from "react";
+import { Package, Search, Plus } from "lucide-react";
 import { useInventory } from "../../hooks/useInventory";
-import AdjustStockModal from "./AdjustStockModal";
+import EditProductModal from "./EditProductModal";
+import AddProductModal from "./AddProductModal";
 import Card from "../ui/card/Card";
 import Input from "../ui/input/Input";
 import Select from "../ui/select/Select";
-import StockStatus from "./StockStatus";
+import InventoryList from "./InventoryList";
+import ConfirmModal from "../ui/modal/ConfirmModal";
+import Toast from "../ui/toast/Toast";
 
 const Inventory = () => {
-  const { inventory, loading, error, updateStock, fetchInventory } = useInventory();
+  const { inventory, loading, error, createItem, updateItem, deleteItem } = useInventory();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [sortBy, setSortBy] = useState("name");
+  const [sortDir, setSortDir] = useState("asc");
 
-  const filteredInventory = useMemo(() => {
-    return inventory
+  const [filteredInventory, setFilteredInventory] = useState([]);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [toastOpen, setToastOpen] = useState(false);
+  const [toastMsg, setToastMsg] = useState("");
+  const [toastType, setToastType] = useState("success");
+
+  useEffect(() => {
+    const next = (inventory || [])
       .filter((item) =>
-        (item.product?.name || item.name || '').toLowerCase().includes(searchTerm.trim().toLowerCase())
+        (item.product?.name || item.name || "")
+          .toLowerCase()
+          .includes(searchTerm.trim().toLowerCase())
       )
       .filter((item) => {
         const stock = item.stock || 0;
         if (statusFilter === "low") return stock > 0 && stock <= 10;
         if (statusFilter === "out") return stock === 0;
         return true;
+      })
+      .sort((a, b) => {
+        if (sortBy === "name") {
+          const an = (a.product?.name || a.name || "").toLowerCase();
+          const bn = (b.product?.name || b.name || "").toLowerCase();
+          return sortDir === "asc" ? an.localeCompare(bn) : bn.localeCompare(an);
+        }
+        const ad = new Date(a.lastUpdated || 0).getTime();
+        const bd = new Date(b.lastUpdated || 0).getTime();
+        return sortDir === "asc" ? ad - bd : bd - ad;
       });
-  }, [inventory, searchTerm, statusFilter]);
+    setFilteredInventory(next);
+  }, [inventory, searchTerm, statusFilter, sortBy, sortDir]);
 
-  const handleAdjustClick = (product) => {
+  const handleAdjustClick = useCallback((product) => {
     setSelectedProduct(product);
     setIsModalOpen(true);
-  };
+  }, []);
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedProduct(null);
   };
 
-  const handleSaveStock = async (productId, newStock) => {
+  const handleCloseAddModal = () => {
+    setIsAddModalOpen(false);
+  };
+
+
+  const handleCreateProduct = async (payload) => {
+    const item = {
+      name: payload.name,
+      unit: payload.unit,
+      salePrice: 0,
+      stock: 0,
+      lastUpdated: new Date().toISOString(),
+    };
     try {
-      await updateStock(productId, newStock);
-      handleCloseModal();
-    } catch (error) {
-      alert(`Error al ajustar stock: ${error.message}`);
+      await createItem(item);
+      setToastMsg("Producto creado");
+      setToastType("success");
+      setToastOpen(true);
+    } catch (err) {
+      alert(`Error al crear producto: ${err.message}`);
     }
   };
 
-  const handleFilterChange = (searchTerm, statusFilter) => {
-    const filters = {};
-    if (searchTerm) filters.searchTerm = searchTerm;
-    if (statusFilter !== 'all') filters.statusFilter = statusFilter;
-    
-    if (Object.keys(filters).length > 0) {
-      fetchInventory(filters);
-    } else {
-      fetchInventory();
+  const handleUpdateProduct = async (id, data) => {
+    try {
+      await updateItem(id, data);
+      handleCloseModal();
+      setToastMsg("Producto actualizado");
+      setToastType("success");
+      setToastOpen(true);
+    } catch (err) {
+      alert(`Error al actualizar producto: ${err.message}`);
     }
   };
+
+  const handleDeleteItem = async () => {
+    if (!deleteTarget) return;
+    try {
+      await deleteItem(deleteTarget.id);
+      setDeleteConfirmOpen(false);
+      setDeleteTarget(null);
+      setToastMsg("Item eliminado");
+      setToastType("success");
+      setToastOpen(true);
+    } catch (err) {
+      alert(`Error al eliminar item: ${err.message}`);
+    }
+  };
+
+  const handleSort = (column) => {
+    if (sortBy === column) {
+      setSortDir((prev) => (prev === "asc" ? "desc" : "asc"));
+      return;
+    }
+    setSortBy(column);
+    setSortDir(column === "lastUpdated" ? "desc" : "asc");
+  };
+
+  // Eliminado fetch bajo cambios de filtro para evitar re-render global; usamos filtrado local
 
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-lg text-gray-400">Cargando inventario...</div>
+        <div className="text-lg text-[var(--color-secondary-text)]">Cargando inventario...</div>
       </div>
     );
   }
@@ -69,7 +134,7 @@ const Inventory = () => {
   if (error) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-lg text-red-400">Error: {error}</div>
+        <div className="text-lg text-[var(--color-error)]">Error: {error}</div>
       </div>
     );
   }
@@ -82,23 +147,22 @@ const Inventory = () => {
             <Package size={22} /> Gestión de Inventario
           </>
         }
+        actions={
+          <button onClick={() => setIsAddModalOpen(true)} className="flex items-center gap-2 bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-[var(--color-text)] font-semibold py-2 px-4 rounded-md">
+            <Plus size={16} /> Crear Producto
+          </button>
+        }
       >
         <div className="flex flex-col md:flex-row justify-between items-center mb-4 gap-4">
           <Input
-            placeholder="Buscar producto por nombre..."
+            placeholder="Buscar producto..."
             value={searchTerm}
-            onChange={(e) => {
-              setSearchTerm(e.target.value);
-              setTimeout(() => handleFilterChange(e.target.value, statusFilter), 300);
-            }}
-            icon={<Search size={18} className="text-gray-400" />}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            icon={<Search size={18} className="text-[var(--color-secondary-text)]" />}
           />
           <Select
             value={statusFilter}
-            onChange={(e) => {
-              setStatusFilter(e.target.value);
-              handleFilterChange(searchTerm, e.target.value);
-            }}
+            onChange={(e) => setStatusFilter(e.target.value)}
             className="max-w-xs"
           >
             <option value="all">Todos los estados</option>
@@ -107,112 +171,42 @@ const Inventory = () => {
           </Select>
         </div>
 
-        {/* Desktop Table View */}
-        <div className="hidden md:block overflow-x-auto rounded-t-md">
-          <table className="w-full text-sm text-left">
-            <thead className="text-xs text-[var(--color-secondary-text)] uppercase bg-[var(--color-border)]">
-              <tr>
-                <th className="p-3">Producto</th>
-                <th className="p-3">Stock Actual</th>
-                <th className="p-3">Estado</th>
-                <th className="p-3">Última Actualización</th>
-                <th className="p-3 text-center">Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredInventory.map((item) => (
-                <tr
-                  key={item.id}
-                  className="border-b border-[var(--color-border)]"
-                >
-                  <td className="p-3 font-medium text-[var(--color-text)]">
-                    {item.product?.name || item.name || 'Producto sin nombre'}
-                  </td>
-                  <td className="p-3 font-mono text-[var(--color-secondary-text)]">
-                    {item.stock || 0} {item.product?.unit || item.unit || 'u'}
-                  </td>
-                  <td className="p-3">
-                    <StockStatus stock={item.stock || 0} />
-                  </td>
-                  <td className="p-3 text-[var(--color-secondary-text)]">
-                    {item.lastUpdated
-                      ? new Date(item.lastUpdated).toLocaleString("es-AR")
-                      : "—"}
-                  </td>
-                  <td className="p-3 flex justify-center">
-                    <button
-                      onClick={() => handleAdjustClick(item)}
-                      className="flex items-center gap-2 btn-secondary"
-                    >
-                      <Edit size={14} />
-                      Ajustar
-                    </button>
-                  </td>
-                </tr>
-              ))}
-            </tbody>
-          </table>
-          {filteredInventory.length === 0 && (
-            <div className="p-4 text-sm text-center text-[var(--color-secondary-text)]">
-              No se encontraron productos.
-            </div>
-          )}
-        </div>
-
-        {/* Mobile Card View */}
-        <div className="md:hidden space-y-4">
-          {filteredInventory.length > 0 ? (
-            filteredInventory.map((p) => (
-              <div
-                key={p.id}
-                className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg p-4 space-y-3"
-              >
-                <div className="flex justify-between items-start">
-                  <div className="flex-1">
-                    <h3 className="font-medium text-[var(--color-text)] text-base">
-                      {p.name}
-                    </h3>
-                    <p className="text-sm text-gray-400 font-mono mt-1">
-                      {p.stock} {p.unit}
-                    </p>
-                  </div>
-                  <StockStatus stock={p.stock} />
-                </div>
-                
-                <div className="text-sm">
-                  <span className="text-gray-400">Última actualización:</span>
-                  <p className="text-[var(--color-secondary-text)] mt-1">
-                    {p.lastUpdated
-                      ? new Date(p.lastUpdated).toLocaleString("es-AR")
-                      : "—"}
-                  </p>
-                </div>
-                
-                <div className="flex justify-center pt-2">
-                  <button
-                    onClick={() => handleAdjustClick(p)}
-                    className="flex items-center gap-2 btn-secondary w-full justify-center"
-                  >
-                    <Edit size={14} />
-                    Ajustar Stock
-                  </button>
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="p-4 text-sm text-center text-[var(--color-secondary-text)]">
-              No se encontraron productos.
-            </div>
-          )}
-        </div>
+        <InventoryList
+          items={filteredInventory}
+          onAdjustClick={handleAdjustClick}
+          sortBy={sortBy}
+          sortDir={sortDir}
+          onSort={handleSort}
+          onDeleteClick={(item) => { setDeleteTarget(item); setDeleteConfirmOpen(true); }}
+          isAdmin={true}
+        />
       </Card>
 
-      <AdjustStockModal
+      <EditProductModal
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         product={selectedProduct}
-        onSave={handleSaveStock}
+        onSave={handleUpdateProduct}
       />
+
+      <AddProductModal
+        isOpen={isAddModalOpen}
+        onClose={handleCloseAddModal}
+        onSave={handleCreateProduct}
+      />
+
+      <ConfirmModal
+        isOpen={deleteConfirmOpen}
+        onClose={() => { setDeleteConfirmOpen(false); setDeleteTarget(null); }}
+        title="Eliminar Item"
+        message={`¿Seguro que deseas eliminar "${deleteTarget?.name || ''}"?`}
+        confirmText="Eliminar"
+        cancelText="Cancelar"
+        onConfirm={handleDeleteItem}
+        variant="danger"
+      />
+
+      <Toast open={toastOpen} message={toastMsg} type={toastType} onClose={() => setToastOpen(false)} />
     </>
   );
 };
