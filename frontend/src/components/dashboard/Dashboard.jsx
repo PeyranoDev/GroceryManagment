@@ -10,7 +10,7 @@ const Dashboard = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-lg text-gray-400">Cargando dashboard...</div>
+        <div className="text-lg text-[var(--color-secondary-text)]">Cargando dashboard...</div>
       </div>
     );
   }
@@ -18,7 +18,7 @@ const Dashboard = () => {
   if (error) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-lg text-red-400">Error: {error}</div>
+        <div className="text-lg text-[var(--color-error)]">Error: {error}</div>
       </div>
     );
   }
@@ -30,28 +30,28 @@ const Dashboard = () => {
           title={"Ventas de hoy"}
           value={stats?.todaySales || 0}
           comparisonText={stats?.todaySalesComparison || "Sin datos de comparación"}
-          comparisonColor={stats?.todaySalesComparison?.includes('+') ? "text-green-400" : "text-red-400"}
+          comparisonColor={stats?.todaySalesComparison?.includes('+') ? "text-[var(--color-success)]" : "text-[var(--color-error)]"}
         />
         <KPIcard
           title={"Ingresos del Mes"}
           value={stats?.monthlyRevenue ? `$${stats.monthlyRevenue.toFixed(2)}` : "$0.00"}
           comparisonText={stats?.monthlyRevenueComparison || "Sin datos de comparación"}
-          comparisonColor={stats?.monthlyRevenueComparison?.includes('+') ? "text-green-400" : "text-red-400"}
+          comparisonColor={stats?.monthlyRevenueComparison?.includes('+') ? "text-[var(--color-success)]" : "text-[var(--color-error)]"}
           valueColor={"text-[var(--color-text)]"}
         />
         <KPIcard
           title={"Bajo Stock"}
           value={lowStockCount}
           comparisonText={"Productos con 10 o menos unidades"}
-          valueColor={"text-yellow-400"}
-          comparisonColor={"text-gray-400"}
+          valueColor={"text-[var(--color-warning)]"}
+          comparisonColor={"text-[var(--color-secondary-text)]"}
         />
         <KPIcard
           title={"Ticket Promedio"}
           value={stats?.averageTicket ? `$${stats.averageTicket.toFixed(2)}` : "$0.00"}
           comparisonText={stats?.averageTicketComparison || "Sin datos de comparación"}
           valueColor={"text-[var(--color-text)]"}
-          comparisonColor={stats?.averageTicketComparison?.includes('+') ? "text-green-400" : "text-red-400"}
+          comparisonColor={stats?.averageTicketComparison?.includes('+') ? "text-[var(--color-success)]" : "text-[var(--color-error)]"}
         />
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

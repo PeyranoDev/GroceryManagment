@@ -2,8 +2,6 @@ import {
   Leaf,
   LogIn,
   LogOut,
-  Moon,
-  Sun,
   UserCircle,
   Menu,
   X,
@@ -16,12 +14,12 @@ const Header = ({ user, onLogin, onLogout }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   const navItems = [
-    { name: "Dashboard", path: "/" },
-    { name: "Ventas", path: "/ventas" },
-    { name: "Pedidos", path: "/pedidos" },
-    { name: "Compras", path: "/compras" },
-    { name: "Inventario", path: "/inventario" },
-    { name: "Reportes", path: "/reportes" },
+    { name: "Dashboard", path: "/dashboard", end: true },
+    { name: "Caja", path: "/caja", end: true },
+    { name: "Ventas", path: "/ventas/registradas" },
+    { name: "Compras", path: "/compras", end: true, adminOnly: true },
+    { name: "Inventario", path: "/inventario", end: true },
+    { name: "Usuarios", path: "/usuarios", end: true, adminOnly: true },
   ];
 
   const toggleMobileMenu = () => {
@@ -38,13 +36,13 @@ const Header = ({ user, onLogin, onLogout }) => {
         <div className="header-content-wrapper">
           <div className="header-left-section">
             <div className="header-logo">
-              <Leaf className="h-8 w-8 text-green-500" />
+              <Leaf className="h-8 w-8 text-[var(--color-primary)]" />
               <span className="header-logo-text">VerduSoft</span>
             </div>
 
             <nav className="header-nav">
               {navItems.map((item) =>
-                !user.isSuperAdmin && item.name === "Dashboard" ? null : (
+                (!user.isSuperAdmin && (item.name === "Dashboard" || item.adminOnly)) ? null : (
                   <NavLink
                     key={item.name}
                     to={item.path}
@@ -53,6 +51,7 @@ const Header = ({ user, onLogin, onLogout }) => {
                         isActive ? "nav-item-active" : "nav-item-inactive"
                       }`
                     }
+                    end={item.end}
                   >
                     {item.name}
                   </NavLink>
@@ -73,7 +72,7 @@ const Header = ({ user, onLogin, onLogout }) => {
             {user ? (
               <div className="user-info-container">
                 <span className="user-name">{user.name}</span>
-                <UserCircle size={28} className="text-gray-400" />
+                <UserCircle size={28} className="text-[var(--color-secondary-text)]" />
                 <button onClick={onLogout} className="theme-toggle-button">
                   <LogOut size={20} />
                 </button>
@@ -92,29 +91,33 @@ const Header = ({ user, onLogin, onLogout }) => {
         {isMobileMenuOpen && (
           <div className="mobile-nav-overlay">
             <nav className="mobile-nav">
-              {navItems.map((item) => (
-                <NavLink
-                  key={item.name}
-                  to={item.path}
-                  className={({ isActive }) =>
-                    `mobile-nav-item ${
-                      isActive
-                        ? "mobile-nav-item-active"
-                        : "mobile-nav-item-inactive"
-                    }`
-                  }
-                  onClick={closeMobileMenu}
-                >
-                  {item.name}
-                </NavLink>
-              ))}
+              {navItems.map((item) =>
+                (!user.isSuperAdmin && (item.name === "Dashboard" || item.adminOnly)) ? null : (
+                  <NavLink
+                    key={item.name}
+                    to={item.path}
+                    className={({ isActive }) =>
+                      `mobile-nav-item ${
+                        isActive
+                          ? "mobile-nav-item-active"
+                          : "mobile-nav-item-inactive"
+                      }`
+                    }
+                    end={item.end}
+                    onClick={closeMobileMenu}
+                  >
+                    {item.name}
+                  </NavLink>
+                )
+              )}
+              {/* Admin-only filter for mobile */}
 
               <div className="mobile-auth-section">
                 {user ? (
                   <div className="mobile-user-info">
                     <div className="flex items-center gap-2 mb-4">
-                      <UserCircle size={24} className="text-gray-400" />
-                      <span className="text-gray-200">{user.name}</span>
+                      <UserCircle size={24} className="text-[var(--color-secondary-text)]" />
+                      <span className="text-[var(--color-text)]">{user.name}</span>
                     </div>
                     <button
                       onClick={() => {

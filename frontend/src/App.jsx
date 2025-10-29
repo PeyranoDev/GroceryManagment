@@ -1,15 +1,15 @@
-import { Routes, Route, useNavigate } from "react-router-dom";
+import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import { useState } from "react";
 
-import { ToastContainer } from "react-toastify";
 
 import Purchases from "./components/purchases/Purchases";
 import Dashboard from "./components/dashboard/Dashboard";
 import Sales from "./components/sales/Sales";
+import SalesList from "./components/sales/SalesList";
+import SaleDetail from "./components/sales/SaleDetail";
 import Inventory from "./components/inventory/Inventory";
-import Reports from "./components/reports/Reports";
-import Delivery from "./components/delivery/Delivery";
+import UsersAdmin from "./components/admin/UsersAdmin";
 import Header from "./components/ui/header/Header";
 import Login from "./components/login/Login";
 
@@ -20,9 +20,13 @@ function App() {
 
   const handleLogin = (user) => {
     setUser(user);
-    navigate("/ventas");
+    
+    navigate(user.isSuperAdmin ? "/dashboard" : "/caja");
   };
-  const handleLogout = () => setUser(null);
+  const handleLogout = () => {
+    setUser(null);
+    navigate("/login");
+  };
 
   return (
     <>
@@ -34,26 +38,38 @@ function App() {
         <main>
           <Routes>
             <Route
+              path="/"
+              element={
+                user ? (
+                  <Navigate to={user.isSuperAdmin ? "/dashboard" : "/caja"} replace />
+                ) : (
+                  <Navigate to="/login" replace />
+                )
+              }
+            />
+            <Route
               path="/login"
               element={<Login handleLogin={handleLogin} />}
             />
 
-            <Route element={<ProtectedRoute user={user} />}>
-              <Route path="/ventas" element={<Sales />} />
-              <Route path="/pedidos" element={<Delivery />} />
-              <Route path="/compras" element={<Purchases />} />
+
+            <Route element={<ProtectedRoute user={user} />}> 
+              <Route path="/caja" element={<Sales />} />
+              <Route path="/ventas/registradas" element={<SalesList />} />
+              <Route path="/ventas/registradas/:id" element={<SaleDetail />} />
               <Route path="/inventario" element={<Inventory />} />
-              <Route path="/reportes" element={<Reports />} />
             </Route>
 
-            <Route element={<ProtectedRoute user={user} onlyAdmin={true} />}>
-              <Route path="/" element={<Dashboard />} />
+            <Route element={<ProtectedRoute user={user} onlyAdmin={true} />}> 
+              <Route path="/dashboard" element={<Dashboard />} />
+              <Route path="/usuarios" element={<UsersAdmin />} />
+              <Route path="/compras" element={<Purchases />} />
+              
             </Route>
           </Routes>
         </main>
       </div>
 
-      <ToastContainer position="bottom-right" autoClose={3000} theme="dark" />
     </>
   );
 }

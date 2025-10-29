@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useCallback } from 'react';
 import { salesAPI, recentActivitiesAPI } from '../services/api';
 
 export const useSales = () => {
@@ -6,10 +6,9 @@ export const useSales = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
-  const fetchSales = async () => {
+  const fetchSales = useCallback(async () => {
     setLoading(true);
     setError(null);
-    
     try {
       const response = await salesAPI.getAll();
       const items = response.data || response;
@@ -21,7 +20,7 @@ export const useSales = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   const createSale = async (saleData) => {
     try {
@@ -44,7 +43,7 @@ export const useSales = () => {
       
       await recentActivitiesAPI.create({
         type: 'Venta',
-        description: `Venta #${newSale.id} finalizada`,
+        description: `Venta #${newSale.id} creada (${newSale.orderStatus}/${newSale.paymentStatus})`,
         userId: cartData.userId
       });
       
@@ -55,6 +54,57 @@ export const useSales = () => {
       throw err;
     } finally {
       setLoading(false);
+    }
+  };
+
+  const addPayment = async (saleId, payment) => {
+    try {
+      const response = await salesAPI.addPayment(saleId, payment);
+      const result = response.data || response;
+      setSales(prev => prev.map(s => s.id === saleId ? result.sale : s));
+      await recentActivitiesAPI.create({
+        type: 'Caja',
+        description: `Pago registrado en venta #${saleId}: $${payment.amount}`,
+        userId: payment.userId || 1,
+      });
+      return result;
+    } catch (err) {
+      console.error('Error adding payment:', err);
+      throw err;
+    }
+  };
+
+  const updateOrderStatus = async (saleId, status) => {
+    try {
+      const response = await salesAPI.updateOrderStatus(saleId, status);
+      const updated = response.data || response;
+      setSales(prev => prev.map(s => s.id === saleId ? updated : s));
+      await recentActivitiesAPI.create({
+        type: 'Pedido',
+        description: `Estado del pedido #${saleId} cambiado a ${status}`,
+        userId: 1,
+      });
+      return updated;
+    } catch (err) {
+      console.error('Error updating order status:', err);
+      throw err;
+    }
+  };
+
+  const updatePaymentStatus = async (saleId, status) => {
+    try {
+      const response = await salesAPI.updatePaymentStatus(saleId, status);
+      const updated = response.data || response;
+      setSales(prev => prev.map(s => s.id === saleId ? updated : s));
+      await recentActivitiesAPI.create({
+        type: 'Caja',
+        description: `Estado de pago #${saleId} cambiado a ${status}`,
+        userId: 1,
+      });
+      return updated;
+    } catch (err) {
+      console.error('Error updating payment status:', err);
+      throw err;
     }
   };
 
@@ -95,6 +145,9 @@ export const useSales = () => {
     fetchSales,
     createSale,
     createSaleFromCart,
+    addPayment,
+    updateOrderStatus,
+    updatePaymentStatus,
     generateWhatsAppMessage,
     getSalesByDateRange,
     deleteSale,
@@ -116,12 +169,12 @@ export const useCart = () => {
         );
       }
       return [
-        ...prev,
         { 
           product, 
           quantity: 1, 
           promotionApplied: !!product.promotion 
-        }
+        },
+        ...prev
       ];
     });
   };
@@ -131,16 +184,26 @@ export const useCart = () => {
   };
 
   const updateQuantity = (productId, quantity) => {
-    if (quantity <= 0) {
-      removeFromCart(productId);
+    if (quantity === "") {
+      // Permite edición temporal con campo vacío
+      setCart((prev) =>
+        prev.map((item) =>
+          item.product.id === productId ? { ...item, quantity: "" } : item
+        )
+      );
       return;
     }
-    
-    setCart(prev =>
-      prev.map(item =>
-        item.product.id === productId
-          ? { ...item, quantity }
-          : item
+
+    if (typeof quantity !== 'number' || Number.isNaN(quantity)) {
+      return;
+    }
+    if (quantity < 0) {
+      return;
+    }
+
+    setCart((prev) =>
+      prev.map((item) =>
+        item.product.id === productId ? { ...item, quantity } : item
       )
     );
   };
@@ -161,20 +224,20 @@ export const useCart = () => {
 
   const calculateTotals = (deliveryCost = 0) => {
     let subtotal = 0;
-    
-    cart.forEach(item => {
+
+    cart.forEach((item) => {
+      const qty = typeof item.quantity === "number" ? item.quantity : 0;
       if (item.promotionApplied && item.product.promotion) {
         const promo = item.product.promotion;
-        const promoSets = Math.floor(item.quantity / promo.quantity);
-        const remainingQty = item.quantity % promo.quantity;
-        subtotal += (promoSets * promo.price) + (remainingQty * item.product.unitPrice);
+        const promoSets = Math.floor(qty / promo.quantity);
+        const remainingQty = qty % promo.quantity;
+        subtotal += promoSets * promo.price + remainingQty * item.product.unitPrice;
       } else {
-        subtotal += item.quantity * item.product.unitPrice;
+        subtotal += qty * item.product.unitPrice;
       }
     });
-    
+
     const total = subtotal + parseFloat(deliveryCost || 0);
-    
     return { subtotal, total };
   };
 
