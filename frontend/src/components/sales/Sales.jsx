@@ -1,11 +1,14 @@
 import { useState, useEffect } from "react";
 import { useProducts } from "../../hooks/useProducts";
 import { useSales, useCart } from "../../hooks/useSales";
-import SalesHeader from "./SalesHeader";
+import SalesInfo from "./SalesInfo";
+import Stepper from "./Stepper";
+import Card from "../ui/card/Card";
 import ProductSearch from "./ProductSearch";
 import SalesSummary from "./SalesSummary";
-import SalesActions from "./SalesActions";
-import WhatsAppMessage from "./WhatsappMessage";
+import SalesPayment from "./SalesPayment";
+import ConfirmModal from "../ui/modal/ConfirmModal";
+import Toast from "../ui/toast/Toast";
 import SalesCart from "./SalesCart";
 
 const Sales = () => {
@@ -16,8 +19,8 @@ const Sales = () => {
     return `${hours}:${minutes}`;
   };
 
-  const { products, loading: productsLoading, searchProducts } = useProducts();
-  const { createSaleFromCart, generateWhatsAppMessage, loading: salesLoading } = useSales();
+  const { loading: productsLoading, searchProducts } = useProducts();
+  const { createSaleFromCart } = useSales();
   const {
     cart,
     addProductToCart,
@@ -35,12 +38,25 @@ const Sales = () => {
     paymentMethod: "Efectivo",
     observations: "",
     isOnline: false,
-    deliveryCost: 5000,
+    deliveryCost: "",
+  });
+  const [step, setStep] = useState(() => {
+    try {
+      const saved = window.localStorage.getItem('sales_state');
+      if (saved) { const s = JSON.parse(saved); return s.step || 1; }
+    } catch {
+      // ignore localStorage read errors
+    }
+    return 1;
   });
   const [searchTerm, setSearchTerm] = useState("");
   const [searchResults, setSearchResults] = useState([]);
-  const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
-  const [lastSaleId, setLastSaleId] = useState(null);
+  
+  const [confirmCreateOpen, setConfirmCreateOpen] = useState(false);
+  const [confirmDiscardOpen, setConfirmDiscardOpen] = useState(false);
+  const [toastOpen, setToastOpen] = useState(false);
+  const [toastMsg, setToastMsg] = useState("");
+  const [toastType, setToastType] = useState("success");
 
   useEffect(() => {
     const interval = setInterval(() => {
@@ -77,6 +93,7 @@ const Sales = () => {
     details.isOnline ? details.deliveryCost : 0
   );
 
+
   const resetSale = () => {
     clearCart();
     setDetails({
@@ -86,9 +103,9 @@ const Sales = () => {
       paymentMethod: "Efectivo",
       observations: "",
       isOnline: false,
-      deliveryCost: 5000,
+      deliveryCost: "",
     });
-    setLastSaleId(null);
+    setStep(1);
   };
 
   const finalizeSale = async () => {
@@ -97,93 +114,166 @@ const Sales = () => {
       return;
     }
 
-    try {
-      const cartData = {
-        userId: 1, // ID temporal, deberías usar el usuario actual
-        cart: cart,
-        details: details
-      };
+    // Validación: no permitir cantidades vacías o inválidas
+    const hasInvalidQty = cart.some(
+      (item) => !Number.isInteger(item.quantity) || item.quantity <= 0
+    );
+    if (hasInvalidQty) {
+      alert("Hay productos con cantidad vacía o inválida. Complete las cantidades antes de guardar.");
+      return;
+    }
 
-      const newSale = await createSaleFromCart(cartData);
-      setLastSaleId(newSale.id);
-      
-      alert(
-        `Venta ${
-          details.isOnline ? "online" : "presencial"
-        } #${newSale.id} finalizada exitosamente.`
-      );
-      
+    try {
+      const { subtotal, total } = calculateTotals(details.isOnline ? details.deliveryCost : 0);
+      const isOnline = !!details.isOnline;
+      const cartData = {
+        userId: 1,
+        items: cart,
+        subtotal,
+        total,
+        deliveryCost: parseFloat(details.deliveryCost || 0),
+        customerName: details.client || '',
+        customerPhone: details.phone || '',
+        deliveryAddress: details.address || '',
+        paymentMethod: details.paymentMethod || 'Efectivo',
+        type: isOnline ? (details.deliveryMethod === 'Entrega a domicilio' ? 'OnlineDelivery' : 'OnlinePickup') : 'Presencial',
+        orderStatus: isOnline ? 'Created' : 'Delivered',
+        paymentStatus: isOnline ? 'Pending' : 'Paid',
+        payments: isOnline ? [] : [{ method: details.paymentMethod, amount: total }],
+      };
+      const created = await createSaleFromCart(cartData);
       resetSale();
+      setToastMsg(`Venta #${(created && created.id) || ''} creada`);
+      setToastType("success");
+      setToastOpen(true);
+      setConfirmCreateOpen(false);
     } catch (error) {
       alert(`Error al finalizar la venta: ${error.message}`);
     }
   };
 
-  const generateSaleMessage = () => {
-    if (lastSaleId) {
-      setShowWhatsAppModal(true);
-    } else {
-      alert("Primero debes finalizar una venta para generar el mensaje de WhatsApp");
+  
+
+  useEffect(() => {
+    try { window.localStorage.setItem('sales_state', JSON.stringify({ step, details })); } catch {
+      // ignore localStorage write errors
     }
+  }, [step, details]);
+
+  const gotoNext = () => setStep((s) => Math.min(s + 1, 4));
+  const gotoPrev = () => setStep((s) => Math.max(s - 1, 1));
+
+  const headerValid = () => {
+    const isOnline = !!details.isOnline;
+    const hasDate = !!details.date;
+    const hasTime = !!details.time;
+    const hasClient = !isOnline || !!details.client?.trim();
+    const needsPhone = isOnline;
+    const hasPhone = !needsPhone || !!details.phone?.trim();
+    const needsAddress = details.deliveryMethod === 'Entrega a domicilio';
+    const hasAddress = !needsAddress || !!details.address?.trim();
+    return hasDate && hasTime && hasClient && hasPhone && hasAddress;
   };
 
   if (productsLoading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <div className="text-lg text-gray-400">Cargando productos...</div>
+        <div className="text-lg text-[var(--color-secondary-text)]">Cargando productos...</div>
       </div>
     );
   }
 
   return (
     <div className="space-y-4 mb-5">
-      <SalesHeader details={details} onDetailChange={handleDetailChange} />
-
-      <SalesCart
-        cart={cart}
-        onQuantityChange={updateQuantity}
-        onRemove={removeFromCart}
-        onTogglePromotion={togglePromotion}
-        productSearchComponent={
-          <ProductSearch
-            searchTerm={searchTerm}
-            searchResults={searchResults}
-            onSearchChange={handleSearchChange}
-            onAddProduct={handleAddProductToCart}
-          />
-        }
-      />
-
-      <div className="flex flex-col lg:flex-row gap-6">
-        <SalesSummary
-          subtotal={subtotal}
-          total={total}
-          deliveryCost={details ? parseFloat(details.deliveryCost || 0) : 0}
-          isOnline={details ? details.isOnline : false}
-        />
-        <SalesActions
-          cart={cart}
-          details={details}
-          onSave={finalizeSale}
-          onClear={resetSale}
-          onShowWhatsApp={generateSaleMessage}
-          isLoading={salesLoading}
-        />
-      </div>
-
-      {/* Modal de WhatsApp */}
-      {showWhatsAppModal && lastSaleId && (
-        <WhatsAppMessage
-          saleId={lastSaleId}
-          cart={cart}
-          details={details}
-          total={total}
-          deliveryCost={details ? parseFloat(details.deliveryCost || 0) : 0}
-          isOpen={showWhatsAppModal}
-          onClose={() => setShowWhatsAppModal(false)}
-          generateWhatsAppMessage={generateWhatsAppMessage}
-        />
+      <Card size="medium" className="flex justify-center">
+          <Stepper current={step} />
+      </Card>
+      {step === 1 && (
+        <div className="transition-all duration-300">
+          <SalesInfo details={details} onDetailChange={handleDetailChange} onNext={() => { if (headerValid()) gotoNext(); }} />
+        </div>
       )}
+      {step === 2 && (
+        <div className="transition-all duration-300 flex justify-center">
+          <SalesCart
+            cart={cart}
+            onQuantityChange={updateQuantity}
+            onRemove={removeFromCart}
+            onTogglePromotion={togglePromotion}
+            productSearchComponent={
+              <ProductSearch
+                searchTerm={searchTerm}
+                searchResults={searchResults}
+                onSearchChange={handleSearchChange}
+                onAddProduct={handleAddProductToCart}
+              />
+            }
+            footerActions={(
+              <>
+                <button onClick={gotoPrev} className="px-4 py-2 rounded-md bg-[var(--surface)] hover:bg-[var(--surface-muted)] text-[var(--color-text)] font-semibold">Anterior</button>
+                <button onClick={gotoNext} disabled={cart.length === 0} className={`px-4 py-2 rounded-md font-semibold ${cart.length>0?'bg-[var(--color-secondary)] hover:bg-[var(--color-secondary-dark)] text-[var(--color-text)]':'bg-[var(--color-secondary)]/50 text-[var(--color-secondary-text)] cursor-not-allowed'}`}>Siguiente</button>
+              </>
+            )}
+          />
+        </div>
+      )}
+      {step === 3 && (
+        <div className="transition-all duration-300">
+          <div className="flex justify-center">
+            <div className="w-full max-w-[800px]">
+              <SalesSummary
+                subtotal={subtotal}
+                total={total}
+                deliveryCost={details ? parseFloat(details.deliveryCost || 0) : 0}
+                isOnline={details ? details.isOnline : false}
+                cart={cart}
+                details={details}
+                footerActions={(
+                  <>
+                    <button onClick={gotoPrev} className="px-4 py-2 rounded-md bg-[var(--surface)] hover:bg-[var(--surface-muted)] text-[var(--color-text)] font-semibold">Anterior</button>
+                    <button onClick={gotoNext} className="px-4 py-2 rounded-md bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-[var(--color-text)] font-semibold">Siguiente</button>
+                  </>
+                )}
+              />
+            </div>
+          </div>
+        </div>
+      )}
+      {step === 4 && (
+        <div className="transition-all duration-300">
+          <SalesPayment
+            details={details}
+            total={total}
+            onDetailChange={handleDetailChange}
+            onPrev={gotoPrev}
+            onConfirm={() => setConfirmCreateOpen(true)}
+            onCancel={() => setConfirmDiscardOpen(true)}
+          />
+        </div>
+      )}
+
+      
+      <ConfirmModal
+        isOpen={confirmCreateOpen}
+        onClose={() => setConfirmCreateOpen(false)}
+        title="Confirmar Venta"
+        message={`Total: $${Number(total || 0).toLocaleString()}`}
+        confirmText="Confirmar"
+        cancelText="Cancelar"
+        onConfirm={finalizeSale}
+        variant="success"
+      />
+      <ConfirmModal
+        isOpen={confirmDiscardOpen}
+        onClose={() => setConfirmDiscardOpen(false)}
+        title="Descartar Venta"
+        message="¿Seguro que deseas descartar la venta actual?"
+        confirmText="Descartar"
+        cancelText="Volver"
+        onConfirm={() => { resetSale(); setConfirmDiscardOpen(false); setToastMsg("Venta descartada"); setToastType("info"); setToastOpen(true); }}
+        variant="danger"
+      />
+      <Toast open={toastOpen} message={toastMsg} type={toastType} onClose={() => setToastOpen(false)} />
     </div>
   );
 };

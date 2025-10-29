@@ -40,13 +40,13 @@ const AdjustStockModal = ({ isOpen, onClose, product, onSave }) => {
         <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-3 pt-4">
           <button
             onClick={onClose}
-            className="bg-gray-600 hover:bg-gray-500 text-[var(--color-text)] font-semibold py-2 px-4 rounded-md text-sm sm:text-base"
+            className="bg-[var(--surface)] hover:bg-[var(--surface-muted)] text-[var(--color-text)] font-semibold py-2 px-4 rounded-md text-sm sm:text-base"
           >
             Cancelar
           </button>
           <button
             onClick={handleSave}
-            className="bg-blue-600 hover:bg-blue-700 text-[var(--color-text)] font-semibold py-2 px-4 rounded-md text-sm sm:text-base"
+            className="bg-[var(--color-secondary)] hover:bg-[var(--color-secondary-dark)] text-[var(--color-text)] font-semibold py-2 px-4 rounded-md text-sm sm:text-base"
           >
             Guardar Ajuste
           </button>

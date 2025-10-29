@@ -7,7 +7,8 @@ import {
   mockRecentActivitiesAPI,
   mockPurchasesAPI,
   mockReportsAPI,
-  mockCategoriesAPI
+  mockCategoriesAPI,
+  mockUsersAPI
 } from './mockApi.js';
 
 // Always use mock data for demo
@@ -115,6 +116,18 @@ export const salesAPI = DEMO_MODE ? mockSalesAPI : {
     method: 'POST',
     body: JSON.stringify(cartData),
   }),
+  updateOrderStatus: (id, newStatus) => apiRequest(`/Sales/${id}/order-status`, {
+    method: 'POST',
+    body: JSON.stringify({ status: newStatus }),
+  }),
+  addPayment: (id, payment) => apiRequest(`/Sales/${id}/payments`, {
+    method: 'POST',
+    body: JSON.stringify(payment),
+  }),
+  updatePaymentStatus: (id, status) => apiRequest(`/Sales/${id}/payment-status`, {
+    method: 'POST',
+    body: JSON.stringify({ status }),
+  }),
   generateWhatsApp: (id, details) => apiRequest(`/Sales/${id}/whatsapp`, {
     method: 'POST',
     body: JSON.stringify(details),
@@ -150,6 +163,8 @@ export const purchasesAPI = DEMO_MODE ? mockPurchasesAPI : {
     const params = new URLSearchParams({ startDate, endDate }).toString();
     return apiRequest(`/Purchases/date-range?${params}`);
   },
+  getLatest: () => apiRequest('/Purchases/latest'),
+  getByDate: (date) => apiRequest(`/Purchases/date/${date}`),
   create: (purchase) => apiRequest('/Purchases', {
     method: 'POST',
     body: JSON.stringify(purchase),
@@ -193,6 +208,14 @@ export const categoriesAPI = DEMO_MODE ? mockCategoriesAPI : {
   delete: (id) => apiRequest(`/Categories/${id}`, {
     method: 'DELETE',
   }),
+};
+
+export const usersAPI = DEMO_MODE ? mockUsersAPI : {
+  getAll: () => apiRequest('/Users'),
+  getById: (id) => apiRequest(`/Users/${id}`),
+  create: (user) => apiRequest('/Users', { method: 'POST', body: JSON.stringify(user) }),
+  update: (id, user) => apiRequest(`/Users/${id}`, { method: 'PUT', body: JSON.stringify(user) }),
+  delete: (id) => apiRequest(`/Users/${id}`, { method: 'DELETE' }),
 };
 
 export const handleApiError = (error) => {

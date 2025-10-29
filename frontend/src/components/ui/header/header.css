@@ -33,11 +33,11 @@
 }
 
 .nav-item-active {
-  @apply bg-green-900/50 text-green-400;
+  @apply bg-[var(--color-success-dark)]/50 text-[var(--color-text)];
 }
 
 .nav-item-inactive {
-  @apply text-[var(--color-secondary-text)] hover:bg-gray-700 hover:shadow-md;
+  @apply text-[var(--color-secondary-text)] hover:bg-[var(--surface)] hover:shadow-md;
 }
 
 .header-right-section {
@@ -46,7 +46,7 @@
 }
 
 .theme-toggle-button {
-  @apply p-2 rounded-full text-gray-400 hover:bg-gray-700 transition-all duration-200 hover:scale-110 hover:shadow-lg;
+  @apply p-2 rounded-full text-[var(--color-secondary-text)] hover:bg-[var(--surface)] transition-all duration-200 hover:scale-110 hover:shadow-lg;
 }
 
 .user-info-container {
@@ -54,7 +54,7 @@
 }
 
 .user-name {
-  @apply font-medium text-gray-200;
+  @apply font-medium text-[var(--color-text)];
 }
 
 .auth-button-group {
@@ -62,16 +62,16 @@
 }
 
 .login-button {
-  @apply flex items-center gap-2 text-sm font-semibold text-[var(--color-secondary-text)] hover:text-green-400 py-2 px-3 rounded-md transition-all duration-200 hover:scale-105;
+  @apply flex items-center gap-2 text-sm font-semibold text-[var(--color-secondary-text)] hover:text-[var(--color-primary)] py-2 px-3 rounded-md transition-all duration-200 hover:scale-105;
 }
 
 .register-button {
-  @apply text-sm font-semibold bg-green-700 text-white py-2 px-3 rounded-md transition-all duration-200 hover:bg-green-600 hover:scale-105 hover:shadow-lg;
+  @apply text-sm font-semibold bg-[var(--color-primary)] text-white py-2 px-3 rounded-md transition-all duration-200 hover:bg-[var(--color-primary-dark)] hover:scale-105 hover:shadow-lg;
 }
 
 /* Mobile Menu Styles */
 .mobile-menu-button {
-  @apply p-2 rounded-md text-[var(--color-secondary-text)] hover:bg-gray-700 hover:text-white transition-all duration-200 hover:scale-110;
+  @apply p-2 rounded-md text-[var(--color-secondary-text)] hover:bg-[var(--surface)] hover:text-[var(--color-text)] transition-all duration-200 hover:scale-110;
 }
 
 .mobile-nav-overlay {
@@ -87,11 +87,11 @@
 }
 
 .mobile-nav-item-active {
-  @apply bg-green-900/50 text-green-400;
+  @apply bg-[var(--color-success-dark)]/50 text-[var(--color-text)];
 }
 
 .mobile-nav-item-inactive {
-  @apply text-[var(--color-secondary-text)] hover:bg-gray-700 hover:text-white hover:shadow-md;
+  @apply text-[var(--color-secondary-text)] hover:bg-[var(--surface)] hover:text-[var(--color-text)] hover:shadow-md;
 }
 
 .mobile-auth-section {
@@ -103,7 +103,7 @@
 }
 
 .mobile-logout-button {
-  @apply flex items-center gap-2 w-full px-4 py-2 text-sm font-medium text-red-400 hover:bg-red-900/20 rounded-md transition-all duration-200 hover:scale-105;
+  @apply flex items-center gap-2 w-full px-4 py-2 text-sm font-medium text-[var(--color-error)] hover:bg-[var(--color-error-dark)]/20 rounded-md transition-all duration-200 hover:scale-105;
 }
 
 .mobile-auth-buttons {
@@ -111,9 +111,9 @@
 }
 
 .mobile-login-button {
-  @apply flex items-center justify-center gap-2 w-full px-4 py-2 text-sm font-semibold text-[var(--color-secondary-text)] hover:text-green-400 border border-[var(--color-border)] rounded-md transition-all duration-200 hover:scale-105 hover:shadow-md;
+  @apply flex items-center justify-center gap-2 w-full px-4 py-2 text-sm font-semibold text-[var(--color-secondary-text)] hover:text-[var(--color-primary)] border border-[var(--color-border)] rounded-md transition-all duration-200 hover:scale-105 hover:shadow-md;
 }
 
 .mobile-register-button {
-  @apply w-full px-4 py-2 text-sm font-semibold bg-green-700 text-white rounded-md hover:bg-green-600 transition-all duration-200 hover:scale-105 hover:shadow-lg;
+  @apply w-full px-4 py-2 text-sm font-semibold bg-[var(--color-primary)] text-white rounded-md hover:bg-[var(--color-primary-dark)] transition-all duration-200 hover:scale-105 hover:shadow-lg;
 }

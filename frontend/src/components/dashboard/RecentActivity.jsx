@@ -35,9 +35,9 @@ const RecentActivity = ({ recentActivities = [] }) => {
           recentActivities.map((activity) => (
             <div
               key={activity.id}
-              className="flex items-start gap-3 p-3 rounded-lg bg-[var(--color-hover)] border border-[var(--color-border)]"
+              className="flex items-start gap-3 p-3 rounded-lg bg-[var(--surface)] border border-[var(--color-border)]"
             >
-              <div className="flex-shrink-0 w-2 h-2 mt-2 bg-blue-400 rounded-full"></div>
+              <div className="flex-shrink-0 w-2 h-2 mt-2 bg-[var(--color-secondary)] rounded-full"></div>
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-sm font-medium text-[var(--color-primary)]">
@@ -60,7 +60,7 @@ const RecentActivity = ({ recentActivities = [] }) => {
           ))
         ) : (
           <div className="text-center py-8">
-            <Clock size={48} className="mx-auto mb-4 text-gray-400" />
+            <Clock size={48} className="mx-auto mb-4 text-[var(--color-secondary-text)]" />
             <p className="text-sm text-[var(--color-secondary-text)]">
               No hay actividad reciente
             </p>

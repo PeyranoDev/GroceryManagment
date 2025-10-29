@@ -1,0 +1,20 @@
+@import "tailwindcss";
+
+.toast {
+  @apply fixed bottom-6 left-1/2 -translate-x-1/2 z-[9999] px-4 py-2 rounded-md shadow-lg text-[var(--color-text)]
+         transition-transform duration-300 ease-out;
+  animation: toastSlide 0.25s ease-out;
+}
+
+.toast-success {
+  @apply bg-[var(--color-success)];
+}
+
+.toast-info {
+  @apply bg-[var(--surface)];
+}
+
+@keyframes toastSlide {
+  from { transform: translate(-50%, 20px); opacity: 0; }
+  to   { transform: translate(-50%, 0); opacity: 1; }
+}
