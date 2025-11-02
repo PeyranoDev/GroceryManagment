@@ -30,13 +30,13 @@ namespace Presentation.Controllers
             }
         }
 
-        [HttpGet("weekly-sales")]
-        public async Task<IActionResult> GetWeeklySales()
+        [HttpGet("last-7-days-sales")]
+        public async Task<IActionResult> GetLast7DaysSales()
         {
             try
             {
-                var weeklySales = await _dashboardService.GetWeeklySalesAsync();
-                return Ok(weeklySales);
+                var last7DaysSales = await _dashboardService.GetLast7DaysSalesAsync();
+                return Ok(last7DaysSales);
             }
             catch (Exception ex)
             {

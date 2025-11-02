@@ -5,6 +5,6 @@ namespace Application.Services.Interfaces
     public interface IDashboardService
     {
         Task<DashboardStatsDto> GetDashboardStatsAsync();
-        Task<IEnumerable<WeeklySalesDto>> GetWeeklySalesAsync();
+        Task<IEnumerable<PerDaySaleDto>> GetLast7DaysSalesAsync();
     }
 }

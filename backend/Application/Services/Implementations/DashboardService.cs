@@ -64,30 +64,29 @@ namespace Application.Services.Implementations
             };
         }
 
-        public async Task<IEnumerable<WeeklySalesDto>> GetWeeklySalesAsync()
+        public async Task<IEnumerable<PerDaySaleDto>> GetLast7DaysSalesAsync()
         {
             var groceryId = _tenantProvider.CurrentGroceryId;
             var today = DateTime.Today;
-            var weekStart = today.AddDays(-(int)today.DayOfWeek + 1); // Lunes de esta semana
             
-            var weeklySales = new List<WeeklySalesDto>();
+            var last7DaysSales = new List<PerDaySaleDto>();
             
-            for (int i = 0; i < 7; i++)
+            for (int i = 6; i >= 0; i--)
             {
-                var day = weekStart.AddDays(i);
+                var day = today.AddDays(-i);
                 var dayEnd = day.AddDays(1);
                 
                 var sales = await _saleRepository.GetSalesByDateRangeAndGrocery(day, dayEnd, groceryId);
                 var dayTotal = sales.Sum(s => s.Total);
                 
-                weeklySales.Add(new WeeklySalesDto
+                last7DaysSales.Add(new PerDaySaleDto
                 {
                     Day = GetDayName(day.DayOfWeek),
                     Sales = dayTotal
                 });
             }
             
-            return weeklySales;
+            return last7DaysSales;
         }
 
         private string CalculatePercentageChange(decimal current, decimal previous)
