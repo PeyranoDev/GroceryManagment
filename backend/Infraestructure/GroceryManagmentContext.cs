@@ -20,7 +20,6 @@ namespace Infraestructure
         public DbSet<Category> Categories { get; set; }
         public DbSet<Product> Products { get; set; }
         public DbSet<InventoryItem> InventoryItems { get; set; }
-        public DbSet<WeeklySale> WeeklySales { get; set; }
         public DbSet<RecentActivity> RecentActivities { get; set; }
         public DbSet<Sale> Sales { get; set; }
         public DbSet<SaleItem> SaleItems { get; set; }
@@ -73,7 +72,7 @@ namespace Infraestructure
             {
                 b.Property(c => c.Name).IsRequired().HasMaxLength(100);
                 b.Property(c => c.Icon).HasMaxLength(10);
-                b.HasIndex(c => new { c.GroceryId, c.Name }).IsUnique();
+                b.HasIndex(c => c.Name).IsUnique();
             });
 
             mb.Entity<Product>(b =>
@@ -81,30 +80,31 @@ namespace Infraestructure
                 b.Property(p => p.Name).IsRequired().HasMaxLength(200);
                 b.Property(p => p.Unit).IsRequired().HasMaxLength(50);
                 b.Property(p => p.Emoji).HasMaxLength(10);
-                b.Property(p => p.UnitPrice).HasColumnType("decimal(18,2)");
-                b.Property(p => p.SalePrice).HasColumnType("decimal(18,2)");
                 
-                b.HasIndex(p => new { p.GroceryId, p.Name }).IsUnique();
+                b.HasIndex(p => p.Name).IsUnique();
                 
                 b.HasOne(p => p.Category)
                  .WithMany(c => c.Products)
                  .HasForeignKey(p => p.CategoryId)
                  .OnDelete(DeleteBehavior.Restrict);
+            });
 
-                b.OwnsOne(p => p.Promotion, promo =>
+            mb.Entity<InventoryItem>(b =>
+            {
+                b.Property(i => i.UnitPrice).HasColumnType("decimal(18,2)");
+                b.Property(i => i.SalePrice).HasColumnType("decimal(18,2)");
+
+                b.HasOne(i => i.Product)
+                 .WithMany(p => p.InventoryItems)
+                 .HasForeignKey(i => i.ProductId)
+                 .OnDelete(DeleteBehavior.Cascade);
+
+                b.OwnsOne(i => i.Promotion, promo =>
                 {
                     promo.Property(pr => pr.DiscountPercent).HasColumnType("decimal(5,2)");
                     promo.Property(pr => pr.DiscountAmount).HasColumnType("decimal(18,2)");
                     promo.Property(pr => pr.PromotionPrice).HasColumnType("decimal(18,2)");
                 });
-            });
-
-            mb.Entity<InventoryItem>(b =>
-            {
-                b.HasOne(i => i.Product)
-                 .WithMany(p => p.InventoryItems)
-                 .HasForeignKey(i => i.ProductId)
-                 .OnDelete(DeleteBehavior.Cascade);
             });
 
             mb.Entity<Purchase>(b =>
@@ -160,12 +160,9 @@ namespace Infraestructure
                 b.Property(ra => ra.Action).IsRequired().HasMaxLength(500);
             });
 
-            mb.Entity<Category>().HasQueryFilter(e => e.GroceryId == _tenant.CurrentGroceryId);
-            mb.Entity<Product>().HasQueryFilter(e => e.GroceryId == _tenant.CurrentGroceryId);
             mb.Entity<InventoryItem>().HasQueryFilter(e => e.GroceryId == _tenant.CurrentGroceryId);
             mb.Entity<Sale>().HasQueryFilter(e => e.GroceryId == _tenant.CurrentGroceryId);
             mb.Entity<SaleItem>().HasQueryFilter(e => e.GroceryId == _tenant.CurrentGroceryId);
-            mb.Entity<WeeklySale>().HasQueryFilter(e => e.GroceryId == _tenant.CurrentGroceryId);
             mb.Entity<RecentActivity>().HasQueryFilter(e => e.GroceryId == _tenant.CurrentGroceryId);
             mb.Entity<Purchase>().HasQueryFilter(e => e.GroceryId == _tenant.CurrentGroceryId);
             mb.Entity<PurchaseItem>().HasQueryFilter(e => e.GroceryId == _tenant.CurrentGroceryId);

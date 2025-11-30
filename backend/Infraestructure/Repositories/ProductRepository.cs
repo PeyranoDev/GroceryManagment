@@ -12,14 +12,18 @@ namespace Infraestructure.Repositories
 
         public Task<bool> ExistsByName(string name)
             => _ctx.Products.AsNoTracking()
-                .AnyAsync(p => p.Name == name && p.GroceryId == _tenant.CurrentGroceryId);
+                .AnyAsync(p => p.Name == name);
 
         public async Task<IReadOnlyList<Product>> GetByCategoryId(int categoryId)
             => await _ctx.Products.AsNoTracking()
-                .Where(p => p.CategoryId == categoryId && p.GroceryId == _tenant.CurrentGroceryId)
+                .Where(p => p.CategoryId == categoryId)
                 .ToListAsync();
 
         public async Task<IReadOnlyList<Product>> GetByGroceryId(int groceryId)
-            => await _ctx.Products.AsNoTracking().Where(p => p.GroceryId == groceryId).ToListAsync();
+            => await _ctx.Products.AsNoTracking()
+                .Include(p => p.Category)
+                .Include(p => p.InventoryItems.Where(i => i.GroceryId == groceryId))
+                .Where(p => p.InventoryItems.Any(i => i.GroceryId == groceryId))
+                .ToListAsync();
     }
 }

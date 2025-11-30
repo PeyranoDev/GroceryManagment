@@ -68,25 +68,33 @@ namespace Application.Services.Implementations
         {
             var groceryId = _tenantProvider.CurrentGroceryId;
             var today = DateTime.Today;
-            var weekStart = today.AddDays(-(int)today.DayOfWeek + 1); // Lunes de esta semana
-            
+            // Calculate start of the week (Monday)
+            var daysSinceMonday = ((int)today.DayOfWeek - (int)DayOfWeek.Monday + 7) % 7;
+            var weekStart = today.AddDays(-daysSinceMonday);
+            var weekEnd = weekStart.AddDays(7); // End of Sunday (start of next Monday)
+
+            // Fetch all sales for the week in one query
+            var weekSales = await _saleRepository.GetSalesByDateRangeAndGrocery(weekStart, weekEnd, groceryId);
+
             var weeklySales = new List<WeeklySalesDto>();
-            
+
             for (int i = 0; i < 7; i++)
             {
-                var day = weekStart.AddDays(i);
-                var dayEnd = day.AddDays(1);
-                
-                var sales = await _saleRepository.GetSalesByDateRangeAndGrocery(day, dayEnd, groceryId);
-                var dayTotal = sales.Sum(s => s.Total);
-                
+                var currentDay = weekStart.AddDays(i);
+                var nextDay = currentDay.AddDays(1);
+
+                // Filter in memory
+                var dayTotal = weekSales
+                    .Where(s => s.Date >= currentDay && s.Date < nextDay)
+                    .Sum(s => s.Total);
+
                 weeklySales.Add(new WeeklySalesDto
                 {
-                    Day = GetDayName(day.DayOfWeek),
+                    Day = GetDayName(currentDay.DayOfWeek),
                     Sales = dayTotal
                 });
             }
-            
+
             return weeklySales;
         }
 

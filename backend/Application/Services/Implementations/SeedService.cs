@@ -31,11 +31,12 @@ namespace Application.Services.Implementations
 
         public async Task<CategoryForResponseDto> CreateCategory(CategoryForCreateDto dto, int groceryId)
         {
-            if (await _categories.ExistsByName(dto.Name))
-                throw new CategoryAlreadyExistsException(dto.Name);
+            var existing = (await _categories.Find(c => c.Name == dto.Name)).FirstOrDefault();
+            if (existing != null)
+                 return _mapper.Map<CategoryForResponseDto>(existing);
 
             var entity = _mapper.Map<Category>(dto);
-            entity.GroceryId = groceryId;
+            // Global category, no GroceryId
             
             var id = await _categories.Create(entity);
             var created = await _categories.GetById(id);
@@ -48,7 +49,7 @@ namespace Application.Services.Implementations
 
         public async Task<IReadOnlyList<CategoryForResponseDto>> GetCategoriesByGroceryId(int groceryId)
         {
-            var list = await _categories.GetAllByGroceryId(groceryId);
+            var list = await _categories.GetAll();
             
             if (list == null)
             {
@@ -60,29 +61,49 @@ namespace Application.Services.Implementations
 
         public async Task<ProductForResponseDto> CreateProduct(ProductForCreateDto dto, int groceryId)
         {
-            if (await _products.ExistsByName(dto.Name))
-                throw new ProductAlreadyExistsException(dto.Name);
-
-            var categoryExists = await _categories.GetById(dto.CategoryId);
-            if (categoryExists is null || categoryExists.GroceryId != groceryId)
-                throw new CategoryNotValidException(dto.CategoryId);
-
-            if (dto.UnitPrice <= 0)
-                throw new InvalidPriceException("precio unitario");
+            // 1. Get or Create Global Product
+            var existingProduct = (await _products.Find(p => p.Name == dto.Name)).FirstOrDefault();
+            Product product;
             
-            if (dto.SalePrice <= 0)
-                throw new InvalidPriceException("precio de venta");
+            if (existingProduct != null)
+            {
+                product = existingProduct;
+            }
+            else
+            {
+                 var categoryExists = await _categories.GetById(dto.CategoryId);
+                 if (categoryExists is null) 
+                    throw new CategoryNotValidException(dto.CategoryId);
 
-            var entity = _mapper.Map<Product>(dto);
-            entity.GroceryId = groceryId;
+                product = _mapper.Map<Product>(dto);
+                var id = await _products.Create(product);
+                product = await _products.GetById(id)!;
+            }
+
+            // 2. Create Inventory Item
+            var inventoryItems = await _inventory.GetByProductId(product.Id);
+            if (inventoryItems.Any(i => i.GroceryId == groceryId))
+                 throw new ProductAlreadyExistsException(dto.Name);
+
+            var inventoryItem = new InventoryItem
+            {
+                ProductId = product.Id,
+                GroceryId = groceryId,
+                Stock = 0,
+                UnitPrice = dto.UnitPrice,
+                SalePrice = dto.SalePrice,
+                Promotion = _mapper.Map<Promotion>(dto.Promotion) ?? new Promotion(),
+                LastUpdated = DateTime.UtcNow
+            };
             
-            var id = await _products.Create(entity);
-            var created = await _products.GetById(id);
+            await _inventory.Create(inventoryItem);
+
+            var responseDto = _mapper.Map<ProductForResponseDto>(product);
+            responseDto.UnitPrice = inventoryItem.UnitPrice;
+            responseDto.SalePrice = inventoryItem.SalePrice;
+            responseDto.Promotion = _mapper.Map<PromotionDto>(inventoryItem.Promotion);
             
-            if (created is null)
-                throw new ProductNotFoundException(id);
-                
-            return _mapper.Map<ProductForResponseDto>(created);
+            return responseDto;
         }
 
         public async Task<InventoryItemForResponseDto> CreateInventoryItem(InventoryItemForCreateDto dto, int groceryId)

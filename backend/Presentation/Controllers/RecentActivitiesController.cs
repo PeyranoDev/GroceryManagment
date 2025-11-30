@@ -2,13 +2,11 @@ using Application.Schemas;
 using Application.Schemas.RecentActivities;
 using Application.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Presentation.Filters;
 
 namespace Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [RequireGroceryHeader]
     public class RecentActivitiesController : ControllerBase
     {
         private readonly IRecentActivityService _recentActivityService;

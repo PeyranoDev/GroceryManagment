@@ -8,9 +8,17 @@ namespace Application.Mapping
     {
         public ProductProfile()
         {
-            CreateMap<ProductForCreateDto, Product>();
-            CreateMap<ProductForUpdateDto, Product>();
-            CreateMap<Product, ProductForResponseDto>();
+            CreateMap<ProductForCreateDto, Product>()
+                .ForMember(dest => dest.InventoryItems, opt => opt.Ignore());
+            
+            CreateMap<ProductForUpdateDto, Product>()
+                .ForMember(dest => dest.InventoryItems, opt => opt.Ignore());
+
+            CreateMap<Product, ProductForResponseDto>()
+                .ForMember(dest => dest.UnitPrice, opt => opt.Ignore())
+                .ForMember(dest => dest.SalePrice, opt => opt.Ignore())
+                .ForMember(dest => dest.Promotion, opt => opt.Ignore());
+
             CreateMap<Promotion, PromotionDto>().ReverseMap();
         }
     }

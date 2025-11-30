@@ -2,13 +2,11 @@ using Application.Schemas;
 using Application.Schemas.Products;
 using Application.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Presentation.Filters;
 
 namespace Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [RequireGroceryHeader]
     public class ProductsController : ControllerBase
     {
         private readonly IProductService _productService;

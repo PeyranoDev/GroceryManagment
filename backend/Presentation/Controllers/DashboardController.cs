@@ -1,12 +1,10 @@
 using Application.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Presentation.Filters;
 
 namespace Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [RequireGroceryHeader]
     public class DashboardController : ControllerBase
     {
         private readonly IDashboardService _dashboardService;
