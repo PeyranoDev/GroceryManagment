@@ -24,7 +24,7 @@ namespace Application.Services.Implementations
         public async Task<CategoryForResponseDto?> GetById(int id)
         {
             var category = await _categories.GetById(id);
-            if (category is null || category.GroceryId != _tenantProvider.CurrentGroceryId)
+            if (category is null)
                 throw new CategoryNotFoundException(id);
             
             return _mapper.Map<CategoryForResponseDto>(category);
@@ -32,7 +32,7 @@ namespace Application.Services.Implementations
 
         public async Task<IReadOnlyList<CategoryForResponseDto>> GetAll()
         {
-            var list = await _categories.GetAllByGroceryId(_tenantProvider.CurrentGroceryId);
+            var list = await _categories.GetAll();
             
             if (list == null)
             {
@@ -48,7 +48,7 @@ namespace Application.Services.Implementations
                 throw new CategoryAlreadyExistsException(dto.Name);
 
             var entity = _mapper.Map<Category>(dto);
-            entity.GroceryId = _tenantProvider.CurrentGroceryId;
+            // Global category
             
             var id = await _categories.Create(entity);
             var created = await _categories.GetById(id);
@@ -62,7 +62,7 @@ namespace Application.Services.Implementations
         public async Task<CategoryForResponseDto?> Update(int id, CategoryForUpdateDto dto)
         {
             var entity = await _categories.GetById(id);
-            if (entity is null || entity.GroceryId != _tenantProvider.CurrentGroceryId) 
+            if (entity is null) 
                 throw new CategoryNotFoundException(id);
 
             if (!string.Equals(entity.Name, dto.Name, StringComparison.OrdinalIgnoreCase)
@@ -78,7 +78,7 @@ namespace Application.Services.Implementations
         public async Task<bool> Delete(int id)
         {
             var entity = await _categories.GetById(id);
-            if (entity is null || entity.GroceryId != _tenantProvider.CurrentGroceryId) 
+            if (entity is null) 
                 throw new CategoryNotFoundException(id);
             
             await _categories.Delete(entity);

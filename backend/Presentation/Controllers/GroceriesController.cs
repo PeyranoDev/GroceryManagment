@@ -4,7 +4,6 @@ using Application.Services.Interfaces;
 using Domain.Tenancy;
 using Infraestructure.Tenancy;
 using Microsoft.AspNetCore.Mvc;
-using Presentation.Filters;
 
 namespace Presentation.Controllers
 {
@@ -32,7 +31,6 @@ namespace Presentation.Controllers
         }
 
         [HttpGet("current")]
-        [RequireGroceryHeader]
         public async Task<ActionResult<ApiResponse<GroceryForResponseDto>>> GetCurrent()
         {
             var grocery = await _groceryService.GetById(_tenantProvider.CurrentGroceryId);

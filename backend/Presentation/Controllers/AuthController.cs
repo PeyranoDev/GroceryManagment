@@ -1,4 +1,4 @@
-ï»¿using Application.Schemas;
+using Application.Schemas;
 using Application.Schemas.Auth;
 using Application.Services.Interfaces;
 using Domain.Exceptions;
@@ -24,10 +24,10 @@ namespace Presentation.Controllers
         }
 
         /// <summary>
-        /// Autentica a un usuario con email y contraseÃ±a
+        /// Autentica a un usuario con email y contraseña
         /// </summary>
         /// <param name="loginDto">Datos de login del usuario</param>
-        /// <returns>Token JWT y informaciÃ³n del usuario</returns>
+        /// <returns>Token JWT y información del usuario</returns>
         [HttpPost("login")]
         public async Task<ActionResult<ApiResponse<AuthResponseDto>>> Login([FromBody] LoginDto loginDto)
         {
@@ -36,14 +36,14 @@ namespace Presentation.Controllers
             // Generar el JWT token
             result.Token = GenerateJwtToken(result.User);
             
-            return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(result, "Inicio de sesiÃ³n exitoso"));
+            return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(result, "Inicio de sesión exitoso"));
         }
 
         /// <summary>
         /// Registra un nuevo usuario en el sistema
         /// </summary>
         /// <param name="registerDto">Datos del nuevo usuario</param>
-        /// <returns>Token JWT y informaciÃ³n del usuario registrado</returns>
+        /// <returns>Token JWT y información del usuario registrado</returns>
         [HttpPost("register")]
         public async Task<ActionResult<ApiResponse<AuthResponseDto>>> Register([FromBody] RegisterDto registerDto)
         {

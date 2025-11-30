@@ -30,9 +30,6 @@ namespace Infraestructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int>("GroceryId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Icon")
                         .HasMaxLength(10)
                         .HasColumnType("character varying(10)");
@@ -44,7 +41,7 @@ namespace Infraestructure.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("GroceryId", "Name")
+                    b.HasIndex("Name")
                         .IsUnique();
 
                     b.ToTable("Categories");
@@ -85,8 +82,14 @@ namespace Infraestructure.Migrations
                     b.Property<int>("ProductId")
                         .HasColumnType("integer");
 
+                    b.Property<decimal>("SalePrice")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<int>("Stock")
                         .HasColumnType("integer");
+
+                    b.Property<decimal>("UnitPrice")
+                        .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
 
@@ -112,7 +115,7 @@ namespace Infraestructure.Migrations
                         .HasMaxLength(10)
                         .HasColumnType("character varying(10)");
 
-                    b.Property<int>("GroceryId")
+                    b.Property<int?>("GroceryId")
                         .HasColumnType("integer");
 
                     b.Property<string>("Name")
@@ -120,22 +123,18 @@ namespace Infraestructure.Migrations
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
 
-                    b.Property<decimal>("SalePrice")
-                        .HasColumnType("decimal(18,2)");
-
                     b.Property<string>("Unit")
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
-                    b.Property<decimal>("UnitPrice")
-                        .HasColumnType("decimal(18,2)");
-
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
 
-                    b.HasIndex("GroceryId", "Name")
+                    b.HasIndex("GroceryId");
+
+                    b.HasIndex("Name")
                         .IsUnique();
 
                     b.ToTable("Products");
@@ -364,44 +363,6 @@ namespace Infraestructure.Migrations
                     b.ToTable("UserGroceries");
                 });
 
-            modelBuilder.Entity("Domain.Entities.WeeklySale", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<int>("GroceryId")
-                        .HasColumnType("integer");
-
-                    b.Property<decimal>("TotalSales")
-                        .HasColumnType("numeric");
-
-                    b.Property<DateTime>("WeekEnd")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<DateTime>("WeekStart")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GroceryId");
-
-                    b.ToTable("WeeklySales");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Category", b =>
-                {
-                    b.HasOne("Domain.Entities.Grocery", "Grocery")
-                        .WithMany()
-                        .HasForeignKey("GroceryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Grocery");
-                });
-
             modelBuilder.Entity("Domain.Entities.InventoryItem", b =>
                 {
                     b.HasOne("Domain.Entities.Grocery", "Grocery")
@@ -416,28 +377,9 @@ namespace Infraestructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Grocery");
-
-                    b.Navigation("Product");
-                });
-
-            modelBuilder.Entity("Domain.Entities.Product", b =>
-                {
-                    b.HasOne("Domain.Entities.Category", "Category")
-                        .WithMany("Products")
-                        .HasForeignKey("CategoryId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
-                    b.HasOne("Domain.Entities.Grocery", "Grocery")
-                        .WithMany("Products")
-                        .HasForeignKey("GroceryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
                     b.OwnsOne("Domain.Entities.Promotion", "Promotion", b1 =>
                         {
-                            b1.Property<int>("ProductId")
+                            b1.Property<int>("InventoryItemId")
                                 .HasColumnType("integer");
 
                             b1.Property<decimal?>("DiscountAmount")
@@ -455,20 +397,35 @@ namespace Infraestructure.Migrations
                             b1.Property<int?>("PromotionQuantity")
                                 .HasColumnType("integer");
 
-                            b1.HasKey("ProductId");
+                            b1.HasKey("InventoryItemId");
 
-                            b1.ToTable("Products");
+                            b1.ToTable("InventoryItems");
 
                             b1.WithOwner()
-                                .HasForeignKey("ProductId");
+                                .HasForeignKey("InventoryItemId");
                         });
-
-                    b.Navigation("Category");
 
                     b.Navigation("Grocery");
 
+                    b.Navigation("Product");
+
                     b.Navigation("Promotion")
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Entities.Product", b =>
+                {
+                    b.HasOne("Domain.Entities.Category", "Category")
+                        .WithMany("Products")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("Domain.Entities.Grocery", null)
+                        .WithMany("Products")
+                        .HasForeignKey("GroceryId");
+
+                    b.Navigation("Category");
                 });
 
             modelBuilder.Entity("Domain.Entities.Purchase", b =>
@@ -593,17 +550,6 @@ namespace Infraestructure.Migrations
                     b.Navigation("Grocery");
 
                     b.Navigation("User");
-                });
-
-            modelBuilder.Entity("Domain.Entities.WeeklySale", b =>
-                {
-                    b.HasOne("Domain.Entities.Grocery", "Grocery")
-                        .WithMany()
-                        .HasForeignKey("GroceryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Grocery");
                 });
 
             modelBuilder.Entity("Domain.Entities.Category", b =>

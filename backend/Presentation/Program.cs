@@ -8,7 +8,6 @@ using Infraestructure.Repositories;
 using Infraestructure.Tenancy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using Presentation.Filters;
 using Presentation.Middleware;
 using Azure.Identity;
 
@@ -93,31 +92,6 @@ builder.Services.AddSwaggerGen(c =>
         Version = "v1",
         Description = "API para administración multi-tenant de groceries."
     });
-
-    c.AddSecurityDefinition("GroceryId", new OpenApiSecurityScheme
-    {
-        Type = SecuritySchemeType.ApiKey,
-        In = ParameterLocation.Header,
-        Name = "X-Grocery-Id",
-        Description = "ID del grocery (requerido para la mayoría de endpoints)"
-    });
-
-    c.AddSecurityRequirement(new OpenApiSecurityRequirement
-    {
-        {
-            new OpenApiSecurityScheme
-            {
-                Reference = new OpenApiReference
-                {
-                    Type = ReferenceType.SecurityScheme,
-                    Id = "GroceryId"
-                }
-            },
-            Array.Empty<string>()
-        }
-    });
-
-    c.OperationFilter<GroceryIdHeaderOperationFilter>();
 });
 
 builder.Services.AddAutoMapper(cfg =>
@@ -132,11 +106,10 @@ builder.Services.AddAutoMapper(cfg =>
     cfg.AddProfile<UserProfile>();
     cfg.AddProfile<RecentActivityProfile>();
     cfg.AddProfile<PurchaseProfile>();
-    cfg.AddProfile<DashboardProfile>();
 });
 
 builder.Services.AddHttpContextAccessor();
-builder.Services.AddScoped<ITenantProvider, HeaderTenantProvider>();
+builder.Services.AddScoped<ITenantProvider, ClaimsGroceryProvider>();
 
 if (string.IsNullOrWhiteSpace(conn))
 {
