@@ -3,7 +3,7 @@
 /* KPI Card Styles */
 
 .kpiCardTitle {
-  @apply text-sm text-slate-400;
+  @apply text-sm text-[var(--color-secondary-text)];
 }
 
 .kpiCardValue {
@@ -19,7 +19,7 @@
 }
 
 .kpiCardComparisonDefault {
-  @apply text-green-400;
+  @apply text-[var(--color-success)];
 }
 
 /* Weekly Sales Chart Styles */
@@ -37,15 +37,15 @@
 }
 
 .weeklySalesChart__bar {
-  @apply flex items-center justify-center w-full bg-green-800/50 rounded-t-md hover:bg-green-700 transition-all duration-300 hover:scale-105 hover:shadow-lg;
+  @apply flex items-center justify-center w-full bg-[var(--color-success-dark)]/50 rounded-t-md hover:bg-[var(--color-success)] transition-all duration-300 hover:scale-105 hover:shadow-lg;
 }
 
 .weeklySalesChart__barValue {
-  @apply text-xs sm:text-sm font-semibold text-gray-200;
+  @apply text-xs sm:text-sm font-semibold text-[var(--color-text)];
 }
 
 .weeklySalesChart__dayLabel {
-  @apply text-xs sm:text-sm font-medium text-gray-400;
+  @apply text-xs sm:text-sm font-medium text-[var(--color-secondary-text)];
 }
 
 /* Recent Activity Styles */
@@ -59,13 +59,13 @@
 }
 
 .recentActivity__iconContainer {
-  @apply p-2 bg-gray-700 rounded-full transition-all duration-200 hover:scale-110 hover:shadow-md;
+  @apply p-2 bg-[var(--surface)] rounded-full transition-all duration-200 hover:scale-110 hover:shadow-md;
 }
 
 .recentActivity__description {
-  @apply text-sm font-medium text-gray-200;
+  @apply text-sm font-medium text-[var(--color-text)];
 }
 
 .recentActivity__details {
-  @apply text-xs text-gray-400;
+  @apply text-xs text-[var(--color-secondary-text)];
 }

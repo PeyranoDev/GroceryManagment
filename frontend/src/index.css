@@ -9,25 +9,22 @@
   --color-secondary-dark: #254487;
 
   /* color error */
-  --color-error: #fa412d;
-  --color-error-dark: #c92a19;
+  --color-error: #b91c1c;
+  --color-error-dark: #7f1d1d;
 
   /* color warning */
   --color-warning: #fdc700;
   --color-warning-dark: #fdbf00;
 
   /* color success */
-  --color-success: #47a07c;
-  --color-success-dark: #3d8b6f;
+  --color-success: #1a5e3f;
+  --color-success-dark: #134a32;
 
   /* color info */
   --color-info: #1976d2;
 
   /* colores adicionales */
   --color-bg-dark: #1f2937;
-  --color-border-light: #374151;
-  --color-text-muted: #9ca3af;
-  --color-secondary-darker: #2d445a;
 
   /* otros */
   --color-text: #fafafa;
@@ -36,6 +33,18 @@
   --color-bg-input: #141312;
   --color-bg-secondary: #262422;
   --color-border: #1c1b19;
+  /* superficies suaves para reducir contraste excesivo */
+  --surface: #2a2826;
+  --surface-muted: #232220;
+}
+
+button[class*="bg-[var(--color-success"] {
+  color: var(--color-text) !important;
+}
+
+a[class*="bg-[var(--color-success"],
+[role="button"][class*="bg-[var(--color-success"] {
+  color: var(--color-text) !important;
 }
 
 /* Global transitions for all elements */

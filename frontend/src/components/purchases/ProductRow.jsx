@@ -1,150 +1,280 @@
-import { DollarSign, Settings2, Trash2 } from "lucide-react";
-import { useMemo } from "react";
+import { DollarSign, Edit, Trash2, X, AlertTriangle } from "lucide-react";
+import { useMemo, useState, useRef, useEffect } from "react";
+import InventorySuggestions from "./InventorySuggestions.jsx";
 import Input from "../ui/input/Input";
-import Select from "../ui/select/Select";
+import { formatDecimalPlain } from "../../utils/money.js";
+import { useDebounced } from "../../hooks/useDebounced";
+import { useSuggestions } from "../../hooks/useSuggestions";
+import { sanitizeInt, clamp } from "../../utils/number.js";
+import { getUnitFromProduct } from "../../utils/unit.js";
 
 export const ProductRow = ({
+  index,
+  displayIndex,
+  autoFocus,
   product,
   onProductChange,
   onRemoveProduct,
-  onOpenPromoModal,
-  isMobile = false,
+  inventory = [],
+  onSelectInventoryItem,
+  onRequestCreateProduct,
+  onAdjustInventoryStock,
+  onAdjustClick,
+  animState,
 }) => {
-  const displayUnit = product.unitType === "peso" ? "kg" : "u";
-  const unitPrice = useMemo(() => {
+  const unitPriceRaw = useMemo(() => {
     const total = parseFloat(product.totalPrice) || 0;
     const quantity = parseFloat(product.quantity) || 0;
-    return quantity > 0 ? (total / quantity).toFixed(2) : "0.00";
+    return quantity > 0 ? (total / quantity) : 0;
   }, [product.totalPrice, product.quantity]);
   const handleFieldChange = (field, value) =>
     onProductChange(product.id, { ...product, [field]: value });
 
-  if (isMobile) {
-    return (
-      <div className="bg-[var(--color-card)] border border-[var(--color-border)] rounded-lg p-4 space-y-4">
-        <div className="space-y-3">
-          <div>
-            <label className="block text-sm text-gray-400 mb-1">Nombre del producto</label>
-            <Input
-              placeholder="Nombre del producto"
-              value={product.name}
-              onChange={(e) => handleFieldChange("name", e.target.value)}
-            />
-          </div>
-          
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-sm text-gray-400 mb-1">Unidad de Medida</label>
-              <Select
-                value={product.unitType}
-                onChange={(e) => handleFieldChange("unitType", e.target.value)}
-              >
-                <option value="peso">Peso (kg)</option>
-                <option value="unidad">Unidad (u)</option>
-              </Select>
-            </div>
-            <div>
-              <label className="block text-sm text-gray-400 mb-1">Cantidad</label>
-              <Input
-                type="number"
-                placeholder="0"
-                value={product.quantity}
-                onChange={(e) => handleFieldChange("quantity", e.target.value)}
-              />
-            </div>
-          </div>
-          
-          <div>
-            <label className="block text-sm text-gray-400 mb-1">Precio Total</label>
-            <Input
-              type="number"
-              placeholder="0.00"
-              value={product.totalPrice}
-              onChange={(e) => handleFieldChange("totalPrice", e.target.value)}
-              icon={<DollarSign size={16} className="text-gray-400" />}
-            />
-          </div>
-          
-          <div className="bg-gray-800/50 p-3 rounded-md">
-            <span className="text-sm text-gray-400">Precio Unitario:</span>
-            <p className="text-lg font-semibold text-[var(--color-text)]">${unitPrice} / {displayUnit}</p>
-          </div>
-        </div>
-        
-        <div className="flex flex-col sm:flex-row gap-2 pt-2 border-t border-[var(--color-border)]">
-          <button
-            onClick={() => onOpenPromoModal(product)}
-            className="flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-[var(--color-text)] font-medium py-2 px-3 rounded-md text-sm flex-1"
-          >
-            <Settings2 size={14} />
-            Promociones
-          </button>
-          <button
-            onClick={() => onRemoveProduct(product.id)}
-            className="flex items-center justify-center gap-2 bg-red-600 hover:bg-red-700 text-[var(--color-text)] font-medium py-2 px-3 rounded-md text-sm flex-1"
-          >
-            <Trash2 size={14} />
-            Eliminar
-          </button>
-        </div>
-      </div>
-    );
-  }
+  const [rawQuery, setRawQuery] = useState("");
+  const debouncedQuery = useDebounced(rawQuery, 250);
+  
+  const [activeIndex, setActiveIndex] = useState(-1);
+  const inputRef = useRef(null);
+  const dropdownRef = useRef(null);
+  const suggestions = useSuggestions(debouncedQuery, inventory);
+
+  const locked = !!product.selectedItemId;
+  const unitDisplay = getUnitFromProduct(product);
+  const [isFocused, setIsFocused] = useState(false);
+  
+  useEffect(() => {
+    if (autoFocus && inputRef.current && !locked) {
+      inputRef.current.focus();
+    }
+  }, [autoFocus, locked]);
+  useEffect(() => {
+    if (locked || !isFocused) return;
+    const q = (debouncedQuery || '').trim();
+    if (!q) { setActiveIndex(-1); return; }
+    if (suggestions.length > 0) setActiveIndex(0);
+  }, [debouncedQuery, suggestions.length, isFocused, locked]);
+
 
   return (
-    <tr className="border-b border-[var(--color-bg-input)]">
-      <td className="p-2 w-1/4">
-        <Input
-          placeholder="Nombre del producto"
-          value={product.name}
-          onChange={(e) => handleFieldChange("name", e.target.value)}
-        />
+    <tr className={`${animState === 'enter' ? 'row-enter' : animState === 'exit' ? 'row-exit' : ''} ${product.isRegistered ? 'bg-[var(--color-bg-input)]/40' : ''}`}>
+      <td className="p-2 w-[4%] text-left text-[var(--color-secondary-text)]">{displayIndex ?? ((index ?? 0) + 1)}</td>
+      <td className="p-2 w-[16%]">
+        <div className="relative">
+          {product.isRegistered ? (
+            <div className="border border-[var(--color-border)] rounded-md px-3 py-2 max-w-[220px] text-[var(--color-secondary-text)]">
+              {product.name}
+            </div>
+          ) : (
+          <Input
+            value={product.name}
+            onChange={(e) => {
+              const val = e.target.value;
+              setRawQuery(val);
+              handleFieldChange("name", val);
+              setIsFocused(true);
+              setActiveIndex(-1);
+            }}
+            className={`${locked ? "pr-8 !bg-[var(--color-bg-input)]/60 cursor-not-allowed text-[var(--color-secondary-text)]" : ""} border border-[var(--color-border)] max-w-[200px] sm:max-w-[220px]`}
+            readOnly={locked}
+            ref={inputRef}
+            required
+            error={!!product.invalidProduct && !!(product.name || '').trim()}
+            onFocus={() => {
+              if (!locked) {
+                setIsFocused(true);
+                onProductChange(product.id, { ...product, touchedProduct: true, invalidProduct: false });
+              }
+            }}
+            onBlur={(e) => {
+              if (locked) return;
+              const rt = e.relatedTarget;
+              if (dropdownRef.current && rt && dropdownRef.current.contains(rt)) {
+                // mantener foco lógico si se interactúa con el dropdown
+                setIsFocused(true);
+                return;
+              }
+              setIsFocused(false);
+              const val = (e.target.value || "").trim().toLowerCase();
+              if (!val) { 
+                onProductChange(product.id, { ...product, invalidProduct: true });
+                return; 
+              }
+              const exact = inventory.find((it) => (it.name || "").toLowerCase() === val);
+              if (exact) {
+                onSelectInventoryItem(product.id, exact);
+                setRawQuery("");
+              } else {
+                onProductChange(product.id, { ...product, invalidProduct: true });
+              }
+            }}
+            onKeyDown={(e) => {
+              if (e.key === "ArrowDown") {
+                e.preventDefault();
+                setActiveIndex((prev) => Math.min(prev + 1, suggestions.length - 1));
+              } else if (e.key === "ArrowUp") {
+                e.preventDefault();
+                setActiveIndex((prev) => Math.max(prev - 1, 0));
+              } else if (e.key === "Enter") {
+                e.preventDefault();
+                const pick = activeIndex >= 0 ? suggestions[activeIndex] : suggestions[0];
+                if (pick) {
+                  onSelectInventoryItem(product.id, pick);
+                  setRawQuery("");
+                }
+              } else if (e.key === "Escape") {
+                setIsFocused(false);
+              }
+            }}
+          />
+          )}
+          {!product.isRegistered && !locked && product.invalidProduct && !!(product.name || '').trim() && (
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--color-error)]" title={`${(!product.name || !product.name.trim()) ? 'Campo requerido' : 'Producto no registrado'}` }>
+              <AlertTriangle size={16} />
+            </div>
+          )}
+          {!product.isRegistered && locked && (
+            <button
+              onClick={() => {
+                onProductChange(product.id, {
+                  ...product,
+                  name: "",
+                  selectedItemId: null,
+                  appliedQuantity: 0,
+                  invalidProduct: false,
+                });
+                setRawQuery("");
+              }}
+              className="absolute right-2 top-1/2 -translate-y-1/2 text-[var(--color-secondary-text)] hover:text-[var(--color-secondary-text)]/70"
+              title="Quitar producto"
+            >
+              <X size={16} />
+            </button>
+          )}
+          {!locked && (
+            <InventorySuggestions
+              anchorRef={inputRef}
+              open={isFocused}
+              suggestions={suggestions}
+              activeIndex={activeIndex}
+              onHoverIndexChange={(idx) => setActiveIndex(idx)}
+              onPick={(sug) => { onSelectInventoryItem(product.id, sug); setRawQuery(""); setIsFocused(false); }}
+              onCreateNew={() => { onRequestCreateProduct(product.id, product.name || rawQuery); setIsFocused(false); }}
+              query={rawQuery}
+              dropdownRef={dropdownRef}
+              usePortal={true}
+            />
+          )}
+        </div>
       </td>
-      <td className="p-2 w-[15%]">
-        <Select
-          value={product.unitType}
-          onChange={(e) => handleFieldChange("unitType", e.target.value)}
-        >
-          <option value="peso">Peso (kg)</option>
-          <option value="unidad">Unidad (u)</option>
-        </Select>
+
+      <td className="p-2 w-[8%]">
+        <div className="relative inline-block w-[100px]">
+          {product.isRegistered ? (
+            <div className="border border-[var(--color-border)] rounded-md px-3 py-2 text-[var(--color-secondary-text)] font-mono">
+              {product.quantity || '0'}
+              {unitDisplay && (
+                <span className="ml-2 text-[var(--color-secondary-text)] text-xs">{unitDisplay}</span>
+              )}
+            </div>
+          ) : (
+          <Input
+            type="number"
+            value={product.quantity}
+            onChange={(e) => {
+              const quantityNum = clamp(sanitizeInt(e.target.value), 0, 999);
+              const prevApplied = parseFloat(product.appliedQuantity || 0) || 0;
+              if (product.selectedItemId && onAdjustInventoryStock) {
+                const delta = quantityNum - prevApplied;
+                if (delta !== 0) onAdjustInventoryStock(product.selectedItemId, delta);
+              }
+              onProductChange(product.id, { ...product, quantity: String(quantityNum), appliedQuantity: quantityNum });
+            }}
+            onFocus={() => {} }
+            onBlur={(e) => {
+              const val = (e.target.value || '').trim();
+              const empty = !val;
+              const quantityNum = parseInt(val || '0', 10) || 0;
+              onProductChange(product.id, { ...product, invalidQuantity: (!empty ? quantityNum <= 0 : false) });
+            }}
+            inputClassName={`pr-16`}
+            min={1}
+            max={999}
+            step={1}
+            inputMode="numeric"
+            required
+          />
+          )}
+          {!product.isRegistered && (
+            <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2 sm:gap-3 pointer-events-none transition-all duration-200">
+              {unitDisplay && (
+                <span
+                  className={`text-[var(--color-secondary-text)] font-mono text-xs select-none transition-all duration-200 ease-in-out ${(!(product.quantity || '').trim() || product.invalidQuantity) ? 'translate-x-0' : 'translate-x-0'}`}
+                >
+                  {unitDisplay}
+                </span>
+              )}
+              {product.invalidQuantity && (
+                <span className="text-[var(--color-error)]" title={`Cantidad debe ser mayor a 0`}
+                >
+                  <AlertTriangle size={16} />
+                </span>
+              )}
+            </div>
+          )}
+        </div>
       </td>
-      <td className="p-2 w-[10%]">
-        <Input
-          type="number"
-          placeholder="0"
-          value={product.quantity}
-          onChange={(e) => handleFieldChange("quantity", e.target.value)}
-        />
+      <td className="p-2 w-[18%]">
+        <div className="relative">
+          {product.isRegistered ? (
+            <div className="border border-[var(--color-border)] rounded-md px-3 py-2 text-[var(--color-secondary-text)] font-bold">
+              <span className="mr-2">$</span>
+              <span>{formatDecimalPlain(parseFloat(product.totalPrice || 0))}</span>
+            </div>
+          ) : (
+          <Input
+            type="text"
+            value={product.totalPrice}
+            onChange={(e) => handleFieldChange("totalPrice", e.target.value)}
+            icon={<DollarSign size={14} className="text-[var(--color-secondary-text)]" />}
+            format="currency"
+            ariaLabel="Precio total"
+            className="max-w-[160px]"
+            onBlur={(e) => {
+              const empty = !(e.target.value || '').trim();
+              if (empty) {
+                onProductChange(product.id, { ...product, totalPrice: '' });
+              }
+            }}
+          />
+          )}
+          
+        </div>
       </td>
-      <td className="p-2 w-[15%]">
-        <Input
-          type="number"
-          placeholder="0.00"
-          value={product.totalPrice}
-          onChange={(e) => handleFieldChange("totalPrice", e.target.value)}
-          icon={<DollarSign size={14} className="text-gray-400" />}
-        />
+      <td className="p-2 w-[14%] text-left text-[var(--color-secondary-text)]">
+        {product.isRegistered && <span className="mr-1">$</span>}
+        <span>{formatDecimalPlain(unitPriceRaw)}</span>
+        <span className="ml-1">/ {unitDisplay || 'u'}</span>
       </td>
-      <td className="p-2 w-[12%] text-center font-mono text-[var(--color-secondary-text)]">
-        ${unitPrice} / {displayUnit}
-      </td>
-      <td className="p-2 w-[15%] text-center">
-        <button
-          onClick={() => onOpenPromoModal(product)}
-          className="flex items-center justify-center w-full gap-2 bg-gray-700/50 text-[var(--color-secondary-text)] hover:bg-gray-700 font-semibold py-1 px-3 rounded-md text-xs"
-        >
-          <Settings2 size={14} />
-          <span>Gestionar ({product.promotions.length})</span>
-        </button>
-      </td>
-      <td className="p-2 w-[5%] text-center">
-        <button
-          onClick={() => onRemoveProduct(product.id)}
-          className="text-red-400 hover:text-red-500"
-        >
-          <Trash2 size={20} />
-        </button>
+
+      <td className="p-2 w-[10%] text-left">
+        <div className="flex items-center justify-start gap-5">
+          {product.isRegistered && (
+            <button
+              onClick={() => onAdjustClick && onAdjustClick(product)}
+              disabled={!product.selectedItemId}
+              className={`${product.selectedItemId ? 'text-[var(--color-secondary)] hover:text-[var(--color-secondary-dark)]' : 'text-[var(--color-secondary-text)] cursor-not-allowed'}`}
+              title="Ajustar"
+            >
+              <Edit size={30} />
+            </button>
+          )}
+          <button
+            onClick={() => onRemoveProduct(product.id)}
+            className={`text-[var(--color-error)] hover:text-[var(--color-error-dark)]`}
+          >
+            <Trash2 size={30} />
+          </button>
+        </div>
       </td>
     </tr>
   );
