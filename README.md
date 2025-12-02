@@ -240,6 +240,31 @@ Editar `docker-compose.yml` para cambiar puertos por defecto.
 └─────────────────┘    └─────────────────┘    └─────────────────┘
 ```
 
+## 🚀 Semantic Release
+
+Este proyecto usa [Semantic Release](https://semantic-release.gitbook.io/) para automatizar el versionado y la generación de releases.
+
+### Cómo funciona
+
+1. Cuando se hace push a `main`, el workflow de GitHub Actions analiza los commits
+2. Basándose en los tipos de commits, determina el siguiente número de versión:
+   - `fix:` → Patch release (1.0.0 → 1.0.1)
+   - `feat:` → Minor release (1.0.0 → 1.1.0)
+   - `BREAKING CHANGE:` → Major release (1.0.0 → 2.0.0)
+3. Genera automáticamente:
+   - Tag de Git con la versión
+   - Release en GitHub con notas de cambios
+   - Actualización del CHANGELOG.md
+
+### Setup local (opcional, para validar commits)
+
+```bash
+# Instalar dependencias
+npm install
+
+# Esto configura Husky para validar commits automáticamente
+```
+
 ## 🤝 Contribución
 
 ### Convenciones de Commits
