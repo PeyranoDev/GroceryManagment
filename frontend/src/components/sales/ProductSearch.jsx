@@ -24,11 +24,11 @@ const ProductSearch = ({
                 <li
                   key={p.id}
                   onClick={() => onAddProduct(p)}
-                  className="px-4 py-2 hover:bg-gray-600 cursor-pointer"
+                  className="px-4 py-2 hover:bg-[var(--surface-muted)] cursor-pointer"
                 >
                   <div className="flex justify-between items-center">
                     <span>{p.name}</span>
-                    <span className="text-sm text-gray-500">
+                    <span className="text-sm text-[var(--color-secondary-text)]">
                       ${p.unitPrice}/{p.unit}
                     </span>
                   </div>

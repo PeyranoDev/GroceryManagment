@@ -6,24 +6,24 @@ const SalesCart = ({
   onQuantityChange, 
   onRemove, 
   onTogglePromotion,
-  productSearchComponent 
+  productSearchComponent,
+  footerActions
 }) => {
   return (
     <Card
-      className="lg:col-span-2 h-fit "
+      className="lg:col-span-2 h-fit !w-auto inline-block"
       title="Productos en la Venta"
       actions={productSearchComponent}
     >
       <div className="hidden md:block overflow-x-auto">
-        <table className="w-full text-sm text-left">
-          <thead className="text-xs text-gray-400 uppercase">
+        <table className="table-auto text-sm text-left">
+          <thead className="text-xs text-[var(--color-secondary-text)] uppercase">
             <tr>
               <th className="p-3">Producto</th>
               <th className="p-3">Cantidad</th>
               <th className="p-3">Unidad</th>
               <th className="p-3">Precio Unit.</th>
               <th className="p-3">Total</th>
-              <th className="p-3">Promoción</th>
               <th className="p-3 text-center">Acciones</th>
             </tr>
           </thead>
@@ -40,7 +40,7 @@ const SalesCart = ({
               ))
             ) : (
               <tr>
-                <td colSpan="7" className="text-center p-6 text-gray-500">
+                <td colSpan="6" className="text-center p-6 text-[var(--color-secondary-text)]">
                   Aún no hay productos en la venta.
                 </td>
               </tr>
@@ -62,11 +62,16 @@ const SalesCart = ({
             />
           ))
         ) : (
-          <div className="text-center p-6 text-gray-500">
+          <div className="text-center p-6 text-[var(--color-secondary-text)]">
             Aún no hay productos en la venta.
           </div>
         )}
       </div>
+      {footerActions && (
+        <div className="flex justify-between mt-3">
+          {footerActions}
+        </div>
+      )}
     </Card>
   );
 };

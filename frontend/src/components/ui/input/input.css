@@ -2,7 +2,7 @@
 
 input {
   @apply py-2 w-full border rounded-md focus:outline-none focus:ring-2 focus:ring-[var(--color-primary)] 
-  bg-[var(--color-bg-input)] border-[var(--color-bg-input)] text-white placeholder-gray-400
+  bg-[var(--color-bg-input)] border-[var(--color-bg-input)] text-[var(--color-text)] placeholder-[var(--color-secondary-text)]
   transition-all duration-200 ease-in-out
   hover:border-[var(--color-primary)]/50 hover:shadow-md
   focus:border-[var(--color-primary)] focus:shadow-lg focus:scale-[1.02];
@@ -38,6 +38,6 @@ input[type="date"] {
 }
 
 .icon {
-  @apply z-[1] absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none
+  @apply z-[1] absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-auto
   transition-all duration-200;
 }

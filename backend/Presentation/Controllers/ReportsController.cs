@@ -1,13 +1,11 @@
 using Application.Schemas.Reports;
 using Application.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Presentation.Filters;
 
 namespace Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [RequireGroceryHeader]
     public class ReportsController : ControllerBase
     {
         private readonly IReportService _reportService;

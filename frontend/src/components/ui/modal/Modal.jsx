@@ -1,18 +1,22 @@
 import './modal.css';
 import { X } from 'lucide-react';
+import { useEffect } from 'react';
 
 const Modal = ({ isOpen, onClose, title, children }) => {
-  if (!isOpen) return null;
+  useEffect(() => {
+    if (!isOpen) return;
+    const handler = (e) => {
+      if (e.key === 'Escape') onClose();
+    };
+    document.addEventListener('keydown', handler);
+    return () => document.removeEventListener('keydown', handler);
+  }, [isOpen, onClose]);
 
-  const handleKeyDown = (e) => {
-    if (e.key === 'Escape') onClose();
-  };
+  if (!isOpen) return null;
 
   return (
     <div 
       className="modal-overlay" 
-      onClick={onClose}
-      onKeyDown={handleKeyDown}
       role="dialog"
       aria-modal="true"
       aria-labelledby="modal-title"
@@ -24,7 +28,7 @@ const Modal = ({ isOpen, onClose, title, children }) => {
           </h3>
           <button 
             onClick={onClose} 
-            className="text-gray-400 hover:text-gray-200 p-1 rounded"
+            className="text-[var(--color-secondary-text)] hover:text-[var(--color-secondary-text)]/70 p-1 rounded"
             aria-label="Cerrar modal"
           >
             <X size={20} />

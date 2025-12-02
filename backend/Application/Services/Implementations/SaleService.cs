@@ -10,75 +10,74 @@ namespace Application.Services.Implementations
     public class SaleService : ISaleService
     {
         private readonly ISaleRepository _sales;
+        private readonly IInventoryRepository _inventory;
         private readonly ITenantProvider _tenantProvider;
         private readonly IMapper _mapper;
 
-        public SaleService(ISaleRepository sales, ITenantProvider tenantProvider, IMapper mapper)
+        public SaleService(ISaleRepository sales, IInventoryRepository inventory, ITenantProvider tenantProvider, IMapper mapper)
         {
             _sales = sales;
+            _inventory = inventory;
             _tenantProvider = tenantProvider;
             _mapper = mapper;
         }
 
-        public async Task<SaleForResponseDto?> GetById(int id)
-        {
-            var sale = await _sales.GetById(id);
-            if (sale is null || sale.GroceryId != _tenantProvider.CurrentGroceryId)
-                return null;
-            
-            return _mapper.Map<SaleForResponseDto>(sale);
-        }
-
-        public async Task<IReadOnlyList<SaleForResponseDto>> GetAll()
-        {
-            var list = await _sales.GetAllByGroceryId(_tenantProvider.CurrentGroceryId);
-            
-            if (list == null)
-            {
-                return new List<SaleForResponseDto>();
-            }
-            
-            return list.Select(_mapper.Map<SaleForResponseDto>).ToList();
-        }
-
-        public async Task<IReadOnlyList<SaleForResponseDto>> GetByDateRange(DateTime startDate, DateTime endDate)
-        {
-            var list = await _sales.GetByDateRange(startDate, endDate);
-            var filteredList = list.Where(s => s.GroceryId == _tenantProvider.CurrentGroceryId).ToList();
-            return filteredList.Select(_mapper.Map<SaleForResponseDto>).ToList();
-        }
-
-        public async Task<IReadOnlyList<SaleForResponseDto>> GetByUserId(int userId)
-        {
-            var list = await _sales.GetByUserId(userId);
-            var filteredList = list.Where(s => s.GroceryId == _tenantProvider.CurrentGroceryId).ToList();
-            return filteredList.Select(_mapper.Map<SaleForResponseDto>).ToList();
-        }
-
         public async Task<SaleForResponseDto> Create(SaleForCreateDto dto)
         {
-            if (dto.UserId <= 0)
-            {
-                throw new ArgumentException("El ID del usuario es requerido y debe ser válido.");
-            }
-
             var entity = _mapper.Map<Sale>(dto);
-            
             entity.GroceryId = _tenantProvider.CurrentGroceryId;
             
-            entity.Items = dto.Items.Select(itemDto => {
+            entity.Items = new List<SaleItem>();
+            foreach (var itemDto in dto.Items)
+            {
                 var saleItem = _mapper.Map<SaleItem>(itemDto);
                 saleItem.GroceryId = _tenantProvider.CurrentGroceryId;
-                return saleItem;
-            }).ToList();
+                entity.Items.Add(saleItem);
+
+                // Update Stock
+                var inventoryItem = await _inventory.GetByProductIdAndGroceryId(itemDto.ProductId, _tenantProvider.CurrentGroceryId);
+                if (inventoryItem != null)
+                {
+                    inventoryItem.Stock -= itemDto.Quantity;
+                    inventoryItem.LastUpdated = DateTime.UtcNow;
+                    await _inventory.Update(inventoryItem);
+                }
+            }
             
             entity.Total = entity.Items.Sum(item => item.Price * item.Quantity);
             entity.Date = DateTime.UtcNow;
 
             await _sales.Create(entity);
             await _sales.SaveChanges();
+            await _inventory.SaveChanges();
 
             return _mapper.Map<SaleForResponseDto>(entity);
+        }
+
+        public async Task<SaleForResponseDto?> GetById(int id)
+        {
+            var entity = await _sales.GetById(id);
+            if (entity is null || entity.GroceryId != _tenantProvider.CurrentGroceryId)
+                return null;
+            return _mapper.Map<SaleForResponseDto>(entity);
+        }
+
+        public async Task<IReadOnlyList<SaleForResponseDto>> GetAll()
+        {
+            var list = await _sales.GetAllByGroceryId(_tenantProvider.CurrentGroceryId);
+            return list.Select(_mapper.Map<SaleForResponseDto>).ToList();
+        }
+
+        public async Task<IReadOnlyList<SaleForResponseDto>> GetByDateRange(DateTime startDate, DateTime endDate)
+        {
+            var list = await _sales.GetSalesByDateRangeAndGrocery(startDate, endDate, _tenantProvider.CurrentGroceryId);
+            return list.Select(_mapper.Map<SaleForResponseDto>).ToList();
+        }
+
+        public async Task<IReadOnlyList<SaleForResponseDto>> GetByUserId(int userId)
+        {
+            var list = await _sales.GetByUserId(userId);
+            return list.Select(_mapper.Map<SaleForResponseDto>).ToList();
         }
 
         public async Task<bool> Delete(int id)

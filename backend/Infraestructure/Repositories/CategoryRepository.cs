@@ -12,9 +12,9 @@ namespace Infraestructure.Repositories
 
         public Task<bool> ExistsByName(string name)
             => _ctx.Categories.AsNoTracking()
-                .AnyAsync(c => c.Name == name && c.GroceryId == _tenant.CurrentGroceryId);
+                .AnyAsync(c => c.Name == name);
 
         public async Task<IReadOnlyList<Category>> GetByGroceryId(int groceryId)
-            => await _ctx.Categories.AsNoTracking().Where(c => c.GroceryId == groceryId).ToListAsync();
+            => await _ctx.Categories.AsNoTracking().ToListAsync();
     }
 }

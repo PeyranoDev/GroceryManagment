@@ -7,27 +7,38 @@ import {
   mockRecentActivitiesAPI,
   mockPurchasesAPI,
   mockReportsAPI,
-  mockCategoriesAPI
+  mockCategoriesAPI,
+  mockUsersAPI
 } from './mockApi.js';
 
-// Always use mock data for demo
+// Set to false to use real API
 const DEMO_MODE = true;
 
-const runtimeEnv = (typeof window !== 'undefined' && window.__APP_ENV__) || {};
-const runtimeApi = runtimeEnv.API_URL; 
+// Get API URL from runtime environment (injected via env.js) or build-time env
+const getApiUrl = () => {
+  // 1. Runtime environment (from env.js injected by entrypoint.sh in production)
+  if (typeof window !== 'undefined' && window.__APP_ENV__?.API_URL) {
+    return window.__APP_ENV__.API_URL;
+  }
+  
+  // 2. Build-time environment variable
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  
+  // 3. Default for local development
+  return 'http://localhost:5001';
+};
 
-const viteApi = import.meta.env.VITE_API_URL; 
-
-const normalizeApi = (url) => {
-  if (!url || typeof url !== 'string') return undefined;
+const normalizeApiUrl = (url) => {
+  if (!url || typeof url !== 'string') return 'http://localhost:5001/api';
   const trimmed = url.replace(/\/+$/, '');
   return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`;
 };
 
-const API_BASE_URL =
-  normalizeApi(runtimeApi) ||
-  normalizeApi(viteApi) ||
-  'http://localhost:5001/api';
+const API_BASE_URL = normalizeApiUrl(getApiUrl());
+
+console.log('API Base URL:', API_BASE_URL);
 
 const getHeaders = () => ({
   'Content-Type': 'application/json',
@@ -115,6 +126,18 @@ export const salesAPI = DEMO_MODE ? mockSalesAPI : {
     method: 'POST',
     body: JSON.stringify(cartData),
   }),
+  updateOrderStatus: (id, newStatus) => apiRequest(`/Sales/${id}/order-status`, {
+    method: 'POST',
+    body: JSON.stringify({ status: newStatus }),
+  }),
+  addPayment: (id, payment) => apiRequest(`/Sales/${id}/payments`, {
+    method: 'POST',
+    body: JSON.stringify(payment),
+  }),
+  updatePaymentStatus: (id, status) => apiRequest(`/Sales/${id}/payment-status`, {
+    method: 'POST',
+    body: JSON.stringify({ status }),
+  }),
   generateWhatsApp: (id, details) => apiRequest(`/Sales/${id}/whatsapp`, {
     method: 'POST',
     body: JSON.stringify(details),
@@ -150,6 +173,8 @@ export const purchasesAPI = DEMO_MODE ? mockPurchasesAPI : {
     const params = new URLSearchParams({ startDate, endDate }).toString();
     return apiRequest(`/Purchases/date-range?${params}`);
   },
+  getLatest: () => apiRequest('/Purchases/latest'),
+  getByDate: (date) => apiRequest(`/Purchases/date/${date}`),
   create: (purchase) => apiRequest('/Purchases', {
     method: 'POST',
     body: JSON.stringify(purchase),
@@ -193,6 +218,14 @@ export const categoriesAPI = DEMO_MODE ? mockCategoriesAPI : {
   delete: (id) => apiRequest(`/Categories/${id}`, {
     method: 'DELETE',
   }),
+};
+
+export const usersAPI = DEMO_MODE ? mockUsersAPI : {
+  getAll: () => apiRequest('/Users'),
+  getById: (id) => apiRequest(`/Users/${id}`),
+  create: (user) => apiRequest('/Users', { method: 'POST', body: JSON.stringify(user) }),
+  update: (id, user) => apiRequest(`/Users/${id}`, { method: 'PUT', body: JSON.stringify(user) }),
+  delete: (id) => apiRequest(`/Users/${id}`, { method: 'DELETE' }),
 };
 
 export const handleApiError = (error) => {

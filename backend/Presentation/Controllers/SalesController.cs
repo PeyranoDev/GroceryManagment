@@ -2,13 +2,11 @@ using Application.Schemas;
 using Application.Schemas.Sales;
 using Application.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Presentation.Filters;
 
 namespace Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [RequireGroceryHeader]
     public class SalesController : ControllerBase
     {
         private readonly ISaleService _saleService;

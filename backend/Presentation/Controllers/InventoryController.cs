@@ -2,13 +2,11 @@ using Application.Schemas;
 using Application.Schemas.Inventory;
 using Application.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
-using Presentation.Filters;
 
 namespace Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [RequireGroceryHeader]
     public class InventoryController : ControllerBase
     {
         private readonly IInventoryService _inventoryService;

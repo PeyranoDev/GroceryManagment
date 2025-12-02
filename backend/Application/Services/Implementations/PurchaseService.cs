@@ -133,7 +133,9 @@ namespace Application.Services.Implementations
                         ProductId = item.ProductId,
                         Stock = item.Quantity,
                         LastUpdated = DateTime.UtcNow,
-                        GroceryId = purchase.GroceryId
+                        GroceryId = purchase.GroceryId,
+                        UnitPrice = item.UnitCost, // Initialize with purchase cost
+                        SalePrice = item.UnitCost * 1.3m // Default 30% markup? Or just 0? Let's use cost for now to avoid 0.
                     };
                     await _inventoryRepository.Create(newInventoryItem);
                 }

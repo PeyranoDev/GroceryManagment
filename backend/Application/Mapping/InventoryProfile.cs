@@ -9,12 +9,15 @@ namespace Application.Mapping
         public InventoryProfile()
         {
             CreateMap<InventoryItemForCreateDto, InventoryItem>()
-                .ForMember(dest => dest.LastUpdated, opt => opt.MapFrom(src => DateTime.UtcNow));
+                .ForMember(dest => dest.LastUpdated, opt => opt.MapFrom(src => DateTime.UtcNow))
+                .ForMember(dest => dest.Promotion, opt => opt.MapFrom(src => src.Promotion));
             
             CreateMap<InventoryItemForUpdateDto, InventoryItem>()
-                .ForMember(dest => dest.LastUpdated, opt => opt.MapFrom(src => DateTime.UtcNow));
+                .ForMember(dest => dest.LastUpdated, opt => opt.MapFrom(src => DateTime.UtcNow))
+                .ForMember(dest => dest.Promotion, opt => opt.MapFrom(src => src.Promotion));
             
-            CreateMap<InventoryItem, InventoryItemForResponseDto>();
+            CreateMap<InventoryItem, InventoryItemForResponseDto>()
+                .ForMember(dest => dest.Promotion, opt => opt.MapFrom(src => src.Promotion));
 
             CreateMap<StockAdjustmentDto, InventoryItem>()
                 .ForMember(dest => dest.Stock, opt => opt.MapFrom(src => src.NewStock))

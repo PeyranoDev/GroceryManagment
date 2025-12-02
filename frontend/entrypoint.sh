@@ -1,18 +1,16 @@
 #!/bin/sh
 set -eu
 
-: "${API_URL:=http://localhost:8080}"
-: "${API_ORIGIN:=}" 
+# Default API URL - will be overridden by Azure Container App environment variable
+: "${API_URL:=http://localhost:5001}"
 
-if [ -f /usr/share/nginx/html/env.template.js ]; then
-  export API_URL
-  envsubst '${API_URL}' < /usr/share/nginx/html/env.template.js > /usr/share/nginx/html/env.js
-fi
+# Generate env.js with runtime environment variables
+cat > /app/dist/env.js << EOF
+window.__APP_ENV__ = {
+  API_URL: "${API_URL}"
+};
+EOF
 
-# Nginx default.conf desde template
-if [ -f /etc/nginx/conf.d/default.conf.template ]; then
-  export API_ORIGIN
-  envsubst '${API_ORIGIN}' < /etc/nginx/conf.d/default.conf.template > /etc/nginx/conf.d/default.conf
-fi
+echo "Environment configured with API_URL: ${API_URL}"
 
 exec "$@"
