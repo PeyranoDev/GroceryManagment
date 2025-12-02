@@ -7,14 +7,20 @@ ARG VITE_BASE=/
 ENV VITE_BASE=${VITE_BASE}
 RUN npm run build
 
-FROM nginx:1.27-alpine
-WORKDIR /
-COPY nginx.conf /etc/nginx/nginx.conf
-COPY default.conf.template /etc/nginx/conf.d/default.conf.template
-COPY env.template.js /usr/share/nginx/html/env.template.js
+FROM node:20-alpine
+WORKDIR /app
+
+# Install serve for static file serving
+RUN npm install -g serve
+
+# Copy built files
+COPY --from=build /app/dist ./dist
+
+# Copy entrypoint script for runtime env injection
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
-COPY --from=build /app/dist /usr/share/nginx/html
-EXPOSE 80
+
+EXPOSE 3000
+
 ENTRYPOINT ["/entrypoint.sh"]
-CMD ["nginx", "-g", "daemon off;"]
+CMD ["serve", "-s", "dist", "-l", "3000"]
