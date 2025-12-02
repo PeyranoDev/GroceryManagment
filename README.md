@@ -69,7 +69,7 @@ chmod +x start.sh
 ```bash
 docker-compose up --build -d
 ```
-- Frontend optimizado servido por Nginx
+- Frontend optimizado servido por Node.js (serve)
 - Backend API optimizada
 - PostgreSQL en producción
 - Persistencia de datos completa
