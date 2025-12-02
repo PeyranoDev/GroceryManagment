@@ -11,24 +11,34 @@ import {
   mockUsersAPI
 } from './mockApi.js';
 
-// Always use mock data for demo
+// Set to false to use real API
 const DEMO_MODE = true;
 
-const runtimeEnv = (typeof window !== 'undefined' && window.__APP_ENV__) || {};
-const runtimeApi = runtimeEnv.API_URL; 
+// Get API URL from runtime environment (injected via env.js) or build-time env
+const getApiUrl = () => {
+  // 1. Runtime environment (from env.js injected by entrypoint.sh in production)
+  if (typeof window !== 'undefined' && window.__APP_ENV__?.API_URL) {
+    return window.__APP_ENV__.API_URL;
+  }
+  
+  // 2. Build-time environment variable
+  if (import.meta.env.VITE_API_URL) {
+    return import.meta.env.VITE_API_URL;
+  }
+  
+  // 3. Default for local development
+  return 'http://localhost:5001';
+};
 
-const viteApi = import.meta.env.VITE_API_URL; 
-
-const normalizeApi = (url) => {
-  if (!url || typeof url !== 'string') return undefined;
+const normalizeApiUrl = (url) => {
+  if (!url || typeof url !== 'string') return 'http://localhost:5001/api';
   const trimmed = url.replace(/\/+$/, '');
   return trimmed.endsWith('/api') ? trimmed : `${trimmed}/api`;
 };
 
-const API_BASE_URL =
-  normalizeApi(runtimeApi) ||
-  normalizeApi(viteApi) ||
-  'http://localhost:5001/api';
+const API_BASE_URL = normalizeApiUrl(getApiUrl());
+
+console.log('API Base URL:', API_BASE_URL);
 
 const getHeaders = () => ({
   'Content-Type': 'application/json',
