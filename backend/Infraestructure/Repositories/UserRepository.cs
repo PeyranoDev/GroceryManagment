@@ -20,7 +20,7 @@ namespace Infraestructure.Repositories
             => _ctx.Users
                 .AsNoTracking()
                 .Include(u => u.Grocery)
-                .FirstOrDefaultAsync(u => u.Email == email)!;
+                .FirstOrDefaultAsync(u => u.Email == email && u.IsActive)!;
 
         public Task<bool> ExistsByEmail(string email)
             => _ctx.Users.AsNoTracking().AnyAsync(u => u.Email == email);
@@ -36,6 +36,54 @@ namespace Infraestructure.Repositories
             var u = await _ctx.Users.FirstOrDefaultAsync(x => x.Id == userId);
             if (u == null) return;
             u.IsSuperAdmin = isSuperAdmin;
+            await _ctx.SaveChangesAsync();
+        }
+
+        public async Task<IReadOnlyList<User>> GetByGroceryId(int groceryId)
+            => await _ctx.Users
+                .AsNoTracking()
+                .Include(u => u.Grocery)
+                .Where(u => u.GroceryId == groceryId && u.IsActive)
+                .ToListAsync();
+
+        public async Task<IReadOnlyList<User>> GetAll()
+            => await _ctx.Users
+                .AsNoTracking()
+                .Include(u => u.Grocery)
+                .Where(u => u.IsActive)
+                .ToListAsync();
+
+        public async Task<IReadOnlyList<User>> GetByGroceryIdAll(int groceryId)
+            => await _ctx.Users
+                .AsNoTracking()
+                .Include(u => u.Grocery)
+                .Where(u => u.GroceryId == groceryId)
+                .ToListAsync();
+
+        public Task<int> CountByGroceryId(int groceryId)
+            => _ctx.Users.AsNoTracking().CountAsync(u => u.GroceryId == groceryId && u.Role != null);
+
+        public async Task Activate(int userId)
+        {
+            var u = await _ctx.Users.FirstOrDefaultAsync(x => x.Id == userId);
+            if (u == null) return;
+            u.IsActive = true;
+            await _ctx.SaveChangesAsync();
+        }
+
+        public async Task SetRole(int userId, Domain.Common.Enums.GroceryRole role)
+        {
+            var u = await _ctx.Users.FirstOrDefaultAsync(x => x.Id == userId);
+            if (u == null) return;
+            u.Role = role;
+            await _ctx.SaveChangesAsync();
+        }
+
+        public async Task SetGrocery(int userId, int groceryId)
+        {
+            var u = await _ctx.Users.FirstOrDefaultAsync(x => x.Id == userId);
+            if (u == null) return;
+            u.GroceryId = groceryId;
             await _ctx.SaveChangesAsync();
         }
     }

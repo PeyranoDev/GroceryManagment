@@ -5,6 +5,7 @@ using Domain.Repositories;
 using Domain.Tenancy;
 using Infraestructure;
 using Infraestructure.Repositories;
+using Infraestructure.Services;
 using Infraestructure.Tenancy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -89,12 +90,19 @@ builder.Services.AddAuthorization(options =>
     
     options.AddPolicy("SuperAdmin", policy =>
         policy.RequireAssertion(context =>
-            context.User.HasClaim(c => c.Type == "isSuperAdmin" && c.Value == "true")));
-    
+            context.User.HasClaim(c => c.Type == "isSuperAdmin" && string.Equals(c.Value, "true", StringComparison.OrdinalIgnoreCase))));
+
     options.AddPolicy("Admin", policy =>
         policy.RequireAssertion(context =>
-            context.User.HasClaim(c => c.Type == "isSuperAdmin" && c.Value == "true") ||
-            context.User.HasClaim(c => c.Type == "role" && (c.Value == "Admin" || c.Value == "2" || c.Value == "SuperAdmin" || c.Value == "3"))));
+        {
+            var isSuper = context.User.HasClaim(c => c.Type == "isSuperAdmin" && string.Equals(c.Value, "true", StringComparison.OrdinalIgnoreCase));
+            if (isSuper) return true;
+
+            var allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "Admin", "2", "SuperAdmin", "3" };
+            bool hasCustomRole = context.User.Claims.Any(c => c.Type == "role" && allowed.Contains(c.Value));
+            bool hasStandardRole = context.User.Claims.Any(c => c.Type.EndsWith("/claims/role", StringComparison.OrdinalIgnoreCase) && allowed.Contains(c.Value));
+            return hasCustomRole || hasStandardRole;
+        }));
     
     options.AddPolicy("Staff", policy =>
         policy.RequireAssertion(context =>
@@ -142,6 +150,9 @@ if (string.IsNullOrWhiteSpace(conn))
 builder.Services.AddDbContext<GroceryManagmentContext>(opt =>
     opt.UseNpgsql(conn));
 
+builder.Services.AddDbContextFactory<GroceryManagmentContext>(opt =>
+    opt.UseNpgsql(conn), ServiceLifetime.Scoped);
+
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
@@ -152,6 +163,8 @@ builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
 builder.Services.AddScoped<ISaleRepository, SaleRepository>();
 builder.Services.AddScoped<IGroceryRepository, GroceryRepository>();
 builder.Services.AddScoped<IPurchaseRepository, PurchaseRepository>();
+
+builder.Services.AddScoped<IDashboardQueryService, DashboardQueryService>();
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();

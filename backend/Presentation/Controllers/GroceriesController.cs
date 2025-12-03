@@ -28,7 +28,7 @@ namespace Presentation.Controllers
             var groceries = await _groceryService.GetAll();
             return Ok(ApiResponse<IReadOnlyList<GroceryForResponseDto>>.SuccessResponse(
                 groceries, 
-                "Verduler�as obtenidas exitosamente"
+                "Verdulerías obtenidas exitosamente"
             ));
         }
 
@@ -48,7 +48,7 @@ namespace Presentation.Controllers
             var grocery = await _groceryService.GetById(id);
             return Ok(ApiResponse<GroceryForResponseDto>.SuccessResponse(
                 grocery!, 
-                "Verduler�a obtenida exitosamente"
+                "Verdulería obtenida exitosamente"
             ));
         }
 
@@ -56,7 +56,7 @@ namespace Presentation.Controllers
         public async Task<ActionResult<ApiResponse<GroceryForResponseDto>>> Create([FromBody] GroceryForCreateDto dto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ApiResponse<GroceryForResponseDto>.ErrorResponse("Datos de entrada inv�lidos."));
+                return BadRequest(ApiResponse<GroceryForResponseDto>.ErrorResponse("Datos de entrada inválidos."));
 
             var grocery = await _groceryService.Create(dto);
             return CreatedAtAction(
@@ -64,7 +64,7 @@ namespace Presentation.Controllers
                 new { id = grocery.Id }, 
                 ApiResponse<GroceryForResponseDto>.SuccessResponse(
                     grocery, 
-                    "Verduler�a creada exitosamente"
+                    "Verdulería creada exitosamente"
                 )
             );
         }
@@ -73,12 +73,12 @@ namespace Presentation.Controllers
         public async Task<ActionResult<ApiResponse<GroceryForResponseDto>>> Update(int id, [FromBody] GroceryForUpdateDto dto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ApiResponse<GroceryForResponseDto>.ErrorResponse("Datos de entrada inv�lidos."));
+                return BadRequest(ApiResponse<GroceryForResponseDto>.ErrorResponse("Datos de entrada inválidos."));
 
             var grocery = await _groceryService.Update(id, dto);
             return Ok(ApiResponse<GroceryForResponseDto>.SuccessResponse(
                 grocery!, 
-                "Verduler�a actualizada exitosamente"
+                "Verdulería actualizada exitosamente"
             ));
         }
 
@@ -86,7 +86,7 @@ namespace Presentation.Controllers
         public async Task<ActionResult<ApiResponse>> Delete(int id)
         {
             await _groceryService.Delete(id);
-            return Ok(ApiResponse.SuccessResponse("Verduler�a eliminada exitosamente"));
+            return Ok(ApiResponse.SuccessResponse("Verdulería eliminada exitosamente"));
         }
     }
 }

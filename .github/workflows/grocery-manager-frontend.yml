@@ -16,7 +16,7 @@ env:
   IMAGE_NAME: grocery-frontend
   RESOURCE_GROUP: GroceryManager
   CONTAINER_APP_NAME: grocery-frontend
-  API_URL: https://grocery-manager-api.salmonground-d5b02f2a.brazilsouth.azurecontainerapps.io
+  API_URL: https://grocery-manager-api.gentlepebble-e9d83181.brazilsouth.azurecontainerapps.io
 
 jobs:
   build-and-deploy:

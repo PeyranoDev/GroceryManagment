@@ -298,6 +298,9 @@ namespace Infraestructure.Migrations
                     b.Property<int?>("GroceryId")
                         .HasColumnType("integer");
 
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsSuperAdmin")
                         .HasColumnType("boolean");
 
