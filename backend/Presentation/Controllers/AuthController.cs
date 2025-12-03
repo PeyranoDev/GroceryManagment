@@ -71,6 +71,46 @@ namespace Presentation.Controllers
             return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(result, "Impersonación exitosa"));
         }
 
+        [Authorize(Policy = "Admin")]
+        [HttpGet("staff")]
+        public async Task<ActionResult<ApiResponse<StaffListResponseDto>>> GetStaff()
+        {
+            var groceryIdClaim = User.Claims.FirstOrDefault(c => c.Type == "groceryId")?.Value;
+            var groceryId = string.IsNullOrEmpty(groceryIdClaim) ? 0 : int.Parse(groceryIdClaim);
+            var list = await _authService.GetStaffByGroceryId(groceryId);
+            return Ok(ApiResponse<StaffListResponseDto>.SuccessResponse(list, "Staff obtenido"));
+        }
+
+        [Authorize(Policy = "Admin")]
+        [HttpPost("staff")]
+        public async Task<ActionResult<ApiResponse<AuthResponseDto>>> CreateStaff([FromBody] CreateStaffDto dto)
+        {
+            var groceryIdClaim = User.Claims.FirstOrDefault(c => c.Type == "groceryId")?.Value;
+            var groceryId = string.IsNullOrEmpty(groceryIdClaim) ? 0 : int.Parse(groceryIdClaim);
+            var result = await _authService.CreateStaff(dto, groceryId);
+            return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(result, "Staff creado"));
+        }
+
+        [Authorize(Policy = "Admin")]
+        [HttpPut("staff/{id:int}")]
+        public async Task<ActionResult<ApiResponse<StaffResponseDto>>> UpdateStaff(int id, [FromBody] UpdateStaffDto dto)
+        {
+            var groceryIdClaim = User.Claims.FirstOrDefault(c => c.Type == "groceryId")?.Value;
+            var groceryId = string.IsNullOrEmpty(groceryIdClaim) ? 0 : int.Parse(groceryIdClaim);
+            var updated = await _authService.UpdateStaff(id, dto, groceryId);
+            return Ok(ApiResponse<StaffResponseDto>.SuccessResponse(updated, "Staff actualizado"));
+        }
+
+        [Authorize(Policy = "Admin")]
+        [HttpDelete("staff/{id:int}")]
+        public async Task<ActionResult<ApiResponse>> DeleteStaff(int id)
+        {
+            var groceryIdClaim = User.Claims.FirstOrDefault(c => c.Type == "groceryId")?.Value;
+            var groceryId = string.IsNullOrEmpty(groceryIdClaim) ? 0 : int.Parse(groceryIdClaim);
+            await _authService.DeleteStaff(id, groceryId);
+            return Ok(ApiResponse.SuccessResponse("Staff eliminado"));
+        }
+
         private string GenerateJwtToken(UserInfoDto user)
         {
             var secretKey = _config["Authentication:SecretForKey"];

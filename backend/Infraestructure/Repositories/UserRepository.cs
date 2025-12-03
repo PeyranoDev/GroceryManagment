@@ -60,6 +60,9 @@ namespace Infraestructure.Repositories
                 .Where(u => u.GroceryId == groceryId)
                 .ToListAsync();
 
+        public Task<int> CountByGroceryId(int groceryId)
+            => _ctx.Users.AsNoTracking().CountAsync(u => u.GroceryId == groceryId && u.Role != null);
+
         public async Task Activate(int userId)
         {
             var u = await _ctx.Users.FirstOrDefaultAsync(x => x.Id == userId);

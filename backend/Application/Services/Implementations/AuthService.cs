@@ -11,6 +11,7 @@ namespace Application.Services.Implementations
 {
     public class AuthService : IAuthService
     {
+        private const int MAX_STAFF_PER_GROCERY = 4;
         private readonly IUserRepository _userRepository;
         private readonly IPasswordHasher _passwordHasher;
         private readonly IMapper _mapper;
@@ -68,6 +69,71 @@ namespace Application.Services.Implementations
                 Expiration = DateTime.UtcNow.AddHours(1),
                 User = userInfo
             };
+        }
+
+        public async Task<AuthResponseDto> CreateStaff(CreateStaffDto dto, int adminGroceryId)
+        {
+            var count = await _userRepository.CountByGroceryId(adminGroceryId);
+            if (count >= MAX_STAFF_PER_GROCERY)
+                throw new BusinessException($"Se alcanzó el máximo de {MAX_STAFF_PER_GROCERY} empleados para esta verdulería.");
+
+            var entity = _mapper.Map<User>(dto);
+            entity.GroceryId = adminGroceryId;
+            entity.Role = GroceryRole.Staff;
+            entity.IsSuperAdmin = false;
+            entity.PasswordHash = _passwordHasher.Hash(dto.Password);
+
+            var id = await _userRepository.Create(entity);
+            await _userRepository.SaveChanges();
+
+            var created = await _userRepository.GetById(id)!;
+            var info = MapUserToInfoDto(created);
+            return new AuthResponseDto
+            {
+                Token = string.Empty,
+                Expiration = DateTime.UtcNow.AddHours(1),
+                User = info
+            };
+        }
+
+        public async Task<StaffListResponseDto> GetStaffByGroceryId(int groceryId)
+        {
+            var list = await _userRepository.GetByGroceryId(groceryId);
+            var staff = list.Where(u => (u.Role ?? GroceryRole.Staff) == GroceryRole.Staff)
+                            .Select(_mapper.Map<StaffResponseDto>)
+                            .ToList();
+            return new StaffListResponseDto
+            {
+                Staff = staff,
+                Count = staff.Count,
+                MaxAllowed = MAX_STAFF_PER_GROCERY
+            };
+        }
+
+        public async Task<StaffResponseDto> UpdateStaff(int staffId, UpdateStaffDto dto, int adminGroceryId)
+        {
+            var u = await _userRepository.GetById(staffId);
+            if (u is null || (u.GroceryId ?? 0) != adminGroceryId)
+                throw new NotFoundException("Empleado no encontrado en esta verdulería.");
+
+            u.Name = dto.Name;
+            u.Email = dto.Email;
+            if (!string.IsNullOrWhiteSpace(dto.NewPassword))
+                u.PasswordHash = _passwordHasher.Hash(dto.NewPassword);
+
+            await _userRepository.Update(u);
+            await _userRepository.SaveChanges();
+            return _mapper.Map<StaffResponseDto>(u);
+        }
+
+        public async Task<bool> DeleteStaff(int staffId, int adminGroceryId)
+        {
+            var u = await _userRepository.GetById(staffId);
+            if (u is null || (u.GroceryId ?? 0) != adminGroceryId)
+                return false;
+            await _userRepository.Delete(u);
+            await _userRepository.SaveChanges();
+            return true;
         }
 
         public async Task<UserInfoDto?> ValidateUser(string email, string password)
