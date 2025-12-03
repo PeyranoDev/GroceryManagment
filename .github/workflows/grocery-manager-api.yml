@@ -54,11 +54,13 @@ jobs:
         with:
           dotnet-version: '9.0.x'
       - name: Install EF Core CLI
-        run: dotnet tool install --global dotnet-ef
+        run: dotnet tool install --global dotnet-ef --version 9.0.0
       - name: Add .NET tools to PATH
         run: echo "$HOME/.dotnet/tools" >> $GITHUB_PATH
       - name: Restore dependencies
         run: dotnet restore
+      - name: Build solution
+        run: dotnet build --configuration Release --no-restore
       - name: Apply EF Core migrations to Neon
         env:
           PGHOST: ep-quiet-band-a8hq2a14-pooler.eastus2.azure.neon.tech
@@ -69,7 +71,7 @@ jobs:
           PGSSLMODE: require
         run: |
           CONNECTION_STRING="Host=$PGHOST;Port=$PGPORT;Database=$PGDATABASE;Username=$PGUSER;Password=$PGPASSWORD;SSL Mode=$PGSSLMODE"
-          dotnet ef database update --project Infraestructure --startup-project Presentation --connection "$CONNECTION_STRING"
+          dotnet ef database update --project Infraestructure --startup-project Presentation --connection "$CONNECTION_STRING" --no-build --configuration Release
 
   deploy:
     runs-on: ubuntu-latest
