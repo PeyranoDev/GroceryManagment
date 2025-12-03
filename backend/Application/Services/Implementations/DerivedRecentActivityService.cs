@@ -1,26 +1,19 @@
 using Application.Schemas.RecentActivities;
 using Application.Services.Interfaces;
-using Domain.Repositories;
 using Domain.Tenancy;
 
 namespace Application.Services.Implementations
 {
     public class DerivedRecentActivityService : IDerivedRecentActivityService
     {
-        private readonly ISaleRepository _saleRepository;
-        private readonly IPurchaseRepository _purchaseRepository;
-        private readonly IInventoryRepository _inventoryRepository;
+        private readonly IDashboardQueryService _dashboardQueryService;
         private readonly ITenantProvider _tenantProvider;
 
         public DerivedRecentActivityService(
-            ISaleRepository saleRepository,
-            IPurchaseRepository purchaseRepository,
-            IInventoryRepository inventoryRepository,
+            IDashboardQueryService dashboardQueryService,
             ITenantProvider tenantProvider)
         {
-            _saleRepository = saleRepository;
-            _purchaseRepository = purchaseRepository;
-            _inventoryRepository = inventoryRepository;
+            _dashboardQueryService = dashboardQueryService;
             _tenantProvider = tenantProvider;
         }
 
@@ -30,21 +23,11 @@ namespace Application.Services.Implementations
             var since = DateTime.UtcNow.AddDays(-days);
             var until = DateTime.UtcNow;
 
-            // Query sales and purchases in parallel
-            var salesTask = _saleRepository.GetSalesByDateRangeAndGrocery(since, until, groceryId);
-            var purchasesTask = _purchaseRepository.GetByDateRangeAndGrocery(since, until, groceryId);
-            var inventoryTask = _inventoryRepository.GetByGroceryId(groceryId);
-
-            await Task.WhenAll(salesTask, purchasesTask, inventoryTask);
-
-            var sales = await salesTask;
-            var purchases = await purchasesTask;
-            var inventoryItems = await inventoryTask;
+            var data = await _dashboardQueryService.GetRecentActivityDataParallelAsync(groceryId, since, until);
 
             var activities = new List<DerivedActivityDto>();
 
-            // Map sales to activities
-            foreach (var sale in sales)
+            foreach (var sale in data.Sales)
             {
                 var itemCount = sale.Items?.Count ?? 0;
                 var userName = sale.User?.Name ?? "Usuario";
@@ -62,8 +45,7 @@ namespace Application.Services.Implementations
                 });
             }
 
-            // Map purchases to activities
-            foreach (var purchase in purchases)
+            foreach (var purchase in data.Purchases)
             {
                 var itemCount = purchase.Items?.Count ?? 0;
                 var userName = purchase.User?.Name;
@@ -85,8 +67,7 @@ namespace Application.Services.Implementations
                 });
             }
 
-            // Map inventory updates to activities (only those with LastUpdatedByUser)
-            foreach (var item in inventoryItems.Where(i => i.LastUpdatedByUserId != null && i.LastUpdated >= since))
+            foreach (var item in data.InventoryItems.Where(i => i.LastUpdatedByUserId != null && i.LastUpdated >= since))
             {
                 var userName = item.LastUpdatedByUser?.Name ?? "Usuario";
                 var productName = item.Product?.Name ?? "Producto";
@@ -104,7 +85,6 @@ namespace Application.Services.Implementations
                 });
             }
 
-            // Sort by date descending and take top N
             return activities
                 .OrderByDescending(a => a.Date)
                 .Take(count)
