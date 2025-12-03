@@ -6,7 +6,7 @@ const AuthContext = createContext(null);
 
 const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'auth_user';
-const DEMO_MODE = true;
+const DEMO_MODE = false;
 
 const parseJwt = (token) => {
   try {
@@ -79,16 +79,59 @@ export const AuthProvider = ({ children }) => {
     const response = DEMO_MODE 
       ? await mockLogin(email, password)
       : await authAPI.login({ email, password });
-    
-    const { token: newToken, user: userData } = response;
-    
+
+    const newToken = response.token || response.Token || '';
+    const rawUser = response.user || response.User || {};
+
+    const normalizedUser = {
+      id: rawUser.id ?? rawUser.Id,
+      name: rawUser.name ?? rawUser.Name,
+      email: rawUser.email ?? rawUser.Email,
+      isSuperAdmin: rawUser.isSuperAdmin ?? rawUser.IsSuperAdmin ?? false,
+      currentRole: (() => {
+        const role = rawUser.currentRole ?? rawUser.CurrentRole;
+        if (typeof role === 'string') return role;
+        const map = { 1: 'Staff', 2: 'Admin', 3: 'SuperAdmin' };
+        return map[role] || 'Staff';
+      })(),
+      currentGroceryId: rawUser.currentGroceryId ?? rawUser.CurrentGroceryId ?? null,
+    };
+
     localStorage.setItem(TOKEN_KEY, newToken);
-    localStorage.setItem(USER_KEY, JSON.stringify(userData));
-    
+    localStorage.setItem(USER_KEY, JSON.stringify(normalizedUser));
+
     setToken(newToken);
-    setUser(userData);
-    
-    return userData;
+    setUser(normalizedUser);
+
+    return normalizedUser;
+  }, []);
+
+  const impersonate = useCallback(async (userId) => {
+    const response = await authAPI.impersonate(userId);
+    const newToken = response.token || response.Token || '';
+    const rawUser = response.user || response.User || {};
+
+    const normalizedUser = {
+      id: rawUser.id ?? rawUser.Id,
+      name: rawUser.name ?? rawUser.Name,
+      email: rawUser.email ?? rawUser.Email,
+      isSuperAdmin: rawUser.isSuperAdmin ?? rawUser.IsSuperAdmin ?? false,
+      currentRole: (() => {
+        const role = rawUser.currentRole ?? rawUser.CurrentRole;
+        if (typeof role === 'string') return role;
+        const map = { 1: 'Staff', 2: 'Admin', 3: 'SuperAdmin' };
+        return map[role] || 'Staff';
+      })(),
+      currentGroceryId: rawUser.currentGroceryId ?? rawUser.CurrentGroceryId ?? null,
+    };
+
+    localStorage.setItem(TOKEN_KEY, newToken);
+    localStorage.setItem(USER_KEY, JSON.stringify(normalizedUser));
+
+    setToken(newToken);
+    setUser(normalizedUser);
+
+    return normalizedUser;
   }, []);
 
   const logout = useCallback(() => {
@@ -122,6 +165,7 @@ export const AuthProvider = ({ children }) => {
     token,
     loading,
     login,
+    impersonate,
     logout,
     hasRole,
     isAdmin,
