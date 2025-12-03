@@ -32,6 +32,18 @@ namespace Application.Services.Implementations
             return list.Select(_mapper.Map<UserForResponseDto>).ToList();
         }
 
+        public async Task<IReadOnlyList<UserForResponseDto>> GetByGroceryId(int groceryId)
+        {
+            var list = await _users.GetByGroceryId(groceryId);
+            return list.Select(_mapper.Map<UserForResponseDto>).ToList();
+        }
+
+        public async Task<IReadOnlyList<UserForResponseDto>> GetByGroceryIdAll(int groceryId)
+        {
+            var list = await _users.GetByGroceryIdAll(groceryId);
+            return list.Select(_mapper.Map<UserForResponseDto>).ToList();
+        }
+
         public async Task<UserForResponseDto> Create(UserForCreateDto dto)
         {
             if (await _users.ExistsByEmail(dto.Email))
@@ -40,6 +52,7 @@ namespace Application.Services.Implementations
             var entity = _mapper.Map<User>(dto);
             entity.PasswordHash = _passwordHasher.Hash(dto.Password);
             entity.IsSuperAdmin = dto.IsSuperAdmin;
+            entity.IsActive = true;
 
             var id = await _users.Create(entity);
             await _users.SaveChanges();
@@ -71,7 +84,8 @@ namespace Application.Services.Implementations
         {
             var entity = await _users.GetById(id);
             if (entity is null) return false;
-            await _users.Delete(entity);
+            entity.IsActive = false;
+            await _users.Update(entity);
             await _users.SaveChanges();
             return true;
         }
@@ -85,6 +99,33 @@ namespace Application.Services.Implementations
             await _users.SetSuperAdmin(id, dto.IsSuperAdmin);
             entity.IsSuperAdmin = dto.IsSuperAdmin;
 
+            return _mapper.Map<UserForResponseDto>(entity);
+        }
+
+        public async Task<UserForResponseDto?> SetRole(int id, Domain.Common.Enums.GroceryRole role)
+        {
+            var entity = await _users.GetById(id);
+            if (entity is null) 
+                throw new NotFoundException($"Usuario con ID {id} no encontrado.");
+
+            await _users.SetRole(id, role);
+            entity.Role = role;
+
+            return _mapper.Map<UserForResponseDto>(entity);
+        }
+
+        public async Task SetGrocery(int id, int groceryId)
+        {
+            await _users.SetGrocery(id, groceryId);
+        }
+
+        public async Task<UserForResponseDto?> Activate(int id)
+        {
+            var entity = await _users.GetById(id);
+            if (entity is null)
+                throw new NotFoundException($"Usuario con ID {id} no encontrado.");
+            await _users.Activate(id);
+            entity.IsActive = true;
             return _mapper.Map<UserForResponseDto>(entity);
         }
     }
