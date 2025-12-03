@@ -5,6 +5,7 @@ using Domain.Repositories;
 using Domain.Tenancy;
 using Infraestructure;
 using Infraestructure.Repositories;
+using Infraestructure.Services;
 using Infraestructure.Tenancy;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
@@ -149,6 +150,9 @@ if (string.IsNullOrWhiteSpace(conn))
 builder.Services.AddDbContext<GroceryManagmentContext>(opt =>
     opt.UseNpgsql(conn));
 
+builder.Services.AddDbContextFactory<GroceryManagmentContext>(opt =>
+    opt.UseNpgsql(conn), ServiceLifetime.Scoped);
+
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 builder.Services.AddScoped(typeof(IBaseRepository<>), typeof(BaseRepository<>));
@@ -159,6 +163,8 @@ builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
 builder.Services.AddScoped<ISaleRepository, SaleRepository>();
 builder.Services.AddScoped<IGroceryRepository, GroceryRepository>();
 builder.Services.AddScoped<IPurchaseRepository, PurchaseRepository>();
+
+builder.Services.AddScoped<IDashboardQueryService, DashboardQueryService>();
 
 builder.Services.AddScoped<IUserService, UserService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
