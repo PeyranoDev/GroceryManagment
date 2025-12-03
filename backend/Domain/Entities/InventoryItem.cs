@@ -12,6 +12,9 @@ namespace Domain.Entities
         public Promotion Promotion { get; set; } = new Promotion();
         public DateTime LastUpdated { get; set; }
 
+        public int? LastUpdatedByUserId { get; set; }
+        public User? LastUpdatedByUser { get; set; }
+
         public int GroceryId { get; set; }
         public Grocery Grocery { get; set; } = null!;
     }

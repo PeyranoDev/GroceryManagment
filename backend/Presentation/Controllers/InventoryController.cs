@@ -2,6 +2,7 @@ using Application.Schemas;
 using Application.Schemas.Inventory;
 using Application.Services.Interfaces;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Presentation.Controllers
 {
@@ -14,6 +15,16 @@ namespace Presentation.Controllers
         public InventoryController(IInventoryService inventoryService)
         {
             _inventoryService = inventoryService;
+        }
+
+        private int? GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("userId");
+            if (userIdClaim != null && int.TryParse(userIdClaim.Value, out var userId))
+            {
+                return userId;
+            }
+            return null;
         }
 
         [HttpGet]
@@ -79,7 +90,8 @@ namespace Presentation.Controllers
                     Stock = dto.NewStock
                 };
 
-                var updatedItem = await _inventoryService.Update(id, updateDto);
+                var userId = GetCurrentUserId();
+                var updatedItem = await _inventoryService.Update(id, updateDto, userId);
                 
                 return Ok(ApiResponse<InventoryItemForResponseDto>.SuccessResponse(
                     updatedItem!, 
@@ -142,7 +154,8 @@ namespace Presentation.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ApiResponse<InventoryItemForResponseDto>.ErrorResponse("Datos de entrada inválidos."));
 
-            var item = await _inventoryService.Create(dto);
+            var userId = GetCurrentUserId();
+            var item = await _inventoryService.Create(dto, userId);
             return CreatedAtAction(
                 nameof(GetById), 
                 new { id = item.Id }, 
@@ -159,7 +172,8 @@ namespace Presentation.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ApiResponse<InventoryItemForResponseDto>.ErrorResponse("Datos de entrada inválidos."));
 
-            var item = await _inventoryService.Update(id, dto);
+            var userId = GetCurrentUserId();
+            var item = await _inventoryService.Update(id, dto, userId);
             return Ok(ApiResponse<InventoryItemForResponseDto>.SuccessResponse(
                 item!, 
                 "Item de inventario actualizado exitosamente"
