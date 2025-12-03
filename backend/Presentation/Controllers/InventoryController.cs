@@ -1,6 +1,7 @@
 using Application.Schemas;
 using Application.Schemas.Inventory;
 using Application.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -8,6 +9,7 @@ namespace Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Policy = "Staff")] 
     public class InventoryController : ControllerBase
     {
         private readonly IInventoryService _inventoryService;

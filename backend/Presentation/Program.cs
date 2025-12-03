@@ -81,7 +81,26 @@ builder.Services.AddAuthentication("Bearer")
         };
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+    
+    options.AddPolicy("SuperAdmin", policy =>
+        policy.RequireAssertion(context =>
+            context.User.HasClaim(c => c.Type == "isSuperAdmin" && c.Value == "true")));
+    
+    options.AddPolicy("Admin", policy =>
+        policy.RequireAssertion(context =>
+            context.User.HasClaim(c => c.Type == "isSuperAdmin" && c.Value == "true") ||
+            context.User.HasClaim(c => c.Type == "role" && (c.Value == "Admin" || c.Value == "2" || c.Value == "SuperAdmin" || c.Value == "3"))));
+    
+    options.AddPolicy("Staff", policy =>
+        policy.RequireAssertion(context =>
+            context.User.HasClaim(c => c.Type == "isSuperAdmin" && c.Value == "true") ||
+            context.User.HasClaim(c => c.Type == "role")));
+});
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>

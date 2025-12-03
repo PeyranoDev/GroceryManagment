@@ -1,12 +1,14 @@
 using Application.Schemas;
 using Application.Schemas.Users;
 using Application.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Policy = "SuperAdmin")] 
     public class UserController : ControllerBase
     {
         private readonly IUserService _userService;
@@ -40,7 +42,7 @@ namespace Presentation.Controllers
         public async Task<ActionResult<ApiResponse<UserForResponseDto>>> Create([FromBody] UserForCreateDto dto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ApiResponse<UserForResponseDto>.ErrorResponse("Datos de entrada inválidos."));
+                return BadRequest(ApiResponse<UserForResponseDto>.ErrorResponse("Datos de entrada invï¿½lidos."));
 
             var user = await _userService.Create(dto);
             return CreatedAtAction(
@@ -57,7 +59,7 @@ namespace Presentation.Controllers
         public async Task<ActionResult<ApiResponse<UserForResponseDto>>> Update(int id, [FromBody] UserForUpdateDto dto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ApiResponse<UserForResponseDto>.ErrorResponse("Datos de entrada inválidos."));
+                return BadRequest(ApiResponse<UserForResponseDto>.ErrorResponse("Datos de entrada invï¿½lidos."));
 
             var user = await _userService.Update(id, dto);
             return Ok(ApiResponse<UserForResponseDto>.SuccessResponse(
@@ -77,7 +79,7 @@ namespace Presentation.Controllers
         public async Task<ActionResult<ApiResponse<UserForResponseDto>>> SetSuperAdmin(int id, [FromBody] SetSuperAdminDto dto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ApiResponse<UserForResponseDto>.ErrorResponse("Datos de entrada inválidos."));
+                return BadRequest(ApiResponse<UserForResponseDto>.ErrorResponse("Datos de entrada invï¿½lidos."));
 
             var user = await _userService.SetSuperAdmin(id, dto);
             return Ok(ApiResponse<UserForResponseDto>.SuccessResponse(

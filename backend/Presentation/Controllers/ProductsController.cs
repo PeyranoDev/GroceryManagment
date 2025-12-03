@@ -1,12 +1,14 @@
 using Application.Schemas;
 using Application.Schemas.Products;
 using Application.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Policy = "Staff")] 
     public class ProductsController : ControllerBase
     {
         private readonly IProductService _productService;
@@ -40,7 +42,7 @@ namespace Presentation.Controllers
         public async Task<ActionResult<ApiResponse<ProductForResponseDto>>> Create([FromBody] ProductForCreateDto dto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ApiResponse<ProductForResponseDto>.ErrorResponse("Datos de entrada inválidos."));
+                return BadRequest(ApiResponse<ProductForResponseDto>.ErrorResponse("Datos de entrada invï¿½lidos."));
 
             var product = await _productService.Create(dto);
             return CreatedAtAction(
@@ -57,7 +59,7 @@ namespace Presentation.Controllers
         public async Task<ActionResult<ApiResponse<ProductForResponseDto>>> Update(int id, [FromBody] ProductForUpdateDto dto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ApiResponse<ProductForResponseDto>.ErrorResponse("Datos de entrada inválidos."));
+                return BadRequest(ApiResponse<ProductForResponseDto>.ErrorResponse("Datos de entrada invï¿½lidos."));
 
             var product = await _productService.Update(id, dto);
             return Ok(ApiResponse<ProductForResponseDto>.SuccessResponse(
