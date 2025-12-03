@@ -1,0 +1,22 @@
+// Theme colors from web frontend
+export const colors = {
+    primary: '#00a63e',
+    primaryDark: '#008236',
+    secondary: '#2563eb',
+    secondaryDark: '#254487',
+    error: '#b91c1c',
+    errorDark: '#7f1d1d',
+    warning: '#fdc700',
+    warningDark: '#fdbf00',
+    success: '#1a5e3f',
+    successDark: '#134a32',
+    info: '#1976d2',
+    text: '#fafafa',
+    textSecondary: '#e5e7eb',
+    bg: '#302e2b',
+    bgInput: '#141312',
+    bgSecondary: '#262422',
+    border: '#1c1b19',
+    surface: '#2a2826',
+    surfaceMuted: '#232220',
+};
