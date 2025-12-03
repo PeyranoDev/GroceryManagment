@@ -2,6 +2,7 @@ using Application.Schemas.Purchases;
 using Application.Services.Interfaces;
 using Domain.Tenancy;
 using Infraestructure.Tenancy;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using System.Security.Claims;
 
@@ -9,6 +10,7 @@ namespace Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Policy = "Admin")]
     public class PurchasesController : ControllerBase
     {
         private readonly IPurchaseService _purchaseService;

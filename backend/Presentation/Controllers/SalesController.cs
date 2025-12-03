@@ -1,12 +1,14 @@
 using Application.Schemas;
 using Application.Schemas.Sales;
 using Application.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Policy = "Staff")] 
     public class SalesController : ControllerBase
     {
         private readonly ISaleService _saleService;

@@ -1,12 +1,14 @@
 using Application.Schemas;
 using Application.Schemas.RecentActivities;
 using Application.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Policy = "Admin")] 
     public class RecentActivitiesController : ControllerBase
     {
         private readonly IDerivedRecentActivityService _activityService;

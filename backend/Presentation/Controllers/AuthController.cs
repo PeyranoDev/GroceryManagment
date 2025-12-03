@@ -2,6 +2,7 @@ using Application.Schemas;
 using Application.Schemas.Auth;
 using Application.Services.Interfaces;
 using Domain.Exceptions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
@@ -12,6 +13,7 @@ namespace Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
+    [AllowAnonymous] 
     public class AuthController : ControllerBase
     {
         private readonly IConfiguration _config;
@@ -24,10 +26,10 @@ namespace Presentation.Controllers
         }
 
         /// <summary>
-        /// Autentica a un usuario con email y contraseña
+        /// Autentica a un usuario con email y contraseï¿½a
         /// </summary>
         /// <param name="loginDto">Datos de login del usuario</param>
-        /// <returns>Token JWT y información del usuario</returns>
+        /// <returns>Token JWT y informaciï¿½n del usuario</returns>
         [HttpPost("login")]
         public async Task<ActionResult<ApiResponse<AuthResponseDto>>> Login([FromBody] LoginDto loginDto)
         {
@@ -36,14 +38,14 @@ namespace Presentation.Controllers
             // Generar el JWT token
             result.Token = GenerateJwtToken(result.User);
             
-            return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(result, "Inicio de sesión exitoso"));
+            return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(result, "Inicio de sesiï¿½n exitoso"));
         }
 
         /// <summary>
         /// Registra un nuevo usuario en el sistema
         /// </summary>
         /// <param name="registerDto">Datos del nuevo usuario</param>
-        /// <returns>Token JWT y información del usuario registrado</returns>
+        /// <returns>Token JWT y informaciï¿½n del usuario registrado</returns>
         [HttpPost("register")]
         public async Task<ActionResult<ApiResponse<AuthResponseDto>>> Register([FromBody] RegisterDto registerDto)
         {
