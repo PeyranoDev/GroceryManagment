@@ -1,3 +1,10 @@
+## [1.2.0](https://github.com/PeyranoDev/GroceryManagment/compare/v1.1.0...v1.2.0) (2025-12-03)
+
+### ✨ Features
+
+* Servicio paralelo para llamadas http de dashboard ([4f1fe6a](https://github.com/PeyranoDev/GroceryManagment/commit/4f1fe6a987af977eb9d3216f5b1579f7415f02b5))
+* **users:** implement user management with roles and activation ([f64c073](https://github.com/PeyranoDev/GroceryManagment/commit/f64c07312bdeab3da308b26d4d93e0d4236ceba8))
+
 ## [1.1.0](https://github.com/PeyranoDev/GroceryManagment/compare/v1.0.0...v1.1.0) (2025-12-03)
 
 ### ✨ Features
