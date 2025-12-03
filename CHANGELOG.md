@@ -1,3 +1,16 @@
+## [1.1.0](https://github.com/PeyranoDev/GroceryManagment/compare/v1.0.0...v1.1.0) (2025-12-03)
+
+### ✨ Features
+
+* persistencia de datos en frontend + manejo de roles ([08949f9](https://github.com/PeyranoDev/GroceryManagment/commit/08949f983a055375fcfd18179f3d55cf5ef82e70))
+* primer modelo de mobile ([a98bbe7](https://github.com/PeyranoDev/GroceryManagment/commit/a98bbe708c3ece78d4a8f02a69bb874cb0529cfe))
+* proteccion completa de rutas ([aaab446](https://github.com/PeyranoDev/GroceryManagment/commit/aaab4467b303124657d608071d3c84e9be5a0c60))
+
+### ♻️ Code Refactoring
+
+* Cambiar completamente las actividades recientes para mejor respuesta y complejidad ([46a200c](https://github.com/PeyranoDev/GroceryManagment/commit/46a200c6c5f4cb937869b1d8cd7a0a9db6b1a095))
+* rehacer dashboard controller completo y UI para 1 sola llamada HTTP ([633149d](https://github.com/PeyranoDev/GroceryManagment/commit/633149d2c605f0b662330e852e67fcc4bb94a533))
+
 ## 1.0.0 (2025-12-02)
 
 ### ✨ Features
