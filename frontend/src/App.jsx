@@ -1,4 +1,5 @@
-import { Routes, Route, useNavigate, Navigate } from "react-router-dom";
+import { Routes, Route, useNavigate, Navigate, useLocation } from "react-router-dom";
+import { useState, useEffect } from "react";
 import ProtectedRoute from "./routes/ProtectedRoute";
 import { AuthProvider, useAuth } from "./contexts/AuthContext";
 
@@ -10,16 +11,37 @@ import SaleDetail from "./components/sales/SaleDetail";
 import Inventory from "./components/inventory/Inventory";
 import UsersAdmin from "./components/admin/UsersAdmin";
 import Header from "./components/ui/header/Header";
+import Toast from "./components/ui/toast/Toast";
 import Login from "./components/login/Login";
 
 function AppContent() {
   const navigate = useNavigate();
   const { user, logout, isAdmin } = useAuth();
+  const location = useLocation();
+  const [toastOpen, setToastOpen] = useState(false);
+  const [toastMsg, setToastMsg] = useState("");
+  const [toastType, setToastType] = useState("success");
 
   const handleLogin = (userData) => {
     const shouldGoToDashboard = userData.isSuperAdmin || userData.currentRole === 'Admin' || userData.currentRole === 2;
     navigate(shouldGoToDashboard ? "/dashboard" : "/caja");
+    setToastMsg("Sesión iniciada correctamente");
+    setToastType("success");
+    setToastOpen(true);
   };
+
+  useEffect(() => {
+    try {
+      const raw = localStorage.getItem('toast_after_navigation');
+      if (raw) {
+        const data = JSON.parse(raw);
+        setToastMsg(data?.message || 'Operación realizada');
+        setToastType(data?.type || 'success');
+        setToastOpen(true);
+        localStorage.removeItem('toast_after_navigation');
+      }
+    } catch {}
+  }, [location.pathname]);
 
   const handleLogout = () => {
     logout();
@@ -68,6 +90,7 @@ function AppContent() {
           </Route>
         </Routes>
       </main>
+      <Toast open={toastOpen} message={toastMsg} type={toastType} onClose={() => setToastOpen(false)} />
     </div>
   );
 }

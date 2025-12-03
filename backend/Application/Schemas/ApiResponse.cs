@@ -6,7 +6,7 @@ namespace Application.Schemas
         public string Detail { get; set; } = string.Empty;
         public T? Data { get; set; }
 
-        public static ApiResponse<T> SuccessResponse(T data, string detail = "Operación exitosa")
+        public static ApiResponse<T> SuccessResponse(T data, string detail = "Operaciï¿½n exitosa")
         {
             return new ApiResponse<T>
             {
@@ -32,7 +32,7 @@ namespace Application.Schemas
         public bool Success { get; set; }
         public string Detail { get; set; } = string.Empty;
 
-        public static ApiResponse SuccessResponse(string detail = "Operación exitosa")
+        public static ApiResponse SuccessResponse(string detail = "Operaciï¿½n exitosa")
         {
             return new ApiResponse
             {
