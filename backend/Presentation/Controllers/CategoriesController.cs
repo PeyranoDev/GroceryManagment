@@ -24,7 +24,7 @@ namespace Presentation.Controllers
             var categories = await _categoryService.GetAll();
             return Ok(ApiResponse<IReadOnlyList<CategoryForResponseDto>>.SuccessResponse(
                 categories, 
-                "Categor�as obtenidas exitosamente"
+                "Categorías obtenidas exitosamente"
             ));
         }
 
@@ -34,7 +34,7 @@ namespace Presentation.Controllers
             var category = await _categoryService.GetById(id);
             return Ok(ApiResponse<CategoryForResponseDto>.SuccessResponse(
                 category!, 
-                "Categor�a obtenida exitosamente"
+                "Categoría obtenida exitosamente"
             ));
         }
 
@@ -42,7 +42,7 @@ namespace Presentation.Controllers
         public async Task<ActionResult<ApiResponse<CategoryForResponseDto>>> Create([FromBody] CategoryForCreateDto dto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ApiResponse<CategoryForResponseDto>.ErrorResponse("Datos de entrada inv�lidos."));
+                return BadRequest(ApiResponse<CategoryForResponseDto>.ErrorResponse("Datos de entrada inválidos."));
 
             var category = await _categoryService.Create(dto);
             return CreatedAtAction(
@@ -50,7 +50,7 @@ namespace Presentation.Controllers
                 new { id = category.Id }, 
                 ApiResponse<CategoryForResponseDto>.SuccessResponse(
                     category, 
-                    "Categor�a creada exitosamente"
+                    "Categoría creada exitosamente"
                 )
             );
         }
@@ -59,12 +59,12 @@ namespace Presentation.Controllers
         public async Task<ActionResult<ApiResponse<CategoryForResponseDto>>> Update(int id, [FromBody] CategoryForUpdateDto dto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ApiResponse<CategoryForResponseDto>.ErrorResponse("Datos de entrada inv�lidos."));
+                return BadRequest(ApiResponse<CategoryForResponseDto>.ErrorResponse("Datos de entrada inválidos."));
 
             var category = await _categoryService.Update(id, dto);
             return Ok(ApiResponse<CategoryForResponseDto>.SuccessResponse(
                 category!, 
-                "Categor�a actualizada exitosamente"
+                "Categoría actualizada exitosamente"
             ));
         }
 
@@ -72,7 +72,7 @@ namespace Presentation.Controllers
         public async Task<ActionResult<ApiResponse>> Delete(int id)
         {
             await _categoryService.Delete(id);
-            return Ok(ApiResponse.SuccessResponse("Categor�a eliminada exitosamente"));
+            return Ok(ApiResponse.SuccessResponse("Categoría eliminada exitosamente"));
         }
     }
 }

@@ -13,7 +13,6 @@ namespace Presentation.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    [AllowAnonymous] 
     public class AuthController : ControllerBase
     {
         private readonly IConfiguration _config;
@@ -26,10 +25,11 @@ namespace Presentation.Controllers
         }
 
         /// <summary>
-        /// Autentica a un usuario con email y contrase�a
+        /// Autentica a un usuario con email y contraseña
         /// </summary>
         /// <param name="loginDto">Datos de login del usuario</param>
-        /// <returns>Token JWT y informaci�n del usuario</returns>
+        /// <returns>Token JWT y información del usuario</returns>
+        [AllowAnonymous]
         [HttpPost("login")]
         public async Task<ActionResult<ApiResponse<AuthResponseDto>>> Login([FromBody] LoginDto loginDto)
         {
@@ -38,14 +38,15 @@ namespace Presentation.Controllers
             // Generar el JWT token
             result.Token = GenerateJwtToken(result.User);
             
-            return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(result, "Inicio de sesi�n exitoso"));
+            return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(result, "Inicio de sesión exitoso"));
         }
 
         /// <summary>
         /// Registra un nuevo usuario en el sistema
         /// </summary>
         /// <param name="registerDto">Datos del nuevo usuario</param>
-        /// <returns>Token JWT y informaci�n del usuario registrado</returns>
+        /// <returns>Token JWT y información del usuario registrado</returns>
+        [AllowAnonymous]
         [HttpPost("register")]
         public async Task<ActionResult<ApiResponse<AuthResponseDto>>> Register([FromBody] RegisterDto registerDto)
         {
@@ -55,6 +56,19 @@ namespace Presentation.Controllers
             result.Token = GenerateJwtToken(result.User);
             
             return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(result, "Usuario registrado exitosamente"));
+        }
+
+        [HttpPost("impersonate/{userId:int}")]
+        [Authorize]
+        public async Task<ActionResult<ApiResponse<AuthResponseDto>>> Impersonate(int userId)
+        {
+            var isSuperAdmin = User.HasClaim(c => c.Type == "isSuperAdmin" && c.Value == "true");
+            if (!isSuperAdmin)
+                return Forbid();
+
+            var result = await _authService.Impersonate(userId);
+            result.Token = GenerateJwtToken(result.User);
+            return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(result, "Impersonación exitosa"));
         }
 
         private string GenerateJwtToken(UserInfoDto user)

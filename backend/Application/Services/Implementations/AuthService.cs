@@ -51,6 +51,7 @@ namespace Application.Services.Implementations
             var newUser = _mapper.Map<User>(registerDto);
             newUser.PasswordHash = _passwordHasher.Hash(registerDto.Password);
             newUser.IsSuperAdmin = false; 
+            newUser.Role = GroceryRole.Staff;
             
             var userId = await _userRepository.Create(newUser);
             await _userRepository.SaveChanges();
@@ -72,11 +73,31 @@ namespace Application.Services.Implementations
         public async Task<UserInfoDto?> ValidateUser(string email, string password)
         {
             var user = await _userRepository.GetByEmail(email);
-            
-            if (user == null || !_passwordHasher.Verify(password, user.PasswordHash))
+            if (user == null)
+                return null;
+            if (!user.IsActive)
+                return null;
+            if (!_passwordHasher.Verify(password, user.PasswordHash))
                 return null;
 
             return MapUserToInfoDto(user);
+        }
+
+        public async Task<AuthResponseDto> Impersonate(int userId)
+        {
+            var user = await _userRepository.GetById(userId);
+            if (user == null)
+                throw new NotFoundException($"Usuario con ID {userId} no encontrado.");
+            if (!user.IsActive)
+                throw new NotFoundException($"Usuario con ID {userId} no está activo.");
+
+            var userInfo = MapUserToInfoDto(user);
+            return new AuthResponseDto
+            {
+                Token = string.Empty,
+                Expiration = DateTime.UtcNow.AddHours(1),
+                User = userInfo
+            };
         }
 
         private UserInfoDto MapUserToInfoDto(User user)

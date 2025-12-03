@@ -7,5 +7,6 @@ namespace Application.Services.Interfaces
         Task<AuthResponseDto> Login(LoginDto loginDto);
         Task<AuthResponseDto> Register(RegisterDto registerDto);
         Task<UserInfoDto?> ValidateUser(string email, string password);
+        Task<AuthResponseDto> Impersonate(int userId);
     }
 }
