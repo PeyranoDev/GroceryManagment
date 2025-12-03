@@ -1,8 +1,6 @@
-import { Package, Save, ShoppingCart } from "lucide-react";
-import "./dashboard.css";
-
 import { Clock } from "lucide-react";
 import Card from "../ui/card/Card";
+import "./dashboard.css";
 
 const RecentActivity = ({ recentActivities = [] }) => {
   const getTimeAgo = (dateString) => {
@@ -22,6 +20,15 @@ const RecentActivity = ({ recentActivities = [] }) => {
     return `hace ${diffInDays} día${diffInDays > 1 ? 's' : ''}`;
   };
 
+  const getTypeColor = (type) => {
+    switch (type) {
+      case 'Venta': return 'bg-green-500';
+      case 'Compra': return 'bg-blue-500';
+      case 'Inventario': return 'bg-yellow-500';
+      default: return 'bg-[var(--color-secondary)]';
+    }
+  };
+
   return (
     <Card
       title={
@@ -37,22 +44,22 @@ const RecentActivity = ({ recentActivities = [] }) => {
               key={activity.id}
               className="flex items-start gap-3 p-3 rounded-lg bg-[var(--surface)] border border-[var(--color-border)]"
             >
-              <div className="flex-shrink-0 w-2 h-2 mt-2 bg-[var(--color-secondary)] rounded-full"></div>
+              <div className={`flex-shrink-0 w-2 h-2 mt-2 ${getTypeColor(activity.type)} rounded-full`}></div>
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-1">
                   <span className="text-sm font-medium text-[var(--color-primary)]">
                     {activity.type}
                   </span>
                   <span className="text-xs text-[var(--color-secondary-text)]">
-                    {getTimeAgo(activity.timestamp || activity.createdAt)}
+                    {getTimeAgo(activity.date)}
                   </span>
                 </div>
                 <p className="text-sm text-[var(--color-text)]">
-                  {activity.description}
+                  {activity.action}
                 </p>
-                {activity.user && (
+                {activity.userName && (
                   <p className="text-xs text-[var(--color-secondary-text)] mt-1">
-                    Por: {activity.user.name || activity.user}
+                    Por: {activity.userName}
                   </p>
                 )}
               </div>
