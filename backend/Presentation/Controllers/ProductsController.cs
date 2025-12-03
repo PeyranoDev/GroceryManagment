@@ -42,7 +42,7 @@ namespace Presentation.Controllers
         public async Task<ActionResult<ApiResponse<ProductForResponseDto>>> Create([FromBody] ProductForCreateDto dto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ApiResponse<ProductForResponseDto>.ErrorResponse("Datos de entrada inv�lidos."));
+                return BadRequest(ApiResponse<ProductForResponseDto>.ErrorResponse("Datos de entrada inválidos."));
 
             var product = await _productService.Create(dto);
             return CreatedAtAction(
@@ -59,7 +59,7 @@ namespace Presentation.Controllers
         public async Task<ActionResult<ApiResponse<ProductForResponseDto>>> Update(int id, [FromBody] ProductForUpdateDto dto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ApiResponse<ProductForResponseDto>.ErrorResponse("Datos de entrada inv�lidos."));
+                return BadRequest(ApiResponse<ProductForResponseDto>.ErrorResponse("Datos de entrada inválidos."));
 
             var product = await _productService.Update(id, dto);
             return Ok(ApiResponse<ProductForResponseDto>.SuccessResponse(
