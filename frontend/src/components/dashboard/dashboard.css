@@ -48,6 +48,10 @@
   @apply text-xs sm:text-sm font-medium text-[var(--color-secondary-text)];
 }
 
+.weeklySalesChart__dayLabel--today {
+  @apply text-[var(--color-primary)] font-bold;
+}
+
 /* Recent Activity Styles */
 
 .recentActivity__list {

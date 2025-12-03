@@ -10,8 +10,8 @@ import { users as mockUsers } from '../data/users.js';
 // Simulate network delay for realistic demo
 const delay = (ms = 300) => new Promise(resolve => setTimeout(resolve, ms));
 
-// Mock response wrapper to match API format
-const mockResponse = (data) => ({ data });
+// Mock response - returns data directly (no wrapper needed for demo mode)
+const mockResponse = (data) => data;
 
 // Mock local storage for demo persistence
   let mockSalesData = [
@@ -447,9 +447,8 @@ export const mockSalesAPI = {
 };
 
 export const mockDashboardAPI = {
-  getStats: async () => {
+  getData: async (activitiesCount = 4, activitiesDays = 30) => {
     await delay();
-    const totalProducts = mockSaleProducts.length;
     const lowStockCount = mockInventory.filter(item => item.stock < 10).length;
     const now = new Date();
     const todayStr = now.toDateString();
@@ -488,21 +487,23 @@ export const mockDashboardAPI = {
       return `${sign}${diff.toFixed(0)}%`;
     };
 
-    const todaySalesComparison = pct(todaySales, yesterdaySales);
-    const monthlyRevenueComparison = pct(monthlyRevenue, prevMonthlyRevenue);
-    const averageTicketComparison = pct(averageTicket, prevAverageTicket);
-
     return mockResponse({
-      totalProducts,
-      lowStockCount,
-      todaySales,
-      todaySalesComparison,
-      monthlyRevenue,
-      monthlyRevenueComparison,
-      averageTicket,
-      averageTicketComparison,
-      outOfStockCount: mockInventory.filter(item => item.stock === 0).length
+      stats: {
+        todaySales,
+        todaySalesComparison: pct(todaySales, yesterdaySales),
+        monthlyRevenue,
+        monthlyRevenueComparison: pct(monthlyRevenue, prevMonthlyRevenue),
+        averageTicket,
+        averageTicketComparison: pct(averageTicket, prevAverageTicket),
+        lowStockCount
+      },
+      weeklySales: mockWeeklySales,
+      recentActivities: mockActivitiesData.slice(0, activitiesCount)
     });
+  },
+  getStats: async () => {
+    const data = await mockDashboardAPI.getData(0, 0);
+    return mockResponse(data.stats);
   },
   getWeeklySales: async () => {
     await delay();
@@ -511,36 +512,14 @@ export const mockDashboardAPI = {
 };
 
 export const mockRecentActivitiesAPI = {
-  getAll: async () => {
-    await delay();
-    return mockResponse(mockActivitiesData);
-  },
-  getRecent: async (count = 10) => {
+  // Simplified API matching new backend endpoint
+  getAll: async (count = 10, days = 30) => {
     await delay();
     return mockResponse(mockActivitiesData.slice(0, count));
   },
-  getById: async (id) => {
+  getRecent: async (count = 10, days = 30) => {
     await delay();
-    const activity = mockActivitiesData.find(a => a.id === parseInt(id));
-    if (!activity) throw new Error('Actividad no encontrada');
-    return mockResponse(activity);
-  },
-  create: async (activity) => {
-    await delay();
-    const newActivity = {
-      ...activity,
-      id: Date.now(),
-      time: 'hace unos segundos'
-    };
-    mockActivitiesData.unshift(newActivity);
-    return mockResponse(newActivity);
-  },
-  delete: async (id) => {
-    await delay();
-    const index = mockActivitiesData.findIndex(a => a.id === parseInt(id));
-    if (index === -1) throw new Error('Actividad no encontrada');
-    mockActivitiesData.splice(index, 1);
-    return mockResponse({ success: true });
+    return mockResponse(mockActivitiesData.slice(0, count));
   },
 };
 

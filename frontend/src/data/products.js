@@ -91,17 +91,72 @@ export const mockInventory = mockSaleProducts.map(product => ({
   promotion: product.promotion
 }));
 
-export const mockWeeklySales = [
-  { day: 'Lun', sales: 115 }, { day: 'Mar', sales: 122 }, { day: 'Mié', sales: 118 },
-  { day: 'Jue', sales: 125 }, { day: 'Vie', sales: 190 }, { day: 'Sáb', sales: 165 },
-  { day: 'Dom', sales: 82 },
-];
+// Generate dynamic weekly sales for last 7 days
+const getDayAbbr = (date) => {
+  const days = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
+  return days[date.getDay()];
+};
 
+const generateMockWeeklySales = () => {
+  const today = new Date();
+  const sales = [];
+  const mockSalesValues = [115, 122, 118, 125, 190, 165, 82]; // Sample values
+  
+  for (let i = 6; i >= 0; i--) {
+    const date = new Date(today);
+    date.setDate(today.getDate() - i);
+    sales.push({
+      day: getDayAbbr(date),
+      sales: mockSalesValues[6 - i]
+    });
+  }
+  return sales;
+};
+
+export const mockWeeklySales = generateMockWeeklySales();
+
+// New structure matching DerivedActivityDto from backend
 export const mockRecentActivity = [
-    { id: 1, type: 'Venta', description: 'Venta #1024 finalizada', time: 'hace 5 minutos', user: 'Admin' },
-    { id: 2, type: 'Inventario', description: 'Stock de "Papa" ajustado a 47 kg', time: 'hace 1 hora', user: 'Admin' },
-    { id: 3, type: 'Compra', description: 'Compra de "Tomates" registrada', time: 'hace 3 horas', user: 'Admin' },
-    { id: 4, type: 'Venta', description: 'Venta #1023 finalizada', time: 'hace 5 horas', user: 'Admin' },
+    { 
+        id: 'sale_1024', 
+        type: 'Venta', 
+        action: 'Admin registró venta #1024 por $15,500 (3 productos)', 
+        date: new Date(Date.now() - 5 * 60 * 1000).toISOString(),
+        userName: 'Admin',
+        amount: 15500,
+        itemCount: 3,
+        entityId: 1024
+    },
+    { 
+        id: 'inventory_46', 
+        type: 'Inventario', 
+        action: 'Admin actualizó stock de "Papa" a 47 unidades', 
+        date: new Date(Date.now() - 60 * 60 * 1000).toISOString(),
+        userName: 'Admin',
+        amount: null,
+        itemCount: 47,
+        entityId: 46
+    },
+    { 
+        id: 'purchase_15', 
+        type: 'Compra', 
+        action: 'Admin registró compra de "Proveedor A" por $45,000 (5 productos)', 
+        date: new Date(Date.now() - 3 * 60 * 60 * 1000).toISOString(),
+        userName: 'Admin',
+        amount: 45000,
+        itemCount: 5,
+        entityId: 15
+    },
+    { 
+        id: 'sale_1023', 
+        type: 'Venta', 
+        action: 'Empleado1 registró venta #1023 por $8,200 (2 productos)', 
+        date: new Date(Date.now() - 5 * 60 * 60 * 1000).toISOString(),
+        userName: 'Empleado1',
+        amount: 8200,
+        itemCount: 2,
+        entityId: 1023
+    },
 ];
 
 export const mockReportData = [
