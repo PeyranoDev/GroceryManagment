@@ -1,17 +1,19 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { users } from "../../data/users";
+import { useAuth } from "../../contexts/AuthContext";
 
 import { Leaf, User, Key, Eye, EyeOff, AlertTriangle, Loader2 } from "lucide-react";
 import Input from "../ui/input/Input";
 
 const Login = ({ handleLogin }) => {
   const location = useLocation();
+  const { login } = useAuth();
+  
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
   const [showPassword, setShowPassword] = useState(false);
-  const [authError, setAuthError] = useState(false);
+  const [authError, setAuthError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
@@ -21,21 +23,19 @@ const Login = ({ handleLogin }) => {
     }
   }, [location.state, handleLogin]);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setAuthError(false);
+    setAuthError(null);
     setSubmitting(true);
-    const user = users.find(
-      (u) => u.email === email && u.password === password
-    );
 
-    if (!user) {
-      setAuthError(true);
+    try {
+      const userData = await login(email, password);
+      handleLogin(userData);
+    } catch (error) {
+      setAuthError(error.message || "Credenciales incorrectas");
+    } finally {
       setSubmitting(false);
-      return;
     }
-
-    handleLogin(user);
   };
 
   const handleChangePasswordView = () => {
@@ -74,11 +74,11 @@ const Login = ({ handleLogin }) => {
                   id="email"
                   type="email"
                   value={email}
-                  onChange={(e) => { setAuthError(false); setEmail(e.target.value); }}
+                  onChange={(e) => { setAuthError(null); setEmail(e.target.value); }}
                   required
                   ariaLabel="Dirección de correo"
                   icon={<User className="w-5 h-5 text-[var(--color-secondary-text)]" />}
-                  error={authError}
+                  error={!!authError}
                 />
               </div>
             </div>
@@ -91,13 +91,13 @@ const Login = ({ handleLogin }) => {
                 <Input
                   id="password"
                   value={password}
-                  onChange={(e) => { setAuthError(false); setPassword(e.target.value); }}
+                  onChange={(e) => { setAuthError(null); setPassword(e.target.value); }}
                   type={showPassword ? "text" : "password"}
                   required
                   ariaLabel="Contraseña"
                   icon={<Key className="w-5 h-5 text-[var(--color-secondary-text)]" aria-hidden="true" />}
                   inputClassName="pr-10"
-                  error={authError}
+                  error={!!authError}
                 />
                 <button
                   type="button"
@@ -120,7 +120,7 @@ const Login = ({ handleLogin }) => {
           {authError && (
             <div className="flex items-center gap-2 bg-[var(--color-error)] text-[var(--color-text)] text-sm px-4 py-2 rounded-md">
               <AlertTriangle size={16} />
-              <span>Credenciales incorrectas. Verifique su correo y contraseña.</span>
+              <span>{authError}</span>
             </div>
           )}
 
