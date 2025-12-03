@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { dashboardAPI, recentActivitiesAPI, inventoryAPI } from '../services/api';
+import { dashboardAPI } from '../services/api';
 
 export const useDashboard = () => {
   const [stats, setStats] = useState(null);
@@ -13,15 +13,12 @@ export const useDashboard = () => {
     setError(null);
     
     try {
-      const [statsResponse, weeklySalesResponse, activitiesResponse] = await Promise.all([
-        dashboardAPI.getStats(),
-        dashboardAPI.getWeeklySales(),
-        recentActivitiesAPI.getRecent(4)
-      ]);
+      // Single API call for all dashboard data
+      const data = await dashboardAPI.getData(4, 30);
 
-      setStats(statsResponse.data || statsResponse);
-      setWeeklySales(weeklySalesResponse.data || weeklySalesResponse);
-      setRecentActivities(activitiesResponse.data || activitiesResponse);
+      setStats(data.stats);
+      setWeeklySales(data.weeklySales);
+      setRecentActivities(data.recentActivities);
     } catch (err) {
       console.error('Error fetching dashboard data:', err);
       setError(err.message);
@@ -42,25 +39,4 @@ export const useDashboard = () => {
     error,
     refresh: fetchDashboardData
   };
-};
-
-export const useLowStockCount = () => {
-  const [lowStockCount, setLowStockCount] = useState(0);
-  
-  useEffect(() => {
-    const fetchLowStock = async () => {
-      try {
-        const response = await inventoryAPI.getLowStock(10);
-        const items = response.data || response;
-        setLowStockCount(Array.isArray(items) ? items.length : 0);
-      } catch (error) {
-        console.error('Error fetching low stock count:', error);
-        setLowStockCount(0);
-      }
-    };
-
-    fetchLowStock();
-  }, []);
-
-  return lowStockCount;
 };
