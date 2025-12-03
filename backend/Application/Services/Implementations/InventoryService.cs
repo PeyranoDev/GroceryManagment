@@ -48,10 +48,11 @@ namespace Application.Services.Implementations
             return filteredList.Select(_mapper.Map<InventoryItemForResponseDto>).ToList();
         }
 
-        public async Task<InventoryItemForResponseDto> Create(InventoryItemForCreateDto dto)
+        public async Task<InventoryItemForResponseDto> Create(InventoryItemForCreateDto dto, int? userId = null)
         {
             var entity = _mapper.Map<InventoryItem>(dto);
             entity.LastUpdated = DateTime.UtcNow;
+            entity.LastUpdatedByUserId = userId;
             entity.GroceryId = _tenantProvider.CurrentGroceryId;
             
             var id = await _inventory.Create(entity);
@@ -59,7 +60,7 @@ namespace Application.Services.Implementations
             return _mapper.Map<InventoryItemForResponseDto>(created);
         }
 
-        public async Task<InventoryItemForResponseDto?> Update(int id, InventoryItemForUpdateDto dto)
+        public async Task<InventoryItemForResponseDto?> Update(int id, InventoryItemForUpdateDto dto, int? userId = null)
         {
             var entity = await _inventory.GetById(id);
             if (entity is null || entity.GroceryId != _tenantProvider.CurrentGroceryId) 
@@ -67,6 +68,7 @@ namespace Application.Services.Implementations
 
             _mapper.Map(dto, entity);
             entity.LastUpdated = DateTime.UtcNow;
+            entity.LastUpdatedByUserId = userId;
             
             await _inventory.Update(entity);
             await _inventory.SaveChanges();

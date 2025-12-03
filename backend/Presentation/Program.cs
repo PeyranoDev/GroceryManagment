@@ -104,7 +104,6 @@ builder.Services.AddAutoMapper(cfg =>
     cfg.AddProfile<SaleProfile>();
     cfg.AddProfile<GroceryProfile>();
     cfg.AddProfile<UserProfile>();
-    cfg.AddProfile<RecentActivityProfile>();
     cfg.AddProfile<PurchaseProfile>();
 });
 
@@ -133,7 +132,6 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
 builder.Services.AddScoped<ISaleRepository, SaleRepository>();
 builder.Services.AddScoped<IGroceryRepository, GroceryRepository>();
-builder.Services.AddScoped<IRecentActivityRepository, RecentActivityRepository>();
 builder.Services.AddScoped<IPurchaseRepository, PurchaseRepository>();
 
 builder.Services.AddScoped<IUserService, UserService>();
@@ -142,7 +140,7 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
 builder.Services.AddScoped<ISaleService, SaleService>();
 builder.Services.AddScoped<IGroceryService, GroceryService>();
-builder.Services.AddScoped<IRecentActivityService, RecentActivityService>();
+builder.Services.AddScoped<IDerivedRecentActivityService, DerivedRecentActivityService>();
 builder.Services.AddScoped<IPurchaseService, PurchaseService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IReportService, ReportService>();

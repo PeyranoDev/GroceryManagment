@@ -14,6 +14,7 @@ namespace Infraestructure.Repositories
             => await _ctx.InventoryItems.AsNoTracking()
                 .Include(i => i.Product)
                     .ThenInclude(p => p.Category)
+                .Include(i => i.LastUpdatedByUser)
                 .Where(i => i.ProductId == productId && i.GroceryId == _tenant.CurrentGroceryId)
                 .ToListAsync();
 
@@ -21,6 +22,7 @@ namespace Infraestructure.Repositories
             => await _ctx.InventoryItems.AsNoTracking()
                 .Include(i => i.Product)
                     .ThenInclude(p => p.Category)
+                .Include(i => i.LastUpdatedByUser)
                 .Where(i => i.GroceryId == groceryId)
                 .ToListAsync();
 
@@ -28,12 +30,14 @@ namespace Infraestructure.Repositories
             => _ctx.InventoryItems.AsNoTracking()
                 .Include(i => i.Product)
                     .ThenInclude(p => p.Category)
+                .Include(i => i.LastUpdatedByUser)
                 .FirstOrDefaultAsync(i => i.ProductId == productId && i.GroceryId == groceryId)!;
 
         public async Task<IReadOnlyList<InventoryItem>> GetLowStock(int threshold, int groceryId)
             => await _ctx.InventoryItems.AsNoTracking()
                 .Include(i => i.Product)
                     .ThenInclude(p => p.Category)
+                .Include(i => i.LastUpdatedByUser)
                 .Where(i => i.GroceryId == groceryId && i.Stock > 0 && i.Stock <= threshold)
                 .ToListAsync();
 
@@ -41,6 +45,7 @@ namespace Infraestructure.Repositories
             => await _ctx.InventoryItems.AsNoTracking()
                 .Include(i => i.Product)
                     .ThenInclude(p => p.Category)
+                .Include(i => i.LastUpdatedByUser)
                 .Where(i => i.GroceryId == groceryId && i.Stock == 0)
                 .ToListAsync();
 
@@ -48,6 +53,7 @@ namespace Infraestructure.Repositories
             => await _ctx.InventoryItems.AsNoTracking()
                 .Include(i => i.Product)
                     .ThenInclude(p => p.Category)
+                .Include(i => i.LastUpdatedByUser)
                 .Where(i => i.GroceryId == groceryId)
                 .OrderBy(i => i.Product.Name)
                 .ToListAsync();

@@ -6,8 +6,8 @@ namespace Application.Services.Interfaces
     {
         Task<InventoryItemForResponseDto?> GetById(int id);
         Task<IReadOnlyList<InventoryItemForResponseDto>> GetAll();
-        Task<InventoryItemForResponseDto> Create(InventoryItemForCreateDto dto);
-        Task<InventoryItemForResponseDto?> Update(int id, InventoryItemForUpdateDto dto);
+        Task<InventoryItemForResponseDto> Create(InventoryItemForCreateDto dto, int? userId = null);
+        Task<InventoryItemForResponseDto?> Update(int id, InventoryItemForUpdateDto dto, int? userId = null);
         Task<bool> Delete(int id);
         Task<IReadOnlyList<InventoryItemForResponseDto>> GetByProductId(int productId);
     }

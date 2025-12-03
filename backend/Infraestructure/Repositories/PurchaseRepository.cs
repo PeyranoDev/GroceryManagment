@@ -17,6 +17,7 @@ namespace Infraestructure.Repositories
             return await _ctx.Purchases.AsNoTracking()
                 .Include(p => p.Items)
                     .ThenInclude(pi => pi.Product)
+                .Include(p => p.User)
                 .Where(p => p.GroceryId == groceryId && p.Supplier.Contains(supplier))
                 .OrderByDescending(p => p.Date)
                 .ToListAsync();
@@ -27,6 +28,7 @@ namespace Infraestructure.Repositories
             return await _ctx.Purchases.AsNoTracking()
                 .Include(p => p.Items)
                     .ThenInclude(pi => pi.Product)
+                .Include(p => p.User)
                 .Where(p => p.GroceryId == groceryId && p.Date >= startDate && p.Date <= endDate)
                 .OrderByDescending(p => p.Date)
                 .ToListAsync();
@@ -44,6 +46,7 @@ namespace Infraestructure.Repositories
             return await _ctx.Purchases.AsNoTracking()
                 .Include(p => p.Items)
                     .ThenInclude(pi => pi.Product)
+                .Include(p => p.User)
                 .Where(p => p.GroceryId == groceryId)
                 .OrderByDescending(p => p.Date)
                 .ToListAsync();
@@ -54,6 +57,7 @@ namespace Infraestructure.Repositories
             return await _ctx.Purchases.AsNoTracking()
                 .Include(p => p.Items)
                     .ThenInclude(pi => pi.Product)
+                .Include(p => p.User)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
     }
