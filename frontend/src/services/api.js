@@ -1,4 +1,3 @@
-import { useState } from 'react';
 import {
   mockProductsAPI,
   mockInventoryAPI,
@@ -11,8 +10,9 @@ import {
   mockUsersAPI
 } from './mockApi.js';
 
-// Set to false to use real API
 const DEMO_MODE = true;
+
+const getToken = () => localStorage.getItem('auth_token');
 
 // Get API URL from runtime environment (injected via env.js) or build-time env
 const getApiUrl = () => {
@@ -40,10 +40,31 @@ const API_BASE_URL = normalizeApiUrl(getApiUrl());
 
 console.log('API Base URL:', API_BASE_URL);
 
-const getHeaders = () => ({
-  'Content-Type': 'application/json',
-  'GroceryId': '1', 
-});
+const getHeaders = () => {
+  const headers = {
+    'Content-Type': 'application/json',
+    'X-Grocery-Id': '1',
+  };
+  
+  const token = getToken();
+  if (token) {
+    headers['Authorization'] = `Bearer ${token}`;
+  }
+  
+  return headers;
+};
+
+// API Response mapper - extracts data from ApiResponse wrapper or throws error
+const mapApiResponse = (response) => {
+  if (response && typeof response === 'object' && 'success' in response) {
+    if (!response.success) {
+      throw new Error(response.detail || 'Error en la operación');
+    }
+    return response.data;
+  }
+  // Fallback for non-wrapped responses
+  return response;
+};
 
 const apiRequest = async (endpoint, options = {}) => {
   const url = `${API_BASE_URL}${endpoint}`;
@@ -56,15 +77,45 @@ const apiRequest = async (endpoint, options = {}) => {
     const response = await fetch(url, config);
     
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ message: 'Error de red' }));
-      throw new Error(errorData.message || `HTTP error! status: ${response.status}`);
+      const errorData = await response.json().catch(() => ({ detail: 'Error de red' }));
+      throw new Error(errorData.detail || errorData.message || `HTTP error! status: ${response.status}`);
     }
 
-    return await response.json();
+    const json = await response.json();
+    return mapApiResponse(json);
   } catch (error) {
     console.error(`API Error (${endpoint}):`, error);
     throw error;
   }
+};
+
+const authRequest = async (endpoint, options = {}) => {
+  const url = `${API_BASE_URL}${endpoint}`;
+  const config = {
+    headers: { 'Content-Type': 'application/json' },
+    ...options,
+  };
+
+  const response = await fetch(url, config);
+  
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({ detail: 'Error de red' }));
+    throw new Error(errorData.detail || errorData.message || `HTTP error! status: ${response.status}`);
+  }
+
+  const json = await response.json();
+  return mapApiResponse(json);
+};
+
+export const authAPI = {
+  login: (credentials) => authRequest('/Auth/login', {
+    method: 'POST',
+    body: JSON.stringify(credentials),
+  }),
+  register: (userData) => authRequest('/Auth/register', {
+    method: 'POST',
+    body: JSON.stringify(userData),
+  }),
 };
 
 export const productsAPI = DEMO_MODE ? mockProductsAPI : {
@@ -148,21 +199,16 @@ export const salesAPI = DEMO_MODE ? mockSalesAPI : {
 };
 
 export const dashboardAPI = DEMO_MODE ? mockDashboardAPI : {
+  getData: (activitiesCount = 4, activitiesDays = 30) => 
+    apiRequest(`/Dashboard?activitiesCount=${activitiesCount}&activitiesDays=${activitiesDays}`),
   getStats: () => apiRequest('/Dashboard/stats'),
   getWeeklySales: () => apiRequest('/Dashboard/weekly-sales'),
 };
 
 export const recentActivitiesAPI = DEMO_MODE ? mockRecentActivitiesAPI : {
-  getAll: () => apiRequest('/RecentActivities'),
-  getRecent: (count = 10) => apiRequest(`/RecentActivities/recent?count=${count}`),
-  getById: (id) => apiRequest(`/RecentActivities/${id}`),
-  create: (activity) => apiRequest('/RecentActivities', {
-    method: 'POST',
-    body: JSON.stringify(activity),
-  }),
-  delete: (id) => apiRequest(`/RecentActivities/${id}`, {
-    method: 'DELETE',
-  }),
+  // New endpoint: GET /api/recentactivities?count=10&days=30
+  getAll: (count = 10, days = 30) => apiRequest(`/RecentActivities?count=${count}&days=${days}`),
+  getRecent: (count = 10, days = 30) => apiRequest(`/RecentActivities?count=${count}&days=${days}`),
 };
 
 export const purchasesAPI = DEMO_MODE ? mockPurchasesAPI : {

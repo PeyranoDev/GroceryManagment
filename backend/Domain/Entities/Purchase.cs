@@ -11,6 +11,9 @@ namespace Domain.Entities
         public int GroceryId { get; set; }
         public Grocery Grocery { get; set; } = null!;
 
+        public int? UserId { get; set; }
+        public User? User { get; set; }
+
         public ICollection<PurchaseItem> Items { get; set; } = new List<PurchaseItem>();
     }
 }

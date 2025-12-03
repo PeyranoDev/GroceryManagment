@@ -4,7 +4,7 @@ namespace Application.Services.Interfaces
 {
     public interface IPurchaseService
     {
-        Task<PurchaseForResponseDto> CreatePurchaseAsync(PurchaseForCreateDto purchaseDto, int groceryId);
+        Task<PurchaseForResponseDto> CreatePurchaseAsync(PurchaseForCreateDto purchaseDto, int groceryId, int? userId = null);
         Task<PurchaseForResponseDto> UpdatePurchaseAsync(int id, PurchaseForUpdateDto purchaseDto, int groceryId);
         Task<PurchaseForResponseDto> GetPurchaseByIdAsync(int id, int groceryId);
         Task<IEnumerable<PurchaseForResponseDto>> GetAllPurchasesAsync(int groceryId);

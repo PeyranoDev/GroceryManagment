@@ -2,12 +2,15 @@ using Application.Schemas.Purchases;
 using Application.Services.Interfaces;
 using Domain.Tenancy;
 using Infraestructure.Tenancy;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Security.Claims;
 
 namespace Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Policy = "Admin")]
     public class PurchasesController : ControllerBase
     {
         private readonly IPurchaseService _purchaseService;
@@ -17,6 +20,16 @@ namespace Presentation.Controllers
         {
             _purchaseService = purchaseService;
             _tenantProvider = tenantProvider;
+        }
+
+        private int? GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier) ?? User.FindFirst("userId");
+            if (userIdClaim != null && int.TryParse(userIdClaim.Value, out var userId))
+            {
+                return userId;
+            }
+            return null;
         }
 
         [HttpGet]
@@ -55,7 +68,8 @@ namespace Presentation.Controllers
             try
             {
                 var groceryId = _tenantProvider.CurrentGroceryId;
-                var purchase = await _purchaseService.CreatePurchaseAsync(purchaseDto, groceryId);
+                var userId = GetCurrentUserId();
+                var purchase = await _purchaseService.CreatePurchaseAsync(purchaseDto, groceryId, userId);
                 return CreatedAtAction(nameof(GetPurchase), new { id = purchase.Id }, purchase);
             }
             catch (Exception ex)

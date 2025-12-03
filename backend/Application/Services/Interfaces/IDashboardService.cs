@@ -6,5 +6,6 @@ namespace Application.Services.Interfaces
     {
         Task<DashboardStatsDto> GetDashboardStatsAsync();
         Task<IEnumerable<WeeklySalesDto>> GetWeeklySalesAsync();
+        Task<DashboardDataDto> GetDashboardDataAsync(int recentActivitiesCount = 4, int recentActivitiesDays = 30);
     }
 }

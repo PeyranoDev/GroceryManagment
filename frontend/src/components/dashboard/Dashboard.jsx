@@ -1,11 +1,10 @@
-import { useDashboard, useLowStockCount } from "../../hooks/useDashboard";
+import { useDashboard } from "../../hooks/useDashboard";
 import KPIcard from "./KPIcard";
 import WeeklySalesChart from "./WeeklySalesChart";
 import RecentActivity from "./RecentActivity";
 
 const Dashboard = () => {
   const { stats, weeklySales, recentActivities, loading, error } = useDashboard();
-  const lowStockCount = useLowStockCount();
   
   if (loading) {
     return (
@@ -41,7 +40,7 @@ const Dashboard = () => {
         />
         <KPIcard
           title={"Bajo Stock"}
-          value={lowStockCount}
+          value={stats?.lowStockCount || 0}
           comparisonText={"Productos con 10 o menos unidades"}
           valueColor={"text-[var(--color-warning)]"}
           comparisonColor={"text-[var(--color-secondary-text)]"}

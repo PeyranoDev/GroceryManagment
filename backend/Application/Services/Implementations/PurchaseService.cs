@@ -11,25 +11,23 @@ namespace Application.Services.Implementations
     {
         private readonly IPurchaseRepository _purchaseRepository;
         private readonly IInventoryRepository _inventoryRepository;
-        private readonly IRecentActivityService _recentActivityService;
         private readonly IMapper _mapper;
 
         public PurchaseService(
             IPurchaseRepository purchaseRepository,
             IInventoryRepository inventoryRepository,
-            IRecentActivityService recentActivityService,
             IMapper mapper)
         {
             _purchaseRepository = purchaseRepository;
             _inventoryRepository = inventoryRepository;
-            _recentActivityService = recentActivityService;
             _mapper = mapper;
         }
 
-        public async Task<PurchaseForResponseDto> CreatePurchaseAsync(PurchaseForCreateDto purchaseDto, int groceryId)
+        public async Task<PurchaseForResponseDto> CreatePurchaseAsync(PurchaseForCreateDto purchaseDto, int groceryId, int? userId = null)
         {
             var purchase = _mapper.Map<Purchase>(purchaseDto);
             purchase.GroceryId = groceryId;
+            purchase.UserId = userId;
             
             purchase.Total = purchase.Items.Sum(item => item.Quantity * item.UnitCost);
             
@@ -42,11 +40,7 @@ namespace Application.Services.Implementations
             var purchaseId = await _purchaseRepository.Create(purchase);
             await _purchaseRepository.SaveChanges();
 
-            await UpdateInventoryFromPurchase(purchase);
-
-            await _recentActivityService.LogActivityAsync(
-                $"Compra de \"{purchaseDto.Supplier}\" registrada", 
-                groceryId);
+            await UpdateInventoryFromPurchase(purchase, userId);
 
             var createdPurchase = await _purchaseRepository.GetById(purchaseId);
             return _mapper.Map<PurchaseForResponseDto>(createdPurchase);
@@ -63,10 +57,6 @@ namespace Application.Services.Implementations
 
             await _purchaseRepository.Update(existingPurchase);
             await _purchaseRepository.SaveChanges();
-
-            await _recentActivityService.LogActivityAsync(
-                $"Compra #{id} actualizada", 
-                groceryId);
 
             return _mapper.Map<PurchaseForResponseDto>(existingPurchase);
         }
@@ -107,14 +97,10 @@ namespace Application.Services.Implementations
             await _purchaseRepository.Delete(purchase);
             await _purchaseRepository.SaveChanges();
 
-            await _recentActivityService.LogActivityAsync(
-                $"Compra #{id} eliminada", 
-                groceryId);
-
             return true;
         }
 
-        private async Task UpdateInventoryFromPurchase(Purchase purchase)
+        private async Task UpdateInventoryFromPurchase(Purchase purchase, int? userId)
         {
             foreach (var item in purchase.Items)
             {
@@ -124,6 +110,7 @@ namespace Application.Services.Implementations
                 {
                     inventoryItem.Stock += item.Quantity;
                     inventoryItem.LastUpdated = DateTime.UtcNow;
+                    inventoryItem.LastUpdatedByUserId = userId;
                     await _inventoryRepository.Update(inventoryItem);
                 }
                 else
@@ -133,9 +120,10 @@ namespace Application.Services.Implementations
                         ProductId = item.ProductId,
                         Stock = item.Quantity,
                         LastUpdated = DateTime.UtcNow,
+                        LastUpdatedByUserId = userId,
                         GroceryId = purchase.GroceryId,
-                        UnitPrice = item.UnitCost, // Initialize with purchase cost
-                        SalePrice = item.UnitCost * 1.3m // Default 30% markup? Or just 0? Let's use cost for now to avoid 0.
+                        UnitPrice = item.UnitCost,
+                        SalePrice = item.UnitCost * 1.3m
                     };
                     await _inventoryRepository.Create(newInventoryItem);
                 }

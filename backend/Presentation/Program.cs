@@ -81,7 +81,26 @@ builder.Services.AddAuthentication("Bearer")
         };
     });
 
-builder.Services.AddAuthorization();
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new Microsoft.AspNetCore.Authorization.AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+    
+    options.AddPolicy("SuperAdmin", policy =>
+        policy.RequireAssertion(context =>
+            context.User.HasClaim(c => c.Type == "isSuperAdmin" && c.Value == "true")));
+    
+    options.AddPolicy("Admin", policy =>
+        policy.RequireAssertion(context =>
+            context.User.HasClaim(c => c.Type == "isSuperAdmin" && c.Value == "true") ||
+            context.User.HasClaim(c => c.Type == "role" && (c.Value == "Admin" || c.Value == "2" || c.Value == "SuperAdmin" || c.Value == "3"))));
+    
+    options.AddPolicy("Staff", policy =>
+        policy.RequireAssertion(context =>
+            context.User.HasClaim(c => c.Type == "isSuperAdmin" && c.Value == "true") ||
+            context.User.HasClaim(c => c.Type == "role")));
+});
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
@@ -104,7 +123,6 @@ builder.Services.AddAutoMapper(cfg =>
     cfg.AddProfile<SaleProfile>();
     cfg.AddProfile<GroceryProfile>();
     cfg.AddProfile<UserProfile>();
-    cfg.AddProfile<RecentActivityProfile>();
     cfg.AddProfile<PurchaseProfile>();
 });
 
@@ -133,7 +151,6 @@ builder.Services.AddScoped<IProductRepository, ProductRepository>();
 builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
 builder.Services.AddScoped<ISaleRepository, SaleRepository>();
 builder.Services.AddScoped<IGroceryRepository, GroceryRepository>();
-builder.Services.AddScoped<IRecentActivityRepository, RecentActivityRepository>();
 builder.Services.AddScoped<IPurchaseRepository, PurchaseRepository>();
 
 builder.Services.AddScoped<IUserService, UserService>();
@@ -142,7 +159,7 @@ builder.Services.AddScoped<IProductService, ProductService>();
 builder.Services.AddScoped<IInventoryService, InventoryService>();
 builder.Services.AddScoped<ISaleService, SaleService>();
 builder.Services.AddScoped<IGroceryService, GroceryService>();
-builder.Services.AddScoped<IRecentActivityService, RecentActivityService>();
+builder.Services.AddScoped<IDerivedRecentActivityService, DerivedRecentActivityService>();
 builder.Services.AddScoped<IPurchaseService, PurchaseService>();
 builder.Services.AddScoped<IDashboardService, DashboardService>();
 builder.Services.AddScoped<IReportService, ReportService>();
