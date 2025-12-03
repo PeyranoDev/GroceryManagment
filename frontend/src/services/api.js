@@ -11,6 +11,8 @@ import {
 } from './mockApi.js';
 
 const DEMO_MODE = true;
+const USE_BACKEND_CATEGORIES = true;
+const USE_BACKEND_USERS = true;
 
 const getToken = () => localStorage.getItem('auth_token');
 
@@ -26,7 +28,7 @@ const getApiUrl = () => {
     return import.meta.env.VITE_API_URL;
   }
   
-  // 3. Default for local development
+  // 3. Default for local development (docker-compose.dev)
   return 'http://localhost:5001';
 };
 
@@ -43,9 +45,21 @@ console.log('API Base URL:', API_BASE_URL);
 const getHeaders = () => {
   const headers = {
     'Content-Type': 'application/json',
-    'X-Grocery-Id': '1',
   };
-  
+
+  try {
+    const storedUser = localStorage.getItem('auth_user');
+    if (storedUser) {
+      const u = JSON.parse(storedUser);
+      const groceryId = u?.currentGroceryId ?? u?.groceryId ?? 1;
+      headers['X-Grocery-Id'] = String(groceryId);
+    } else {
+      headers['X-Grocery-Id'] = '1';
+    }
+  } catch {
+    headers['X-Grocery-Id'] = '1';
+  }
+
   const token = getToken();
   if (token) {
     headers['Authorization'] = `Bearer ${token}`;
@@ -77,8 +91,18 @@ const apiRequest = async (endpoint, options = {}) => {
     const response = await fetch(url, config);
     
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ detail: 'Error de red' }));
-      throw new Error(errorData.detail || errorData.message || `HTTP error! status: ${response.status}`);
+      let detail = '';
+      try {
+        const et = await response.text();
+        detail = et || '';
+      } catch {}
+      let msg = '';
+      try {
+        const ej = await response.json();
+        msg = ej?.detail || ej?.message || '';
+      } catch {}
+      const fallback = response.status === 403 ? 'No autorizado' : (response.statusText || 'Error de red');
+      throw new Error(msg || detail || fallback);
     }
 
     const json = await response.json();
@@ -116,6 +140,7 @@ export const authAPI = {
     method: 'POST',
     body: JSON.stringify(userData),
   }),
+  impersonate: (userId) => apiRequest(`/Auth/impersonate/${userId}`, { method: 'POST' }),
 };
 
 export const productsAPI = DEMO_MODE ? mockProductsAPI : {
@@ -250,7 +275,7 @@ export const reportsAPI = DEMO_MODE ? mockReportsAPI : {
   },
 };
 
-export const categoriesAPI = DEMO_MODE ? mockCategoriesAPI : {
+export const categoriesAPI = USE_BACKEND_CATEGORIES ? {
   getAll: () => apiRequest('/Categories'),
   getById: (id) => apiRequest(`/Categories/${id}`),
   create: (category) => apiRequest('/Categories', {
@@ -264,15 +289,32 @@ export const categoriesAPI = DEMO_MODE ? mockCategoriesAPI : {
   delete: (id) => apiRequest(`/Categories/${id}`, {
     method: 'DELETE',
   }),
-};
+} : mockCategoriesAPI;
 
-export const usersAPI = DEMO_MODE ? mockUsersAPI : {
-  getAll: () => apiRequest('/Users'),
+export const usersAPI = USE_BACKEND_USERS ? {
+  getAll: () => {
+    try {
+      const storedUser = localStorage.getItem('auth_user');
+      const u = storedUser ? JSON.parse(storedUser) : null;
+      const isSuper = !!(u && (u.isSuperAdmin || String(u.currentRole).toLowerCase() === 'superadmin' || u.currentRole === 3));
+      const endpoint = isSuper ? '/Users/grocery/all' : '/Users/grocery';
+      return apiRequest(endpoint);
+    } catch {
+      return apiRequest('/Users/grocery');
+    }
+  },
   getById: (id) => apiRequest(`/Users/${id}`),
   create: (user) => apiRequest('/Users', { method: 'POST', body: JSON.stringify(user) }),
   update: (id, user) => apiRequest(`/Users/${id}`, { method: 'PUT', body: JSON.stringify(user) }),
   delete: (id) => apiRequest(`/Users/${id}`, { method: 'DELETE' }),
-};
+  setSuperAdmin: (id, isSuperAdmin) => apiRequest(`/Users/${id}/super-admin`, { method: 'PATCH', body: JSON.stringify({ isSuperAdmin }) }),
+  setRole: (id, role) => {
+    const map = { staff: 1, admin: 2 };
+    const payload = { role: map[String(role).toLowerCase()] };
+    return apiRequest(`/Users/${id}/role`, { method: 'PATCH', body: JSON.stringify(payload) });
+  },
+  activate: (id) => apiRequest(`/Users/${id}/activate`, { method: 'PATCH' }),
+} : mockUsersAPI;
 
 export const handleApiError = (error) => {
   console.error('API Error:', error);
