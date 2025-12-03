@@ -3,6 +3,7 @@ using Application.Schemas.Groceries;
 using Application.Schemas.Products;
 using Application.Schemas.Inventory;
 using Application.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Application.Schemas;
 
@@ -10,6 +11,7 @@ namespace Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Policy = "SuperAdmin")]     
     public class SeedController : ControllerBase
     {
         private readonly IGroceryService _groceryService;
@@ -27,13 +29,13 @@ namespace Presentation.Controllers
         public async Task<ActionResult<ApiResponse<GroceryForResponseDto>>> CreateTestGrocery([FromBody] GroceryForCreateDto dto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ApiResponse<GroceryForResponseDto>.ErrorResponse("Datos de entrada inválidos."));
+                return BadRequest(ApiResponse<GroceryForResponseDto>.ErrorResponse("Datos de entrada invï¿½lidos."));
 
             var grocery = await _groceryService.Create(dto);
             
             return Ok(ApiResponse<GroceryForResponseDto>.SuccessResponse(
                 grocery, 
-                $"Grocery '{grocery.Name}' creado exitosamente con ID {grocery.Id}. Usa el header 'X-Grocery-Id: {grocery.Id}' en las próximas llamadas."
+                $"Grocery '{grocery.Name}' creado exitosamente con ID {grocery.Id}. Usa el header 'X-Grocery-Id: {grocery.Id}' en las prï¿½ximas llamadas."
             ));
         }
 
@@ -55,11 +57,11 @@ namespace Presentation.Controllers
             var categorias = new[]
             {
                 new CategoryForCreateDto { Name = "Frutas Tropicales", Icon = "??" },
-                new CategoryForCreateDto { Name = "Frutas Cítricas", Icon = "??" },
+                new CategoryForCreateDto { Name = "Frutas Cï¿½tricas", Icon = "??" },
                 new CategoryForCreateDto { Name = "Frutas de Huerta", Icon = "??" },
-                new CategoryForCreateDto { Name = "Frutas Exóticas", Icon = "??" },
+                new CategoryForCreateDto { Name = "Frutas Exï¿½ticas", Icon = "??" },
                 new CategoryForCreateDto { Name = "Verduras y Hortalizas", Icon = "??" },
-                new CategoryForCreateDto { Name = "Verduras Raíz", Icon = "??" },
+                new CategoryForCreateDto { Name = "Verduras Raï¿½z", Icon = "??" },
                 new CategoryForCreateDto { Name = "Verduras de Hoja", Icon = "??" },
                 new CategoryForCreateDto { Name = "Otros", Icon = "??" }
             };
@@ -139,27 +141,27 @@ namespace Presentation.Controllers
 
             return Ok(ApiResponse.SuccessResponse(
                 $"Datos de prueba creados exitosamente para el grocery con ID {groceryId}. " +
-                $"Se crearon {categoriasCreadas.Count} categorías y {productosCreados} productos."));
+                $"Se crearon {categoriasCreadas.Count} categorï¿½as y {productosCreados} productos."));
         }
 
         [HttpPost("complete-setup")]
         public async Task<ActionResult<ApiResponse<object>>> CreateCompleteSetup([FromBody] GroceryForCreateDto groceryDto)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ApiResponse<object>.ErrorResponse("Datos de entrada inválidos."));
+                return BadRequest(ApiResponse<object>.ErrorResponse("Datos de entrada invï¿½lidos."));
 
             // 1. Crear el grocery
             var grocery = await _groceryService.Create(groceryDto);
 
-            // 2. Crear categorías
+            // 2. Crear categorï¿½as
             var categorias = new[]
             {
                 new CategoryForCreateDto { Name = "Frutas Tropicales", Icon = "??" },
-                new CategoryForCreateDto { Name = "Frutas Cítricas", Icon = "??" },
+                new CategoryForCreateDto { Name = "Frutas Cï¿½tricas", Icon = "??" },
                 new CategoryForCreateDto { Name = "Frutas de Huerta", Icon = "??" },
-                new CategoryForCreateDto { Name = "Frutas Exóticas", Icon = "??" },
+                new CategoryForCreateDto { Name = "Frutas Exï¿½ticas", Icon = "??" },
                 new CategoryForCreateDto { Name = "Verduras y Hortalizas", Icon = "??" },
-                new CategoryForCreateDto { Name = "Verduras Raíz", Icon = "??" },
+                new CategoryForCreateDto { Name = "Verduras Raï¿½z", Icon = "??" },
                 new CategoryForCreateDto { Name = "Verduras de Hoja", Icon = "??" },
                 new CategoryForCreateDto { Name = "Otros", Icon = "??" }
             };
@@ -243,8 +245,8 @@ namespace Presentation.Controllers
                     categoriesCreated = categoriasCreadas.Count,
                     productsCreated = productosCreados
                 },
-                $"Setup completo creado exitosamente. Grocery '{grocery.Name}' (ID: {grocery.Id}) con {categoriasCreadas.Count} categorías y {productosCreados} productos. " +
-                $"Usa el header 'X-Grocery-Id: {grocery.Id}' en las próximas llamadas."
+                $"Setup completo creado exitosamente. Grocery '{grocery.Name}' (ID: {grocery.Id}) con {categoriasCreadas.Count} categorï¿½as y {productosCreados} productos. " +
+                $"Usa el header 'X-Grocery-Id: {grocery.Id}' en las prï¿½ximas llamadas."
             ));
         }
     }

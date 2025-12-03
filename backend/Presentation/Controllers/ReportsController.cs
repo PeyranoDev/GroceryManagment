@@ -1,11 +1,13 @@
 using Application.Schemas.Reports;
 using Application.Services.Interfaces;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize(Policy = "Admin")] 
     public class ReportsController : ControllerBase
     {
         private readonly IReportService _reportService;
