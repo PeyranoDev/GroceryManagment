@@ -1,6 +1,5 @@
 import {
   Leaf,
-  LogIn,
   LogOut,
   UserCircle,
   Menu,
@@ -10,11 +9,13 @@ import { NavLink } from "react-router-dom";
 import { useState } from "react";
 import "./header.css";
 
-const Header = ({ user, onLogin, onLogout }) => {
+const Header = ({ user, onLogout }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  const isAdmin = user?.isSuperAdmin || user?.currentRole === 'Admin' || user?.currentRole === 2;
+
   const navItems = [
-    { name: "Dashboard", path: "/dashboard", end: true },
+    { name: "Dashboard", path: "/dashboard", end: true, adminOnly: true },
     { name: "Caja", path: "/caja", end: true },
     { name: "Ventas", path: "/ventas/registradas" },
     { name: "Compras", path: "/compras", end: true, adminOnly: true },
@@ -30,6 +31,11 @@ const Header = ({ user, onLogin, onLogout }) => {
     setIsMobileMenuOpen(false);
   };
 
+  const canShowItem = (item) => {
+    if (!item.adminOnly) return true;
+    return isAdmin;
+  };
+
   return (
     <header className="header-container">
       <div className="header-inner">
@@ -42,7 +48,7 @@ const Header = ({ user, onLogin, onLogout }) => {
 
             <nav className="header-nav">
               {navItems.map((item) =>
-                (!user.isSuperAdmin && (item.name === "Dashboard" || item.adminOnly)) ? null : (
+                !canShowItem(item) ? null : (
                   <NavLink
                     key={item.name}
                     to={item.path}
@@ -69,22 +75,13 @@ const Header = ({ user, onLogin, onLogout }) => {
           </button>
 
           <div className="header-right-section">
-            {user ? (
-              <div className="user-info-container">
-                <span className="user-name">{user.name}</span>
-                <UserCircle size={28} className="text-[var(--color-secondary-text)]" />
-                <button onClick={onLogout} className="theme-toggle-button">
-                  <LogOut size={20} />
-                </button>
-              </div>
-            ) : (
-              <div className="auth-button-group">
-                <button onClick={onLogin} className="login-button">
-                  <LogIn size={16} /> Iniciar Sesión
-                </button>
-                <button className="register-button">Registrarse</button>
-              </div>
-            )}
+            <div className="user-info-container">
+              <span className="user-name">{user.name}</span>
+              <UserCircle size={28} className="text-[var(--color-secondary-text)]" />
+              <button onClick={onLogout} className="theme-toggle-button">
+                <LogOut size={20} />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -92,7 +89,7 @@ const Header = ({ user, onLogin, onLogout }) => {
           <div className="mobile-nav-overlay">
             <nav className="mobile-nav">
               {navItems.map((item) =>
-                (!user.isSuperAdmin && (item.name === "Dashboard" || item.adminOnly)) ? null : (
+                !canShowItem(item) ? null : (
                   <NavLink
                     key={item.name}
                     to={item.path}
@@ -110,44 +107,23 @@ const Header = ({ user, onLogin, onLogout }) => {
                   </NavLink>
                 )
               )}
-              {/* Admin-only filter for mobile */}
 
               <div className="mobile-auth-section">
-                {user ? (
-                  <div className="mobile-user-info">
-                    <div className="flex items-center gap-2 mb-4">
-                      <UserCircle size={24} className="text-[var(--color-secondary-text)]" />
-                      <span className="text-[var(--color-text)]">{user.name}</span>
-                    </div>
-                    <button
-                      onClick={() => {
-                        onLogout();
-                        closeMobileMenu();
-                      }}
-                      className="mobile-logout-button"
-                    >
-                      <LogOut size={16} /> Cerrar Sesión
-                    </button>
+                <div className="mobile-user-info">
+                  <div className="flex items-center gap-2 mb-4">
+                    <UserCircle size={24} className="text-[var(--color-secondary-text)]" />
+                    <span className="text-[var(--color-text)]">{user.name}</span>
                   </div>
-                ) : (
-                  <div className="mobile-auth-buttons">
-                    <button
-                      onClick={() => {
-                        onLogin();
-                        closeMobileMenu();
-                      }}
-                      className="mobile-login-button"
-                    >
-                      <LogIn size={16} /> Iniciar Sesión
-                    </button>
-                    <button
-                      onClick={closeMobileMenu}
-                      className="mobile-register-button"
-                    >
-                      Registrarse
-                    </button>
-                  </div>
-                )}
+                  <button
+                    onClick={() => {
+                      onLogout();
+                      closeMobileMenu();
+                    }}
+                    className="mobile-logout-button"
+                  >
+                    <LogOut size={16} /> Cerrar Sesión
+                  </button>
+                </div>
               </div>
             </nav>
           </div>
