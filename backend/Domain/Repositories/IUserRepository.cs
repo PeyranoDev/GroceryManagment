@@ -13,5 +13,6 @@ namespace Domain.Repositories
         Task<IReadOnlyList<User>> GetByGroceryIdAll(int groceryId);
         Task Activate(int userId);
         Task SetRole(int userId, Domain.Common.Enums.GroceryRole role);
+        Task SetGrocery(int userId, int groceryId);
     }
 }

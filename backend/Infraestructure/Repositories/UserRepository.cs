@@ -78,5 +78,13 @@ namespace Infraestructure.Repositories
             u.Role = role;
             await _ctx.SaveChangesAsync();
         }
+
+        public async Task SetGrocery(int userId, int groceryId)
+        {
+            var u = await _ctx.Users.FirstOrDefaultAsync(x => x.Id == userId);
+            if (u == null) return;
+            u.GroceryId = groceryId;
+            await _ctx.SaveChangesAsync();
+        }
     }
 }

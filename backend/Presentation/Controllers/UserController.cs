@@ -44,13 +44,21 @@ namespace Presentation.Controllers
         }
 
         [HttpPost]
-        [Authorize(Policy = "SuperAdmin")]
+        [Authorize(Policy = "Admin")]
         public async Task<ActionResult<ApiResponse<UserForResponseDto>>> Create([FromBody] UserForCreateDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ApiResponse<UserForResponseDto>.ErrorResponse("Datos de entrada inválidos."));
+            var isSuperAdmin = User.HasClaim(c => c.Type == "isSuperAdmin" && c.Value == "true");
+            if (!isSuperAdmin && dto.IsSuperAdmin)
+                return Forbid();
 
             var user = await _userService.Create(dto);
+            if (!isSuperAdmin)
+            {
+                var groceryId = _tenantProvider.CurrentGroceryId;
+                await _userService.SetGrocery(user.Id, groceryId);
+            }
             return CreatedAtAction(
                 nameof(GetById), 
                 new { id = user.Id }, 
@@ -62,11 +70,21 @@ namespace Presentation.Controllers
         }
 
         [HttpPut("{id}")]
-        [Authorize(Policy = "SuperAdmin")]
+        [Authorize(Policy = "Admin")]
         public async Task<ActionResult<ApiResponse<UserForResponseDto>>> Update(int id, [FromBody] UserForUpdateDto dto)
         {
             if (!ModelState.IsValid)
                 return BadRequest(ApiResponse<UserForResponseDto>.ErrorResponse("Datos de entrada inválidos."));
+            var target = await _userService.GetById(id);
+            var isSuperAdmin = User.HasClaim(c => c.Type == "isSuperAdmin" && c.Value == "true");
+            if (!isSuperAdmin)
+            {
+                if (target?.IsSuperAdmin == true) return Forbid();
+                var groceryId = _tenantProvider.CurrentGroceryId;
+                // si el usuario objetivo no pertenece a la verdulería actual, prohibir
+                var list = await _userService.GetByGroceryIdAll(groceryId);
+                if (!list.Any(u => u.Id == id)) return Forbid();
+            }
 
             var user = await _userService.Update(id, dto);
             return Ok(ApiResponse<UserForResponseDto>.SuccessResponse(
@@ -76,9 +94,19 @@ namespace Presentation.Controllers
         }
 
         [HttpDelete("{id}")]
-        [Authorize(Policy = "SuperAdmin")]
+        [Authorize(Policy = "Admin")]
         public async Task<ActionResult<ApiResponse>> Delete(int id)
         {
+            var target = await _userService.GetById(id);
+            var isSuperAdmin = User.HasClaim(c => c.Type == "isSuperAdmin" && c.Value == "true");
+            if (!isSuperAdmin)
+            {
+                if (target?.IsSuperAdmin == true) return Forbid();
+                var groceryId = _tenantProvider.CurrentGroceryId;
+                var list = await _userService.GetByGroceryIdAll(groceryId);
+                if (!list.Any(u => u.Id == id)) return Forbid();
+            }
+
             await _userService.Delete(id);
             return Ok(ApiResponse.SuccessResponse("Usuario eliminado exitosamente"));
         }

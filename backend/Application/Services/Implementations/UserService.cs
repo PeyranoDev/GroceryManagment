@@ -114,6 +114,11 @@ namespace Application.Services.Implementations
             return _mapper.Map<UserForResponseDto>(entity);
         }
 
+        public async Task SetGrocery(int id, int groceryId)
+        {
+            await _users.SetGrocery(id, groceryId);
+        }
+
         public async Task<UserForResponseDto?> Activate(int id)
         {
             var entity = await _users.GetById(id);

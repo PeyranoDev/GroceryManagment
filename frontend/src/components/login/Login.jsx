@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
 import { useAuth } from "../../contexts/AuthContext";
+import Toast from "../ui/toast/Toast";
 
 import { Leaf, User, Key, Eye, EyeOff, AlertTriangle, Loader2 } from "lucide-react";
 import Input from "../ui/input/Input";
@@ -15,6 +16,9 @@ const Login = ({ handleLogin }) => {
   const [showPassword, setShowPassword] = useState(false);
   const [authError, setAuthError] = useState(null);
   const [submitting, setSubmitting] = useState(false);
+  const [toastOpen, setToastOpen] = useState(false);
+  const [toastMsg, setToastMsg] = useState("");
+  const [toastType, setToastType] = useState("success");
 
   useEffect(() => {
     const u = location.state && location.state.user;
@@ -31,6 +35,9 @@ const Login = ({ handleLogin }) => {
     try {
       const userData = await login(email, password);
       handleLogin(userData);
+      setToastMsg("Sesión iniciada correctamente");
+      setToastType("success");
+      setToastOpen(true);
     } catch (error) {
       setAuthError(error.message || "Credenciales incorrectas");
     } finally {
@@ -133,6 +140,7 @@ const Login = ({ handleLogin }) => {
           </button>
         </form>
       </section>
+      <Toast open={toastOpen} message={toastMsg} type={toastType} onClose={() => setToastOpen(false)} />
     </div>
   );
 };

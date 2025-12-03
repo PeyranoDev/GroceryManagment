@@ -12,6 +12,7 @@ namespace Application.Services.Interfaces
         Task<UserForResponseDto?> GetById(int id);
         Task<UserForResponseDto?> SetSuperAdmin(int id, SetSuperAdminDto dto);
         Task<UserForResponseDto?> SetRole(int id, Domain.Common.Enums.GroceryRole role);
+        Task SetGrocery(int id, int groceryId);
         Task<UserForResponseDto?> Activate(int id);
         Task<UserForResponseDto?> Update(int id, UserForUpdateDto dto);
     }

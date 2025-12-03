@@ -137,6 +137,9 @@ const UsersAdmin = () => {
       if (!isSuperAdmin()) return;
       const v = await impersonate(u.id);
       const shouldGoToDashboard = v.isSuperAdmin || v.currentRole === 'Admin' || v.currentRole === 2;
+      try {
+        localStorage.setItem('toast_after_navigation', JSON.stringify({ message: `Sesión iniciada como ${u.name}`, type: 'success' }));
+      } catch {}
       navigate(shouldGoToDashboard ? '/dashboard' : '/caja');
     } catch (err) {
       setToastMsg(err.message || 'No se pudo impersonar al usuario');
