@@ -79,6 +79,9 @@ namespace Infraestructure.Migrations
                     b.Property<DateTime>("LastUpdated")
                         .HasColumnType("timestamp without time zone");
 
+                    b.Property<int?>("LastUpdatedByUserId")
+                        .HasColumnType("integer");
+
                     b.Property<int>("ProductId")
                         .HasColumnType("integer");
 
@@ -94,6 +97,8 @@ namespace Infraestructure.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("GroceryId");
+
+                    b.HasIndex("LastUpdatedByUserId");
 
                     b.HasIndex("ProductId");
 
@@ -166,9 +171,14 @@ namespace Infraestructure.Migrations
                     b.Property<decimal>("Total")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int?>("UserId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("GroceryId");
+
+                    b.HasIndex("UserId");
 
                     b.ToTable("Purchases");
                 });
@@ -208,32 +218,6 @@ namespace Infraestructure.Migrations
                     b.HasIndex("PurchaseId");
 
                     b.ToTable("PurchaseItems");
-                });
-
-            modelBuilder.Entity("Domain.Entities.RecentActivity", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Action")
-                        .IsRequired()
-                        .HasMaxLength(500)
-                        .HasColumnType("character varying(500)");
-
-                    b.Property<DateTime>("Date")
-                        .HasColumnType("timestamp without time zone");
-
-                    b.Property<int>("GroceryId")
-                        .HasColumnType("integer");
-
-                    b.HasKey("Id");
-
-                    b.HasIndex("GroceryId");
-
-                    b.ToTable("RecentActivities");
                 });
 
             modelBuilder.Entity("Domain.Entities.Sale", b =>
@@ -371,6 +355,11 @@ namespace Infraestructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Domain.Entities.User", "LastUpdatedByUser")
+                        .WithMany()
+                        .HasForeignKey("LastUpdatedByUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("Domain.Entities.Product", "Product")
                         .WithMany("InventoryItems")
                         .HasForeignKey("ProductId")
@@ -407,6 +396,8 @@ namespace Infraestructure.Migrations
 
                     b.Navigation("Grocery");
 
+                    b.Navigation("LastUpdatedByUser");
+
                     b.Navigation("Product");
 
                     b.Navigation("Promotion")
@@ -436,7 +427,14 @@ namespace Infraestructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.Navigation("Grocery");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("Domain.Entities.PurchaseItem", b =>
@@ -464,17 +462,6 @@ namespace Infraestructure.Migrations
                     b.Navigation("Product");
 
                     b.Navigation("Purchase");
-                });
-
-            modelBuilder.Entity("Domain.Entities.RecentActivity", b =>
-                {
-                    b.HasOne("Domain.Entities.Grocery", "Grocery")
-                        .WithMany()
-                        .HasForeignKey("GroceryId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Grocery");
                 });
 
             modelBuilder.Entity("Domain.Entities.Sale", b =>
