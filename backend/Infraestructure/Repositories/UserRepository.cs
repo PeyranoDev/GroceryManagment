@@ -38,5 +38,18 @@ namespace Infraestructure.Repositories
             u.IsSuperAdmin = isSuperAdmin;
             await _ctx.SaveChangesAsync();
         }
+
+        public Task<int> CountByGroceryId(int groceryId)
+            => _ctx.Users
+                .AsNoTracking()
+                .Where(u => u.GroceryId == groceryId)
+                .CountAsync();
+
+        public async Task<IReadOnlyList<User>> GetByGroceryId(int groceryId)
+            => await _ctx.Users
+                .AsNoTracking()
+                .Include(u => u.Grocery)
+                .Where(u => u.GroceryId == groceryId)
+                .ToListAsync();
     }
 }

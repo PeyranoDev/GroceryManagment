@@ -8,5 +8,7 @@ namespace Domain.Repositories
         Task<bool> ExistsByEmail(string email);
         Task<bool> IsSuperAdmin(int userId);
         Task SetSuperAdmin(int userId, bool isSuperAdmin);
+        Task<int> CountByGroceryId(int groceryId);
+        Task<IReadOnlyList<User>> GetByGroceryId(int groceryId);
     }
 }

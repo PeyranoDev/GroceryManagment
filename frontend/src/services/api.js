@@ -10,7 +10,7 @@ import {
   mockUsersAPI
 } from './mockApi.js';
 
-const DEMO_MODE = true;
+const DEMO_MODE = false;
 
 const getToken = () => localStorage.getItem('auth_token');
 
@@ -272,6 +272,22 @@ export const usersAPI = DEMO_MODE ? mockUsersAPI : {
   create: (user) => apiRequest('/Users', { method: 'POST', body: JSON.stringify(user) }),
   update: (id, user) => apiRequest(`/Users/${id}`, { method: 'PUT', body: JSON.stringify(user) }),
   delete: (id) => apiRequest(`/Users/${id}`, { method: 'DELETE' }),
+};
+
+// Staff management API (for Admin users)
+export const staffAPI = {
+  getMyStaff: () => apiRequest('/Auth/my-staff'),
+  create: (staff) => apiRequest('/Auth/staff', { 
+    method: 'POST', 
+    body: JSON.stringify(staff) 
+  }),
+  update: (id, staff) => apiRequest(`/Auth/staff/${id}`, { 
+    method: 'PUT', 
+    body: JSON.stringify(staff) 
+  }),
+  delete: (id) => apiRequest(`/Auth/staff/${id}`, { 
+    method: 'DELETE' 
+  }),
 };
 
 export const handleApiError = (error) => {
