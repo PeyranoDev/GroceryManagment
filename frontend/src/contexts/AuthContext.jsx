@@ -8,6 +8,9 @@ const TOKEN_KEY = 'auth_token';
 const USER_KEY = 'auth_user';
 const DEMO_MODE = false;
 
+const ROLE_MAP = { 1: 'Staff', 2: 'Admin', 3: 'SuperAdmin' };
+const ROLE_HIERARCHY = { Staff: 1, Admin: 2, SuperAdmin: 3 };
+
 const parseJwt = (token) => {
   try {
     const base64Url = token.split('.')[1];
@@ -31,6 +34,14 @@ const isTokenExpired = (token) => {
   return decoded.exp * 1000 < Date.now();
 };
 
+const normalizeRole = (role) => {
+  if (typeof role === 'string') {
+    const normalized = role.charAt(0).toUpperCase() + role.slice(1).toLowerCase();
+    return ROLE_HIERARCHY[normalized] ? normalized : 'Staff';
+  }
+  return ROLE_MAP[role] || 'Staff';
+};
+
 const mockLogin = async (email, password) => {
   await new Promise(resolve => setTimeout(resolve, 500));
   
@@ -43,9 +54,8 @@ const mockLogin = async (email, password) => {
     id: user.id,
     name: user.name,
     email: user.email,
-    isSuperAdmin: user.isSuperAdmin,
-    currentRole: user.isSuperAdmin ? 'Admin' : 'Staff',
-    groceryId: 1
+    currentRole: user.role || 'Staff',
+    currentGroceryId: 1
   };
   
   return {
@@ -83,17 +93,15 @@ export const AuthProvider = ({ children }) => {
     const newToken = response.token || response.Token || '';
     const rawUser = response.user || response.User || {};
 
+    // Obtener el role del response
+    const rawRole = rawUser.currentRole ?? rawUser.CurrentRole;
+    const currentRole = normalizeRole(rawRole);
+
     const normalizedUser = {
       id: rawUser.id ?? rawUser.Id,
       name: rawUser.name ?? rawUser.Name,
       email: rawUser.email ?? rawUser.Email,
-      isSuperAdmin: rawUser.isSuperAdmin ?? rawUser.IsSuperAdmin ?? false,
-      currentRole: (() => {
-        const role = rawUser.currentRole ?? rawUser.CurrentRole;
-        if (typeof role === 'string') return role;
-        const map = { 1: 'Staff', 2: 'Admin', 3: 'SuperAdmin' };
-        return map[role] || 'Staff';
-      })(),
+      currentRole,
       currentGroceryId: rawUser.currentGroceryId ?? rawUser.CurrentGroceryId ?? null,
     };
 
@@ -111,17 +119,15 @@ export const AuthProvider = ({ children }) => {
     const newToken = response.token || response.Token || '';
     const rawUser = response.user || response.User || {};
 
+    // Obtener el role del response
+    const rawRole = rawUser.currentRole ?? rawUser.CurrentRole;
+    const currentRole = normalizeRole(rawRole);
+
     const normalizedUser = {
       id: rawUser.id ?? rawUser.Id,
       name: rawUser.name ?? rawUser.Name,
       email: rawUser.email ?? rawUser.Email,
-      isSuperAdmin: rawUser.isSuperAdmin ?? rawUser.IsSuperAdmin ?? false,
-      currentRole: (() => {
-        const role = rawUser.currentRole ?? rawUser.CurrentRole;
-        if (typeof role === 'string') return role;
-        const map = { 1: 'Staff', 2: 'Admin', 3: 'SuperAdmin' };
-        return map[role] || 'Staff';
-      })(),
+      currentRole,
       currentGroceryId: rawUser.currentGroceryId ?? rawUser.CurrentGroceryId ?? null,
     };
 
@@ -143,11 +149,9 @@ export const AuthProvider = ({ children }) => {
 
   const hasRole = useCallback((requiredRole) => {
     if (!user) return false;
-    if (user.isSuperAdmin) return true;
     
-    const roleHierarchy = { Staff: 1, Admin: 2, SuperAdmin: 3 };
-    const userRoleLevel = roleHierarchy[user.currentRole] || 0;
-    const requiredRoleLevel = roleHierarchy[requiredRole] || 0;
+    const userRoleLevel = ROLE_HIERARCHY[user.currentRole] || 0;
+    const requiredRoleLevel = ROLE_HIERARCHY[requiredRole] || 0;
     
     return userRoleLevel >= requiredRoleLevel;
   }, [user]);
@@ -157,7 +161,7 @@ export const AuthProvider = ({ children }) => {
   }, [hasRole]);
 
   const isSuperAdmin = useCallback(() => {
-    return user?.isSuperAdmin === true;
+    return user?.currentRole === 'SuperAdmin' || user?.currentRole === 3;
   }, [user]);
 
   const value = {

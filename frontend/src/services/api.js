@@ -296,7 +296,7 @@ export const usersAPI = USE_BACKEND_USERS ? {
     try {
       const storedUser = localStorage.getItem('auth_user');
       const u = storedUser ? JSON.parse(storedUser) : null;
-      const isSuper = !!(u && (u.isSuperAdmin || String(u.currentRole).toLowerCase() === 'superadmin' || u.currentRole === 3));
+      const isSuper = u?.currentRole === 'SuperAdmin';
       const endpoint = isSuper ? '/Users/grocery/all' : '/Users/grocery';
       return apiRequest(endpoint);
     } catch {
@@ -307,9 +307,8 @@ export const usersAPI = USE_BACKEND_USERS ? {
   create: (user) => apiRequest('/Users', { method: 'POST', body: JSON.stringify(user) }),
   update: (id, user) => apiRequest(`/Users/${id}`, { method: 'PUT', body: JSON.stringify(user) }),
   delete: (id) => apiRequest(`/Users/${id}`, { method: 'DELETE' }),
-  setSuperAdmin: (id, isSuperAdmin) => apiRequest(`/Users/${id}/super-admin`, { method: 'PATCH', body: JSON.stringify({ isSuperAdmin }) }),
   setRole: (id, role) => {
-    const map = { staff: 1, admin: 2 };
+    const map = { staff: 1, admin: 2, superadmin: 3 };
     const payload = { role: map[String(role).toLowerCase()] };
     return apiRequest(`/Users/${id}/role`, { method: 'PATCH', body: JSON.stringify(payload) });
   },

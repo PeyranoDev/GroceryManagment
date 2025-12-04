@@ -12,7 +12,9 @@ import "./header.css";
 const Header = ({ user, onLogout }) => {
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  const isAdmin = user?.isSuperAdmin || user?.currentRole === 'Admin' || user?.currentRole === 2;
+  const roleHierarchy = { Staff: 1, Admin: 2, SuperAdmin: 3 };
+  const userRoleLevel = roleHierarchy[user?.currentRole] || 0;
+  const isAdmin = userRoleLevel >= roleHierarchy.Admin;
 
   const navItems = [
     { name: "Dashboard", path: "/dashboard", end: true, adminOnly: true },

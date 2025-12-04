@@ -732,7 +732,7 @@ export const mockUsersAPI = {
   create: async (user) => {
     await delay();
     const nextId = Math.max(...mockUsers.map(u => u.id)) + 1;
-    const newUser = { id: nextId, isSuperAdmin: !!user.isSuperAdmin, ...user };
+    const newUser = { id: nextId, role: user.role || 'Staff', ...user };
     mockUsers.push(newUser);
     return mockResponse(newUser);
   },
