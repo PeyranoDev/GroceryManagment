@@ -7,10 +7,13 @@ using Infraestructure;
 using Infraestructure.Repositories;
 using Infraestructure.Services;
 using Infraestructure.Tenancy;
+using Infraestructure.BackgroundServices;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
 using Presentation.Middleware;
 using Azure.Identity;
+using Polly;
+using Polly.Extensions.Http;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -170,6 +173,8 @@ builder.Services.AddScoped<IInventoryRepository, InventoryRepository>();
 builder.Services.AddScoped<ISaleRepository, SaleRepository>();
 builder.Services.AddScoped<IGroceryRepository, GroceryRepository>();
 builder.Services.AddScoped<IPurchaseRepository, PurchaseRepository>();
+builder.Services.AddScoped<ICotizacionDolarRepository, CotizacionDolarRepository>();
+builder.Services.AddScoped<IFeriadoRepository, FeriadoRepository>();
 
 builder.Services.AddScoped<IDashboardQueryService, DashboardQueryService>();
 
@@ -186,6 +191,48 @@ builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<ISeedService, SeedService>();
+builder.Services.AddScoped<IExchangeRateService, ExchangeRateService>();
+
+// HttpClient configuration with Polly resilience policies
+var retryPolicy = HttpPolicyExtensions
+    .HandleTransientHttpError()
+    .WaitAndRetryAsync(3, retryAttempt => TimeSpan.FromSeconds(Math.Pow(2, retryAttempt)),
+        onRetry: (outcome, timespan, retryAttempt, context) =>
+        {
+            Console.WriteLine($"Retry {retryAttempt} after {timespan.TotalSeconds}s due to {outcome.Exception?.Message ?? outcome.Result.StatusCode.ToString()}");
+        });
+
+var circuitBreakerPolicy = HttpPolicyExtensions
+    .HandleTransientHttpError()
+    .CircuitBreakerAsync(5, TimeSpan.FromMinutes(1),
+        onBreak: (outcome, timespan) =>
+        {
+            Console.WriteLine($"Circuit breaker opened for {timespan.TotalSeconds}s due to {outcome.Exception?.Message ?? outcome.Result.StatusCode.ToString()}");
+        },
+        onReset: () => Console.WriteLine("Circuit breaker reset"),
+        onHalfOpen: () => Console.WriteLine("Circuit breaker half-open"));
+
+builder.Services.AddHttpClient("DolarApi", client =>
+{
+    client.BaseAddress = new Uri("https://dolarapi.com/");
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+    client.Timeout = TimeSpan.FromSeconds(30);
+})
+.AddPolicyHandler(retryPolicy)
+.AddPolicyHandler(circuitBreakerPolicy);
+
+builder.Services.AddHttpClient("ArgentinaDataApi", client =>
+{
+    client.BaseAddress = new Uri("https://api.argentinadatos.com/");
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+    client.Timeout = TimeSpan.FromSeconds(30);
+})
+.AddPolicyHandler(retryPolicy)
+.AddPolicyHandler(circuitBreakerPolicy);
+
+// Background services for fetching exchange rates and holidays
+builder.Services.AddHostedService<HolidayFetcherService>();
+builder.Services.AddHostedService<DollarRateFetcherService>();
 
 var app = builder.Build();
 

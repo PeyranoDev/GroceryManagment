@@ -47,6 +47,80 @@ namespace Infraestructure.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("Domain.Entities.CotizacionDolar", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Compra")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<DateTime>("FechaActualizacion")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime>("FechaRegistro")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Fuente")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("TipoCambio")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<decimal>("Venta")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TipoCambio", "FechaActualizacion");
+
+                    b.ToTable("CotizacionesDolar", (string)null);
+                });
+
+            modelBuilder.Entity("Domain.Entities.FeriadoArgentino", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Anio")
+                        .HasColumnType("integer");
+
+                    b.Property<DateOnly>("Fecha")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime>("FechaRegistro")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Tipo")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Fecha")
+                        .IsUnique();
+
+                    b.HasIndex("Anio", "Fecha");
+
+                    b.ToTable("FeriadosArgentinos", (string)null);
+                });
+
             modelBuilder.Entity("Domain.Entities.Grocery", b =>
                 {
                     b.Property<int>("Id")
@@ -225,6 +299,9 @@ namespace Infraestructure.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<decimal?>("CotizacionDolar")
+                        .HasColumnType("decimal(18,2)");
+
                     b.Property<string>("CustomerName")
                         .HasColumnType("text");
 
@@ -246,6 +323,9 @@ namespace Infraestructure.Migrations
                     b.Property<bool>("IsOnline")
                         .HasColumnType("boolean");
 
+                    b.Property<int>("Moneda")
+                        .HasColumnType("integer");
+
                     b.Property<string>("OrderStatus")
                         .IsRequired()
                         .HasColumnType("text");
@@ -259,6 +339,12 @@ namespace Infraestructure.Migrations
                         .HasColumnType("text");
 
                     b.Property<decimal>("Total")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalARS")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("TotalUSD")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("UserId")
@@ -285,6 +371,9 @@ namespace Infraestructure.Migrations
                         .HasColumnType("integer");
 
                     b.Property<decimal>("Price")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<decimal>("PriceUSD")
                         .HasColumnType("decimal(18,2)");
 
                     b.Property<int>("ProductId")
