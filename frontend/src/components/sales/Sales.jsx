@@ -64,16 +64,7 @@ const Sales = () => {
   const [toastMsg, setToastMsg] = useState("");
   const [toastType, setToastType] = useState("success");
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setDetails((prev) => ({
-        ...prev,
-        time: getCurrentTime(),
-      }));
-    }, 60000);
-
-    return () => clearInterval(interval);
-  }, []);
+  // La hora se toma del formulario, no se actualiza automáticamente
 
   const handleDetailChange = (key, value) =>
     setDetails((prev) => ({ ...prev, [key]: value }));
