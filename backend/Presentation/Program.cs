@@ -21,8 +21,9 @@ if (builder.Environment.IsProduction())
     try
     {
         var keyVaultEndpoint = new Uri("https://grocerymanagerkv.vault.azure.net/");
-        builder.Configuration.AddAzureKeyVault(keyVaultEndpoint, new DefaultAzureCredential());
-        Console.WriteLine("Key Vault configurado correctamente.");
+        // Usar ManagedIdentityCredential para Container Apps con System-Assigned Identity
+        builder.Configuration.AddAzureKeyVault(keyVaultEndpoint, new ManagedIdentityCredential());
+        Console.WriteLine("Key Vault configurado correctamente con Managed Identity.");
         
         var pgHost = builder.Configuration["PGHOST"];
         var pgPort = builder.Configuration["PGPORT"] ?? "5432";
@@ -90,13 +91,14 @@ builder.Services.AddAuthorization(options =>
     
     options.AddPolicy("SuperAdmin", policy =>
         policy.RequireAssertion(context =>
-            context.User.HasClaim(c => c.Type == "isSuperAdmin" && string.Equals(c.Value, "true", StringComparison.OrdinalIgnoreCase))));
+        {
+            var allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "SuperAdmin", "3" };
+            return context.User.Claims.Any(c => c.Type == "role" && allowed.Contains(c.Value));
+        }));
 
     options.AddPolicy("Admin", policy =>
         policy.RequireAssertion(context =>
         {
-            var isSuper = context.User.HasClaim(c => c.Type == "isSuperAdmin" && string.Equals(c.Value, "true", StringComparison.OrdinalIgnoreCase));
-            if (isSuper) return true;
 
             var allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "Admin", "2", "SuperAdmin", "3" };
             bool hasCustomRole = context.User.Claims.Any(c => c.Type == "role" && allowed.Contains(c.Value));
@@ -106,7 +108,6 @@ builder.Services.AddAuthorization(options =>
     
     options.AddPolicy("Staff", policy =>
         policy.RequireAssertion(context =>
-            context.User.HasClaim(c => c.Type == "isSuperAdmin" && c.Value == "true") ||
             context.User.HasClaim(c => c.Type == "role")));
 });
 

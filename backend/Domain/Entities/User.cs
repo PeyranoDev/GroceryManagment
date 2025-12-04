@@ -8,7 +8,6 @@ namespace Domain.Entities
         public string Name { get; set; } = null!;
         public string Email { get; set; } = null!;
         public string PasswordHash { get; set; } = null!;
-        public bool IsSuperAdmin { get; set; }
         public bool IsActive { get; set; } = true;
         
         public int? GroceryId { get; set; }
