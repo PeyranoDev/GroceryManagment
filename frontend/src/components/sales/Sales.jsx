@@ -41,6 +41,7 @@ const Sales = () => {
     observations: "",
     isOnline: false,
     deliveryCost: "",
+    moneda: 1, // 1 = ARS, 2 = USD
   });
   const [step, setStep] = useState(() => {
     try {
@@ -98,6 +99,8 @@ const Sales = () => {
         stock: invItem?.stock ?? product.stock ?? 0,
         unit: invItem?.unit ?? product.unit ?? 'u',
         salePrice: invItem?.salePrice ?? product.salePrice ?? product.unitPrice,
+        salePriceUSD: invItem?.salePriceUSD ?? 0,
+        cotizacionDolar: invItem?.cotizacionDolar ?? 0,
       };
       addProductToCart(enriched);
     } catch {
@@ -112,6 +115,9 @@ const Sales = () => {
     details.isOnline ? details.deliveryCost : 0
   );
 
+  // Obtener cotización del dólar del primer item del carrito
+  const cotizacionDolar = cart.length > 0 ? (cart[0]?.product?.cotizacionDolar || 0) : 0;
+
 
   const resetSale = () => {
     clearCart();
@@ -123,6 +129,7 @@ const Sales = () => {
       observations: "",
       isOnline: false,
       deliveryCost: "",
+      moneda: 1,
     });
     setStep(1);
   };
@@ -172,6 +179,7 @@ const Sales = () => {
         cart: cart.map((item) => ({
           productId: item.product.id,
           salePrice: item.product.salePrice ?? item.product.unitPrice,
+          salePriceUSD: item.product.salePriceUSD ?? 0,
           quantity: item.quantity,
         })),
         details: {
@@ -183,6 +191,7 @@ const Sales = () => {
           isOnline: !!details.isOnline,
           deliveryCost: parseFloat(details.deliveryCost || 0),
         },
+        moneda: details.moneda || 1,
       };
       const created = await createSaleFromCart(cartPayload);
       resetSale();
@@ -287,6 +296,9 @@ const Sales = () => {
                 isOnline={details ? details.isOnline : false}
                 cart={cart}
                 details={details}
+                moneda={details.moneda || 1}
+                onMonedaChange={(m) => handleDetailChange('moneda', m)}
+                cotizacionDolar={cotizacionDolar}
                 footerActions={(
                   <>
                     <button onClick={gotoPrev} className="px-4 py-2 rounded-md bg-[var(--surface)] hover:bg-[var(--surface-muted)] text-[var(--color-text)] font-semibold">Anterior</button>
@@ -316,7 +328,10 @@ const Sales = () => {
         isOpen={confirmCreateOpen}
         onClose={() => setConfirmCreateOpen(false)}
         title="Confirmar Venta"
-        message={`Total: $${Number(total || 0).toLocaleString()}`}
+        message={details.moneda === 2 && cotizacionDolar > 0
+          ? `Total: US$ ${(total / cotizacionDolar).toFixed(2)}`
+          : `Total: $${Number(total || 0).toLocaleString()}`
+        }
         confirmText="Confirmar"
         cancelText="Cancelar"
         onConfirm={finalizeSale}
