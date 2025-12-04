@@ -1,3 +1,9 @@
+## [1.7.2](https://github.com/PeyranoDev/GroceryManagment/compare/v1.7.1...v1.7.2) (2025-12-04)
+
+### 🐛 Bug Fixes
+
+* combinar fecha y hora del formulario en ventas ([f82c58c](https://github.com/PeyranoDev/GroceryManagment/commit/f82c58c51ae412a396ec09b8c45efc898ba3d856))
+
 ## [1.7.1](https://github.com/PeyranoDev/GroceryManagment/compare/v1.7.0...v1.7.1) (2025-12-04)
 
 ### 🐛 Bug Fixes
