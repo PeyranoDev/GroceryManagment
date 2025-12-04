@@ -1,15 +1,65 @@
 import React from 'react';
-import { View, Text, StyleSheet, ScrollView } from 'react-native';
+import { View, Text, StyleSheet, ScrollView, TouchableOpacity } from 'react-native';
 import { colors } from '../../utils/colors';
-import { formatCurrency } from '../../utils/formatters';
+import { formatCurrency, formatUSD } from '../../utils/formatters';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
 import { Truck, User, Phone, MapPin, FileText } from 'lucide-react-native';
 
-export default function SalesSummary({ cart, details, subtotal, total, onNext, onPrev }) {
+export default function SalesSummary({ 
+    cart, 
+    details, 
+    subtotal, 
+    total, 
+    totalUSD = 0,
+    moneda = 1,
+    cotizacionDolar = 0,
+    onMonedaChange,
+    onNext, 
+    onPrev 
+}) {
+    const isUSD = moneda === 2;
+    const subtotalUSD = cotizacionDolar > 0 ? (subtotal / cotizacionDolar) : 0;
+    
     return (
         <ScrollView style={styles.container}>
             <Card title="Resumen de la Venta" style={styles.card}>
+                {/* Selector de Moneda */}
+                {cotizacionDolar > 0 && onMonedaChange && (
+                    <View style={styles.currencySection}>
+                        <Text style={styles.currencyLabel}>Moneda de pago:</Text>
+                        <View style={styles.currencyButtons}>
+                            <TouchableOpacity
+                                style={[
+                                    styles.currencyButton,
+                                    moneda === 1 && styles.currencyButtonActive,
+                                ]}
+                                onPress={() => onMonedaChange(1)}
+                            >
+                                <Text style={[
+                                    styles.currencyButtonText,
+                                    moneda === 1 && styles.currencyButtonTextActive,
+                                ]}>🇦🇷 ARS</Text>
+                            </TouchableOpacity>
+                            <TouchableOpacity
+                                style={[
+                                    styles.currencyButton,
+                                    moneda === 2 && styles.currencyButtonActiveUSD,
+                                ]}
+                                onPress={() => onMonedaChange(2)}
+                            >
+                                <Text style={[
+                                    styles.currencyButtonText,
+                                    moneda === 2 && styles.currencyButtonTextActiveUSD,
+                                ]}>🇺🇸 USD</Text>
+                            </TouchableOpacity>
+                        </View>
+                        <Text style={styles.exchangeRate}>
+                            Cotización: ${cotizacionDolar.toFixed(2)} ARS
+                        </Text>
+                    </View>
+                )}
+
                 {/* Información del Cliente */}
                 {details.isOnline && (
                     <View style={styles.section}>
@@ -79,18 +129,38 @@ export default function SalesSummary({ cart, details, subtotal, total, onNext, o
                 <View style={styles.totalsSection}>
                     <View style={styles.totalRow}>
                         <Text style={styles.totalLabel}>Subtotal:</Text>
-                        <Text style={styles.totalValue}>{formatCurrency(subtotal)}</Text>
+                        <Text style={[styles.totalValue, isUSD && styles.usdText]}>
+                            {isUSD ? formatUSD(subtotalUSD) : formatCurrency(subtotal)}
+                        </Text>
                     </View>
                     {details.isOnline && details.deliveryCost && (
                         <View style={styles.totalRow}>
                             <Text style={styles.totalLabel}>Envío:</Text>
-                            <Text style={styles.totalValue}>{formatCurrency(parseFloat(details.deliveryCost))}</Text>
+                            <Text style={[styles.totalValue, isUSD && styles.usdText]}>
+                                {isUSD 
+                                    ? formatUSD(parseFloat(details.deliveryCost) / cotizacionDolar)
+                                    : formatCurrency(parseFloat(details.deliveryCost))
+                                }
+                            </Text>
                         </View>
                     )}
                     <View style={[styles.totalRow, styles.totalRowFinal]}>
                         <Text style={styles.totalLabelFinal}>Total:</Text>
-                        <Text style={styles.totalValueFinal}>{formatCurrency(total)}</Text>
+                        <Text style={[styles.totalValueFinal, isUSD && styles.usdTextFinal]}>
+                            {isUSD ? formatUSD(totalUSD) : formatCurrency(total)}
+                        </Text>
                     </View>
+                    {/* Equivalente en otra moneda */}
+                    {cotizacionDolar > 0 && (
+                        <View style={styles.equivalentRow}>
+                            <Text style={styles.equivalentText}>
+                                {isUSD 
+                                    ? `Equivalente: ${formatCurrency(total)}`
+                                    : `Equivalente: ${formatUSD(totalUSD)}`
+                                }
+                            </Text>
+                        </View>
+                    )}
                 </View>
 
                 {/* Botones */}
@@ -196,6 +266,68 @@ const styles = StyleSheet.create({
         fontSize: 24,
         fontWeight: 'bold',
         color: colors.primary,
+    },
+    usdText: {
+        color: '#22c55e',
+    },
+    usdTextFinal: {
+        color: '#22c55e',
+    },
+    currencySection: {
+        marginBottom: 20,
+        paddingBottom: 20,
+        borderBottomWidth: 1,
+        borderBottomColor: colors.border,
+        alignItems: 'center',
+    },
+    currencyLabel: {
+        fontSize: 14,
+        color: colors.textSecondary,
+        marginBottom: 10,
+    },
+    currencyButtons: {
+        flexDirection: 'row',
+        gap: 12,
+    },
+    currencyButton: {
+        paddingHorizontal: 20,
+        paddingVertical: 10,
+        borderRadius: 8,
+        backgroundColor: colors.bgSecondary,
+        borderWidth: 1,
+        borderColor: colors.border,
+    },
+    currencyButtonActive: {
+        backgroundColor: colors.primary,
+        borderColor: colors.primary,
+    },
+    currencyButtonActiveUSD: {
+        backgroundColor: '#22c55e',
+        borderColor: '#22c55e',
+    },
+    currencyButtonText: {
+        fontSize: 14,
+        fontWeight: '600',
+        color: colors.textSecondary,
+    },
+    currencyButtonTextActive: {
+        color: '#fff',
+    },
+    currencyButtonTextActiveUSD: {
+        color: '#fff',
+    },
+    exchangeRate: {
+        fontSize: 12,
+        color: colors.textSecondary,
+        marginTop: 8,
+    },
+    equivalentRow: {
+        alignItems: 'center',
+        marginTop: 8,
+    },
+    equivalentText: {
+        fontSize: 14,
+        color: colors.textSecondary,
     },
     actions: {
         flexDirection: 'row',

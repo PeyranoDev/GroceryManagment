@@ -1,12 +1,24 @@
 import React, { useState } from 'react';
 import { View, Text, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { colors } from '../../utils/colors';
-import { formatCurrency } from '../../utils/formatters';
+import { formatCurrency, formatUSD } from '../../utils/formatters';
 import Card from '../ui/Card';
 import Button from '../ui/Button';
 import { Banknote, CreditCard, Smartphone } from 'lucide-react-native';
 
-export default function SalesPayment({ details, total, isOnline, onDetailChange, onFinish, onPrev, loading }) {
+export default function SalesPayment({ 
+    details, 
+    total, 
+    totalUSD = 0,
+    moneda = 1,
+    cotizacionDolar = 0,
+    isOnline, 
+    onDetailChange, 
+    onFinish, 
+    onPrev, 
+    loading 
+}) {
+    const isUSD = moneda === 2;
     const paymentMethods = [
         { id: 'Efectivo', label: 'Efectivo', icon: Banknote },
         { id: 'Tarjeta', label: 'Tarjeta', icon: CreditCard },
@@ -14,9 +26,10 @@ export default function SalesPayment({ details, total, isOnline, onDetailChange,
     ];
 
     const handleFinish = () => {
+        const totalDisplay = isUSD ? formatUSD(totalUSD) : formatCurrency(total);
         Alert.alert(
             'Confirmar Venta',
-            `¿Confirmar venta de ${formatCurrency(total)}?`,
+            `¿Confirmar venta de ${totalDisplay}?`,
             [
                 { text: 'Cancelar', style: 'cancel' },
                 {
@@ -80,8 +93,20 @@ export default function SalesPayment({ details, total, isOnline, onDetailChange,
                 <View style={styles.totalSection}>
                     <View style={styles.totalRow}>
                         <Text style={styles.totalLabel}>{isOnline ? 'Total a Cobrar:' : 'Total a Pagar:'}</Text>
-                        <Text style={styles.totalValue}>{formatCurrency(total)}</Text>
+                        <Text style={[styles.totalValue, isUSD && styles.usdText]}>
+                            {isUSD ? formatUSD(totalUSD) : formatCurrency(total)}
+                        </Text>
                     </View>
+                    {cotizacionDolar > 0 && (
+                        <View style={styles.equivalentRow}>
+                            <Text style={styles.equivalentText}>
+                                {isUSD 
+                                    ? `Equivalente: ${formatCurrency(total)}`
+                                    : `Equivalente: ${formatUSD(totalUSD)}`
+                                }
+                            </Text>
+                        </View>
+                    )}
                 </View>
 
                 {/* Botones */}
@@ -185,6 +210,17 @@ const styles = StyleSheet.create({
         fontSize: 28,
         fontWeight: 'bold',
         color: colors.primary,
+    },
+    usdText: {
+        color: '#22c55e',
+    },
+    equivalentRow: {
+        alignItems: 'center',
+        marginTop: 8,
+    },
+    equivalentText: {
+        fontSize: 14,
+        color: colors.textSecondary,
     },
     actions: {
         flexDirection: 'row',

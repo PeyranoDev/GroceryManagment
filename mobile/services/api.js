@@ -88,6 +88,11 @@ export const dashboardAPI = {
     getWeeklySales: () => apiClient.get('/Dashboard/weekly-sales'),
 };
 
+// Exchange Rate API
+export const exchangeRateAPI = {
+    getCurrent: () => apiClient.get('/ExchangeRate/current'),
+};
+
 // Recent Activities API
 export const recentActivitiesAPI = {
     getRecent: (count = 10) => apiClient.get(`/RecentActivities/recent?${count}`),

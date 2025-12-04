@@ -1,11 +1,12 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { View, StyleSheet, ScrollView, Alert } from 'react-native';
 import { useRouter } from 'expo-router';
 import { colors } from '../../utils/colors';
-import { formatCurrency } from '../../utils/formatters';
+import { formatCurrency, formatUSD } from '../../utils/formatters';
 import { useCart } from '../../hooks/useCart';
 import { useSales } from '../../hooks/useSales';
 import { useAuth } from '../../contexts/AuthContext';
+import { exchangeRateAPI } from '../../services/api';
 import Stepper from '../../components/sales/Stepper';
 import SalesInfo from '../../components/sales/SalesInfo';
 import ProductSearch from '../../components/sales/ProductSearch';
@@ -31,6 +32,7 @@ export default function SalesScreen() {
     const { createSaleFromCart, loading } = useSales();
 
     const [step, setStep] = useState(1);
+    const [cotizacionDolar, setCotizacionDolar] = useState(0);
     const [details, setDetails] = useState({
         date: new Date().toISOString().slice(0, 10),
         time: new Date().toTimeString().slice(0, 5),
@@ -42,11 +44,31 @@ export default function SalesScreen() {
         isOnline: false,
         deliveryMethod: 'Retiro en tienda',
         deliveryCost: '0',
+        moneda: 1, // 1 = ARS, 2 = USD
     });
+
+    // Obtener cotización del dólar al montar
+    useEffect(() => {
+        const fetchExchangeRate = async () => {
+            try {
+                const response = await exchangeRateAPI.getCurrent();
+                const data = response.data?.data || response.data || response;
+                if (data?.venta) {
+                    setCotizacionDolar(data.venta);
+                }
+            } catch (err) {
+                console.log('No se pudo obtener cotización del dólar:', err.message);
+            }
+        };
+        fetchExchangeRate();
+    }, []);
 
     const { subtotal, total } = calculateTotals(
         details.isOnline && details.deliveryCost ? parseFloat(details.deliveryCost) : 0
     );
+
+    // Calcular total en USD
+    const totalUSD = cotizacionDolar > 0 ? (total / cotizacionDolar) : 0;
 
     const handleDetailChange = (key, value) => {
         setDetails(prev => ({ ...prev, [key]: value }));
@@ -73,6 +95,7 @@ export default function SalesScreen() {
             isOnline: false,
             deliveryMethod: 'Retiro en tienda',
             deliveryCost: '0',
+            moneda: 1,
         });
         setStep(1);
     };
@@ -108,34 +131,33 @@ export default function SalesScreen() {
 
         try {
             const isOnline = !!details.isOnline;
+            const isUSD = details.moneda === 2;
             const cartData = {
                 userId: user?.id || 1,
-                items: cart.map(item => ({
+                cart: cart.map(item => ({
                     productId: item.product.id,
                     quantity: item.quantity,
-                    unitPrice: item.product.unitPrice,
-                    promotionApplied: item.promotionApplied,
+                    salePrice: item.product.unitPrice,
+                    salePriceUSD: cotizacionDolar > 0 ? (item.product.unitPrice / cotizacionDolar) : 0,
                 })),
-                subtotal,
-                total,
-                deliveryCost: parseFloat(details.deliveryCost || 0),
-                customerName: details.client || '',
-                customerPhone: details.phone || '',
-                deliveryAddress: details.address || '',
-                paymentMethod: details.paymentMethod || 'Efectivo',
-                type: isOnline
-                    ? (details.deliveryMethod === 'Entrega a domicilio' ? 'OnlineDelivery' : 'OnlinePickup')
-                    : 'Presencial',
-                orderStatus: isOnline ? 'Created' : 'Delivered',
-                paymentStatus: isOnline ? 'Pending' : 'Paid',
-                payments: isOnline ? [] : [{ method: details.paymentMethod, amount: total }],
+                details: {
+                    date: details.date,
+                    time: details.time,
+                    client: details.client || '',
+                    paymentMethod: details.paymentMethod || 'Efectivo',
+                    observations: details.observations || '',
+                    isOnline: isOnline,
+                    deliveryCost: parseFloat(details.deliveryCost || 0),
+                },
+                moneda: details.moneda || 1,
             };
 
             const created = await createSaleFromCart(cartData);
 
+            const totalDisplay = isUSD ? formatUSD(totalUSD) : formatCurrency(total);
             Alert.alert(
                 '¡Venta Exitosa!',
-                `Venta #${created?.id || ''} creada\nTotal: ${formatCurrency(total)}`,
+                `Venta #${created?.id || ''} creada\nTotal: ${totalDisplay}`,
                 [
                     {
                         text: 'OK',
@@ -151,7 +173,34 @@ export default function SalesScreen() {
         }
     };
 
-    const gotoNext = () => setStep(s => Math.min(s + 1, 4));
+    const gotoNext = () => {
+        // Validar en paso 2 antes de ir al resumen
+        if (step === 2) {
+            // Validar cantidad 0
+            const zeroQty = cart.find(item => {
+                const qty = typeof item.quantity === 'number' ? item.quantity : 0;
+                return qty <= 0;
+            });
+            if (zeroQty) {
+                Alert.alert(
+                    'Cantidad Inválida',
+                    'Hay productos con cantidad 0. Por favor, ingrese una cantidad válida mayor a 0 o elimine el producto del carrito.'
+                );
+                return;
+            }
+
+            // Validar stock
+            const outOfStock = cart.find(item => item.quantity > item.product.stock);
+            if (outOfStock) {
+                Alert.alert(
+                    'Stock Insuficiente',
+                    `El producto "${outOfStock.product.name}" no tiene stock suficiente (disponible: ${outOfStock.product.stock}).`
+                );
+                return;
+            }
+        }
+        setStep(s => Math.min(s + 1, 4));
+    };
     const gotoPrev = () => setStep(s => Math.max(s - 1, 1));
 
     return (
@@ -212,6 +261,10 @@ export default function SalesScreen() {
                             details={details}
                             subtotal={subtotal}
                             total={total}
+                            totalUSD={totalUSD}
+                            moneda={details.moneda}
+                            cotizacionDolar={cotizacionDolar}
+                            onMonedaChange={(m) => handleDetailChange('moneda', m)}
                             onNext={gotoNext}
                             onPrev={gotoPrev}
                         />
@@ -222,6 +275,9 @@ export default function SalesScreen() {
                         <SalesPayment
                             details={details}
                             total={total}
+                            totalUSD={totalUSD}
+                            moneda={details.moneda}
+                            cotizacionDolar={cotizacionDolar}
                             isOnline={details.isOnline}
                             onDetailChange={handleDetailChange}
                             onFinish={handleFinish}

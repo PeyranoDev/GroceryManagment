@@ -14,6 +14,17 @@ export const formatCurrency = (value) => {
     });
 };
 
+// Format USD currency
+export const formatUSD = (value) => {
+    if (value === undefined || value === null || value === '') return 'US$ 0.00';
+
+    const num = typeof value === 'number' ? value : parseFloat(value);
+
+    if (isNaN(num)) return 'US$ 0.00';
+
+    return `US$ ${num.toFixed(2)}`;
+};
+
 // Format date to readable string
 export const formatDate = (dateString) => {
     if (!dateString) return '';
