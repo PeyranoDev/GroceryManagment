@@ -192,6 +192,7 @@ builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<IPasswordHasher, PasswordHasher>();
 builder.Services.AddScoped<ISeedService, SeedService>();
 builder.Services.AddScoped<IExchangeRateService, ExchangeRateService>();
+builder.Services.AddScoped<SuperAdminSeeder>();
 
 // HttpClient configuration with Polly resilience policies
 var retryPolicy = HttpPolicyExtensions
@@ -250,6 +251,15 @@ using (var scope = app.Services.CreateScope())
         Console.WriteLine("Aplicando migraciones...");
         await db.Database.MigrateAsync();
         logger.LogInformation($"Migraciones aplicadas correctamente en {app.Environment.EnvironmentName}.");
+        
+        // Seed SuperAdmin
+        Console.WriteLine("Verificando SuperAdmin...");
+        var superAdminSeeder = scope.ServiceProvider.GetRequiredService<SuperAdminSeeder>();
+        var superAdminEmail = builder.Configuration["SuperAdmin:Email"] ?? "admin@grocery.com";
+        var superAdminPassword = builder.Configuration["SuperAdmin:Password"] ?? "Admin123!";
+        var superAdminName = builder.Configuration["SuperAdmin:Name"] ?? "Super Admin";
+        await superAdminSeeder.SeedSuperAdminAsync(superAdminEmail, superAdminPassword, superAdminName);
+        Console.WriteLine("SuperAdmin verificado/creado correctamente.");
     }
     catch (Exception ex)
     {
