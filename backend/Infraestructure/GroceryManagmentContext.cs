@@ -24,6 +24,8 @@ namespace Infraestructure
         public DbSet<SaleItem> SaleItems { get; set; }
         public DbSet<Purchase> Purchases { get; set; }
         public DbSet<PurchaseItem> PurchaseItems { get; set; }
+        public DbSet<CotizacionDolar> CotizacionesDolar { get; set; }
+        public DbSet<FeriadoArgentino> FeriadosArgentinos { get; set; }
 
         protected override void OnModelCreating(ModelBuilder mb)
         {
@@ -141,6 +143,10 @@ namespace Infraestructure
             mb.Entity<Sale>(b =>
             {
                 b.Property(s => s.Total).HasColumnType("decimal(18,2)");
+                b.Property(s => s.TotalARS).HasColumnType("decimal(18,2)");
+                b.Property(s => s.TotalUSD).HasColumnType("decimal(18,2)");
+                b.Property(s => s.CotizacionDolar).HasColumnType("decimal(18,2)");
+                b.Property(s => s.Moneda).HasConversion<int>();
                 
                 b.HasOne(s => s.User)
                  .WithMany()
@@ -156,6 +162,7 @@ namespace Infraestructure
             mb.Entity<SaleItem>(b =>
             {
                 b.Property(si => si.Price).HasColumnType("decimal(18,2)");
+                b.Property(si => si.PriceUSD).HasColumnType("decimal(18,2)");
                 
                 b.HasOne(si => si.Product)
                  .WithMany()
@@ -168,6 +175,27 @@ namespace Infraestructure
             mb.Entity<SaleItem>().HasQueryFilter(e => e.GroceryId == _tenant.CurrentGroceryId);
             mb.Entity<Purchase>().HasQueryFilter(e => e.GroceryId == _tenant.CurrentGroceryId);
             mb.Entity<PurchaseItem>().HasQueryFilter(e => e.GroceryId == _tenant.CurrentGroceryId);
+
+            // Cotizaciones del dólar - datos públicos sin tenant filter
+            mb.Entity<CotizacionDolar>(b =>
+            {
+                b.ToTable("CotizacionesDolar");
+                b.Property(c => c.TipoCambio).IsRequired().HasMaxLength(50);
+                b.Property(c => c.Compra).HasColumnType("decimal(18,2)");
+                b.Property(c => c.Venta).HasColumnType("decimal(18,2)");
+                b.Property(c => c.Fuente).HasMaxLength(100);
+                b.HasIndex(c => new { c.TipoCambio, c.FechaActualizacion });
+            });
+
+            // Feriados argentinos - datos públicos sin tenant filter
+            mb.Entity<FeriadoArgentino>(b =>
+            {
+                b.ToTable("FeriadosArgentinos");
+                b.Property(f => f.Tipo).IsRequired().HasMaxLength(50);
+                b.Property(f => f.Nombre).IsRequired().HasMaxLength(200);
+                b.HasIndex(f => new { f.Anio, f.Fecha });
+                b.HasIndex(f => f.Fecha).IsUnique();
+            });
         }
     }
 }
