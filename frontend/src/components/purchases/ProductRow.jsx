@@ -4,9 +4,9 @@ import InventorySuggestions from "./InventorySuggestions.jsx";
 import Input from "../ui/input/Input";
 import { formatDecimalPlain } from "../../utils/money.js";
 import { useDebounced } from "../../hooks/useDebounced";
-import { useSuggestions } from "../../hooks/useSuggestions";
 import { sanitizeInt, clamp } from "../../utils/number.js";
 import { getUnitFromProduct } from "../../utils/unit.js";
+import { inventoryAPI } from "../../services/api";
 
 export const ProductRow = ({
   index,
@@ -32,13 +32,15 @@ export const ProductRow = ({
 
   const [rawQuery, setRawQuery] = useState("");
   const debouncedQuery = useDebounced(rawQuery, 250);
-  
   const [activeIndex, setActiveIndex] = useState(-1);
   const inputRef = useRef(null);
   const dropdownRef = useRef(null);
-  const suggestions = useSuggestions(debouncedQuery, inventory);
+  const [loadedOnce, setLoadedOnce] = useState(false);
+  const [suggestionsCache, setSuggestionsCache] = useState([]);
+  const [suggestions, setSuggestions] = useState([]);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
 
-  const locked = !!product.selectedItemId;
+  const locked = !!product.selectedItemId || !!product.selectedProductId;
   const unitDisplay = getUnitFromProduct(product);
   const [isFocused, setIsFocused] = useState(false);
   
@@ -49,10 +51,44 @@ export const ProductRow = ({
   }, [autoFocus, locked]);
   useEffect(() => {
     if (locked || !isFocused) return;
-    const q = (debouncedQuery || '').trim();
-    if (!q) { setActiveIndex(-1); return; }
-    if (suggestions.length > 0) setActiveIndex(0);
-  }, [debouncedQuery, suggestions.length, isFocused, locked]);
+    setSuggestionsLoading(true);
+    const q = (debouncedQuery || '').trim().toLowerCase();
+    const source = loadedOnce ? suggestionsCache : (Array.isArray(inventory) ? inventory : []);
+    const list = source
+      .map((it) => ({
+        id: it.id ?? it.Id,
+        name: it.product?.name ?? it.name ?? it.Product?.Name ?? "",
+        unit: it.unit ?? it.Unit ?? "u",
+      }))
+      .filter((s) => !!(s.name || '').toLowerCase().includes(q));
+    setSuggestions(list.slice(0, 8));
+    setActiveIndex(list.length > 0 ? 0 : -1);
+    setSuggestionsLoading(false);
+  }, [debouncedQuery, isFocused, locked, loadedOnce, suggestionsCache, inventory]);
+
+  const ensureLoadedOnce = async () => {
+    if (loadedOnce) return;
+    try {
+      setSuggestionsLoading(true);
+      const resp = await inventoryAPI.getAll();
+      const items = resp.data || resp || [];
+      setSuggestionsCache(Array.isArray(items) ? items : []);
+      setLoadedOnce(true);
+    } catch {
+      setSuggestionsCache(Array.isArray(inventory) ? inventory : []);
+      setLoadedOnce(true);
+    } finally {
+      setSuggestionsLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    if (loadedOnce) {
+      // si el inventario externo cambia (por creación de producto), sincroniza cache
+      setSuggestionsCache(Array.isArray(inventory) ? inventory : []);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [inventory]);
 
 
   return (
@@ -79,8 +115,9 @@ export const ProductRow = ({
             ref={inputRef}
             required
             error={!!product.invalidProduct && !!(product.name || '').trim()}
-            onFocus={() => {
+            onFocus={async () => {
               if (!locked) {
+                await ensureLoadedOnce();
                 setIsFocused(true);
                 onProductChange(product.id, { ...product, touchedProduct: true, invalidProduct: false });
               }
@@ -118,7 +155,9 @@ export const ProductRow = ({
                 e.preventDefault();
                 const pick = activeIndex >= 0 ? suggestions[activeIndex] : suggestions[0];
                 if (pick) {
-                  onSelectInventoryItem(product.id, pick);
+                  const full = (loadedOnce ? suggestionsCache : (Array.isArray(inventory) ? inventory : []))
+                    .find((it) => (it.id ?? it.Id) === pick.id);
+                  if (full) onSelectInventoryItem(product.id, full);
                   setRawQuery("");
                 }
               } else if (e.key === "Escape") {
@@ -157,11 +196,12 @@ export const ProductRow = ({
               suggestions={suggestions}
               activeIndex={activeIndex}
               onHoverIndexChange={(idx) => setActiveIndex(idx)}
-              onPick={(sug) => { onSelectInventoryItem(product.id, sug); setRawQuery(""); setIsFocused(false); }}
+              onPick={(sug) => { const full = (loadedOnce ? suggestionsCache : (Array.isArray(inventory) ? inventory : [])).find((it) => (it.id ?? it.Id) === sug.id); if (full) { onSelectInventoryItem(product.id, full); } setRawQuery(""); setIsFocused(false); }}
               onCreateNew={() => { onRequestCreateProduct(product.id, product.name || rawQuery); setIsFocused(false); }}
               query={rawQuery}
               dropdownRef={dropdownRef}
               usePortal={true}
+              loading={suggestionsLoading}
             />
           )}
         </div>
@@ -172,9 +212,6 @@ export const ProductRow = ({
           {product.isRegistered ? (
             <div className="border border-[var(--color-border)] rounded-md px-3 py-2 text-[var(--color-secondary-text)] font-mono">
               {product.quantity || '0'}
-              {unitDisplay && (
-                <span className="ml-2 text-[var(--color-secondary-text)] text-xs">{unitDisplay}</span>
-              )}
             </div>
           ) : (
           <Input
@@ -182,11 +219,6 @@ export const ProductRow = ({
             value={product.quantity}
             onChange={(e) => {
               const quantityNum = clamp(sanitizeInt(e.target.value), 0, 999);
-              const prevApplied = parseFloat(product.appliedQuantity || 0) || 0;
-              if (product.selectedItemId && onAdjustInventoryStock) {
-                const delta = quantityNum - prevApplied;
-                if (delta !== 0) onAdjustInventoryStock(product.selectedItemId, delta);
-              }
               onProductChange(product.id, { ...product, quantity: String(quantityNum), appliedQuantity: quantityNum });
             }}
             onFocus={() => {} }
@@ -206,16 +238,8 @@ export const ProductRow = ({
           )}
           {!product.isRegistered && (
             <div className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center gap-2 sm:gap-3 pointer-events-none transition-all duration-200">
-              {unitDisplay && (
-                <span
-                  className={`text-[var(--color-secondary-text)] font-mono text-xs select-none transition-all duration-200 ease-in-out ${(!(product.quantity || '').trim() || product.invalidQuantity) ? 'translate-x-0' : 'translate-x-0'}`}
-                >
-                  {unitDisplay}
-                </span>
-              )}
               {product.invalidQuantity && (
-                <span className="text-[var(--color-error)]" title={`Cantidad debe ser mayor a 0`}
-                >
+                <span className="text-[var(--color-error)]" title={`Cantidad debe ser mayor a 0`}>
                   <AlertTriangle size={16} />
                 </span>
               )}
@@ -251,9 +275,7 @@ export const ProductRow = ({
         </div>
       </td>
       <td className="p-2 w-[14%] text-left text-[var(--color-secondary-text)]">
-        {product.isRegistered && <span className="mr-1">$</span>}
-        <span>{formatDecimalPlain(unitPriceRaw)}</span>
-        <span className="ml-1">/ {unitDisplay || 'u'}</span>
+        <span className="mr-1">$</span><span>{formatDecimalPlain(unitPriceRaw)}</span>
       </td>
 
       <td className="p-2 w-[10%] text-left">

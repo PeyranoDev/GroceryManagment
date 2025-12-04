@@ -15,11 +15,10 @@ namespace Application.Mapping
                 .ForMember(dest => dest.InventoryItems, opt => opt.Ignore());
 
             CreateMap<Product, ProductForResponseDto>()
-                .ForMember(dest => dest.UnitPrice, opt => opt.Ignore())
                 .ForMember(dest => dest.SalePrice, opt => opt.Ignore())
-                .ForMember(dest => dest.Promotion, opt => opt.Ignore());
+                .ForMember(dest => dest.Unit, opt => opt.Ignore());
 
-            CreateMap<Promotion, PromotionDto>().ReverseMap();
+            
         }
     }
 }

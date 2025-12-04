@@ -11,24 +11,6 @@ namespace Application.Schemas.Sales
         [Required, Range(1, int.MaxValue)]
         public int Quantity { get; set; }
         
-        public bool PromotionApplied { get; set; }
-        
-        public decimal TotalPrice => CalculateTotalPrice();
-
-        private decimal CalculateTotalPrice()
-        {
-            if (PromotionApplied && Product.Promotion?.PromotionQuantity > 0 && Product.Promotion?.PromotionPrice > 0)
-            {
-                var promoQuantity = Product.Promotion.PromotionQuantity.Value;
-                var promoPrice = Product.Promotion.PromotionPrice.Value;
-                
-                var promoSets = Quantity / promoQuantity;
-                var remainingQty = Quantity % promoQuantity;
-                
-                return (promoSets * promoPrice) + (remainingQty * Product.UnitPrice);
-            }
-            
-            return Quantity * Product.UnitPrice;
-        }
+        public decimal TotalPrice => Quantity * Product.SalePrice;
     }
 }

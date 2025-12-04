@@ -26,6 +26,15 @@ namespace Infraestructure.Tenancy
                         return groceryId;
                     }
                 }
+                var headers = _httpContextAccessor.HttpContext?.Request?.Headers;
+                if (headers != null && headers.TryGetValue("X-Grocery-Id", out var headerVal))
+                {
+                    var raw = headerVal.ToString();
+                    if (int.TryParse(raw, out var hdrGroceryId))
+                    {
+                        return hdrGroceryId;
+                    }
+                }
                 return 0;
             }
         }

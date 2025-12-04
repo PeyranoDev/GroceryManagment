@@ -11,13 +11,14 @@ import { useNavigate } from "react-router-dom";
 
 const SalesList = () => {
   const navigate = useNavigate();
-  const {
+  const { 
     sales,
     loading,
     error,
     fetchSales,
     updateOrderStatus,
     updatePaymentStatus,
+    getSalesByDateRange,
   } = useSales();
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
@@ -27,6 +28,10 @@ const SalesList = () => {
   const [paymentFilter, setPaymentFilter] = useState("all");
   const [sortBy, setSortBy] = useState("date");
   const [sortDir, setSortDir] = useState("desc");
+  const [rangeLoading, setRangeLoading] = useState(false);
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
+  const [rangeResults, setRangeResults] = useState(null);
 
   useEffect(() => {
     fetchSales();
@@ -47,6 +52,24 @@ const SalesList = () => {
     }
   };
 
+  const handleFetchRange = async () => {
+    if (!startDate || !endDate) {
+      openToast("Seleccione ambas fechas", "info");
+      return;
+    }
+    try {
+      setRangeLoading(true);
+      const result = await getSalesByDateRange(startDate, endDate);
+      const items = result.data || result || [];
+      setRangeResults(Array.isArray(items) ? items : []);
+      openToast(`Ventas del rango: ${Array.isArray(items) ? items.length : 0}`, "success");
+    } catch (err) {
+      openToast(err?.message || "No se pudieron obtener ventas por rango", "info");
+    } finally {
+      setRangeLoading(false);
+    }
+  };
+
   const handlePaymentStatusChange = async (saleId, value) => {
     try {
       await updatePaymentStatus(saleId, value);
@@ -61,7 +84,8 @@ const SalesList = () => {
 
   const filtered = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
-    return (sales || [])
+    const base = rangeResults !== null ? rangeResults : (sales || []);
+    return base
       .filter((s) => {
         const idMatch = String(s.id).includes(term);
         const nameMatch = (s.customerName || "").toLowerCase().includes(term);
@@ -135,7 +159,12 @@ const SalesList = () => {
             <Search size={18} className="text-[var(--color-secondary-text)]" />
           }
         />
-        <div className="flex items-center gap-3 w-full md:w-auto">
+      <div className="flex items-center gap-3 w-full md:w-auto">
+          <Input type="date" value={startDate} onChange={(e)=>setStartDate(e.target.value)} className="max-w-xs" label="Desde" />
+          <Input type="date" value={endDate} onChange={(e)=>setEndDate(e.target.value)} className="max-w-xs" label="Hasta" />
+          <button onClick={handleFetchRange} className="px-3 py-2 rounded-md bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-[var(--color-text)] font-semibold">
+            {rangeLoading ? "Procesando..." : "Buscar"}
+          </button>
           <Select
             value={channelFilter}
             onChange={(e) => setChannelFilter(e.target.value)}
@@ -206,7 +235,7 @@ const SalesList = () => {
                   {Array.isArray(s.items) ? s.items.length : 0}
                 </td>
                 <td className="p-3 text-[var(--color-secondary-text)]">
-                  {(s.deliveryAddress || s.customerPhone) ? 'online' : 'presencial'}
+                  {s.isOnline ? 'online' : 'presencial'}
                 </td>
                 <td className="p-3">
                   {isCancelled(s)
@@ -284,7 +313,7 @@ const SalesList = () => {
                 </div>
                 <div>
                   <span className="text-[var(--color-secondary-text)]">Canal:</span>{" "}
-                  <span className="text-[var(--color-text)]">{(s.deliveryAddress || s.customerPhone) ? 'online' : 'presencial'}</span>
+                  <span className="text-[var(--color-text)]">{s.isOnline ? 'online' : 'presencial'}</span>
                 </div>
                 <div>
                   <span className="text-[var(--color-secondary-text)]">Pedido:</span>{" "}

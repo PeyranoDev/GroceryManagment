@@ -9,6 +9,15 @@ namespace Application.Schemas.Sales
 
         [Required]
         public List<SaleItemForCreateDto> Items { get; set; } = new List<SaleItemForCreateDto>();
+
+        public string PaymentMethod { get; set; } = "Efectivo";
+        public string OrderStatus { get; set; } = "Created";
+        public string PaymentStatus { get; set; } = "Pending";
+        public string? CustomerName { get; set; }
+        public string? CustomerPhone { get; set; }
+        public string? DeliveryAddress { get; set; }
+        public bool IsOnline { get; set; }
+        public decimal DeliveryCost { get; set; }
     }
 
     public class SaleItemForCreateDto

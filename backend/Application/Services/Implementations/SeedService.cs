@@ -90,18 +90,16 @@ namespace Application.Services.Implementations
                 ProductId = product.Id,
                 GroceryId = groceryId,
                 Stock = 0,
-                UnitPrice = dto.UnitPrice,
-                SalePrice = dto.SalePrice,
-                Promotion = _mapper.Map<Promotion>(dto.Promotion) ?? new Promotion(),
+                Unit = "u",
+                SalePrice = 0,
                 LastUpdated = DateTime.UtcNow
             };
             
             await _inventory.Create(inventoryItem);
 
             var responseDto = _mapper.Map<ProductForResponseDto>(product);
-            responseDto.UnitPrice = inventoryItem.UnitPrice;
             responseDto.SalePrice = inventoryItem.SalePrice;
-            responseDto.Promotion = _mapper.Map<PromotionDto>(inventoryItem.Promotion);
+            responseDto.Unit = inventoryItem.Unit;
             
             return responseDto;
         }
