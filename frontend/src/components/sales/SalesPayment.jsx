@@ -2,8 +2,9 @@ import Card from "../ui/card/Card";
 import { MoneyText } from "../../utils/MoneyText";
 import PaymentMethodPicker from "./PaymentMethodPicker";
 
-const SalesPayment = ({ details, total = 0, onDetailChange, onPrev, onConfirm, onCancel }) => {
+const SalesPayment = ({ details, total = 0, totalUSD = 0, moneda = 1, cotizacionDolar = 0, onDetailChange, onPrev, onConfirm, onCancel }) => {
   const canConfirm = !!details.paymentMethod;
+  const isUSD = moneda === 2;
 
   return (
     <Card size="narrow" title="Pago">
@@ -15,8 +16,17 @@ const SalesPayment = ({ details, total = 0, onDetailChange, onPrev, onConfirm, o
 
         <div className="flex justify-between items-end">
           <div className="text-[var(--color-secondary-text)]">Total a pagar:</div>
-          <div className="text-2xl font-extrabold text-[var(--color-text)]"><MoneyText value={total} /></div>
+          <div className={`text-2xl font-extrabold ${isUSD ? 'text-green-600' : 'text-[var(--color-text)]'}`}>
+            {isUSD ? `US$ ${totalUSD.toFixed(2)}` : <MoneyText value={total} />}
+          </div>
         </div>
+        {cotizacionDolar > 0 && (
+          <div className="text-sm text-center text-[var(--color-secondary-text)]">
+            {isUSD 
+              ? <>Equivalente: <MoneyText value={total} /></>
+              : <>Equivalente: <span className="text-green-600">US$ {totalUSD.toFixed(2)}</span></>}
+          </div>
+        )}
 
         <div className="flex justify-between">
           <button type="button" onClick={onPrev} className="px-4 py-2 rounded-md bg-[var(--surface)] hover:bg-[var(--surface-muted)] text-[var(--color-text)] font-semibold">Anterior</button>
