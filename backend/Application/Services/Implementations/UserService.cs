@@ -32,6 +32,12 @@ namespace Application.Services.Implementations
             return list.Select(_mapper.Map<UserForResponseDto>).ToList();
         }
 
+        public async Task<IReadOnlyList<UserForResponseDto>> GetAllIncludingInactive()
+        {
+            var list = await _users.GetAllIncludingInactive();
+            return list.Select(_mapper.Map<UserForResponseDto>).ToList();
+        }
+
         public async Task<IReadOnlyList<UserForResponseDto>> GetByGroceryId(int groceryId)
         {
             var list = await _users.GetByGroceryId(groceryId);

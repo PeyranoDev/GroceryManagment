@@ -130,6 +130,14 @@ namespace Presentation.Controllers
         {
             var groceryId = _tenantProvider.CurrentGroceryId;
             var users = await _userService.GetByGroceryId(groceryId);
+            
+            // Admin/Staff no deben ver SuperAdmins en la lista
+            var isSuperAdmin = User.Claims.Any(c => c.Type == "role" && (c.Value == "SuperAdmin" || c.Value == "3"));
+            if (!isSuperAdmin)
+            {
+                users = users.Where(u => u.Role != GroceryRole.SuperAdmin).ToList();
+            }
+            
             return Ok(ApiResponse<IReadOnlyList<UserForResponseDto>>.SuccessResponse(
                 users,
                 "Usuarios de la verdulería obtenidos exitosamente"
@@ -140,11 +148,11 @@ namespace Presentation.Controllers
         [Authorize(Policy = "SuperAdmin")]
         public async Task<ActionResult<ApiResponse<IReadOnlyList<UserForResponseDto>>>> GetByCurrentGroceryAll()
         {
-            var groceryId = _tenantProvider.CurrentGroceryId;
-            var users = await _userService.GetByGroceryIdAll(groceryId);
+            // SuperAdmin ve TODOS los usuarios del sistema (activos e inactivos)
+            var users = await _userService.GetAllIncludingInactive();
             return Ok(ApiResponse<IReadOnlyList<UserForResponseDto>>.SuccessResponse(
                 users,
-                "Usuarios (activos e inactivos) de la verdulería obtenidos exitosamente"
+                "Todos los usuarios obtenidos exitosamente"
             ));
         }
 

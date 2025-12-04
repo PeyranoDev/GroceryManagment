@@ -9,6 +9,7 @@ namespace Domain.Repositories
         Task<int> CountByGroceryId(int groceryId);
         Task<IReadOnlyList<User>> GetByGroceryId(int groceryId);
         Task<IReadOnlyList<User>> GetByGroceryIdAll(int groceryId);
+        Task<IReadOnlyList<User>> GetAllIncludingInactive();
         Task Activate(int userId);
         Task SetRole(int userId, Domain.Common.Enums.GroceryRole role);
         Task SetGrocery(int userId, int groceryId);
