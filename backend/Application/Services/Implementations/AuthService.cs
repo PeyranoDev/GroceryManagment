@@ -51,7 +51,6 @@ namespace Application.Services.Implementations
 
             var newUser = _mapper.Map<User>(registerDto);
             newUser.PasswordHash = _passwordHasher.Hash(registerDto.Password);
-            newUser.IsSuperAdmin = false; 
             newUser.Role = GroceryRole.Staff;
             
             var userId = await _userRepository.Create(newUser);
@@ -80,7 +79,6 @@ namespace Application.Services.Implementations
             var entity = _mapper.Map<User>(dto);
             entity.GroceryId = adminGroceryId;
             entity.Role = GroceryRole.Staff;
-            entity.IsSuperAdmin = false;
             entity.PasswordHash = _passwordHasher.Hash(dto.Password);
 
             var id = await _userRepository.Create(entity);
@@ -170,12 +168,7 @@ namespace Application.Services.Implementations
         {
             var userInfo = _mapper.Map<UserInfoDto>(user);
             
-            if (user.GroceryId.HasValue && user.Role.HasValue)
-            {
-                userInfo.CurrentRole = user.Role.Value;
-                userInfo.CurrentGroceryId = user.GroceryId.Value;
-            }
-            else if (user.IsSuperAdmin)
+            if (user.Role == GroceryRole.SuperAdmin)
             {
                 userInfo.CurrentRole = GroceryRole.SuperAdmin;
                 
@@ -183,6 +176,11 @@ namespace Application.Services.Implementations
                 {
                     userInfo.CurrentGroceryId = _tenantProvider.CurrentGroceryId;
                 }
+            }
+            else if (user.GroceryId.HasValue && user.Role.HasValue)
+            {
+                userInfo.CurrentRole = user.Role.Value;
+                userInfo.CurrentGroceryId = user.GroceryId.Value;
             }
 
             return userInfo;

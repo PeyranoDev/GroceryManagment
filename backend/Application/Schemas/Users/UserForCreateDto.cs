@@ -17,7 +17,5 @@ namespace Application.Schemas.Users
 
         [Required, MinLength(6), MaxLength(200)]
         public string Password { get; set; } = null!;
-
-        public bool IsSuperAdmin { get; set; } = false;
     }
 }

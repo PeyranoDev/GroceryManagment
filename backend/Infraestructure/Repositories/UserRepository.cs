@@ -25,20 +25,6 @@ namespace Infraestructure.Repositories
         public Task<bool> ExistsByEmail(string email)
             => _ctx.Users.AsNoTracking().AnyAsync(u => u.Email == email);
 
-        public async Task<bool> IsSuperAdmin(int userId)
-        {
-            var u = await _ctx.Users.AsNoTracking().FirstOrDefaultAsync(x => x.Id == userId);
-            return u?.IsSuperAdmin == true;
-        }
-
-        public async Task SetSuperAdmin(int userId, bool isSuperAdmin)
-        {
-            var u = await _ctx.Users.FirstOrDefaultAsync(x => x.Id == userId);
-            if (u == null) return;
-            u.IsSuperAdmin = isSuperAdmin;
-            await _ctx.SaveChangesAsync();
-        }
-
         public async Task<IReadOnlyList<User>> GetByGroceryId(int groceryId)
             => await _ctx.Users
                 .AsNoTracking()
