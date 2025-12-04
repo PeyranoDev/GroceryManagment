@@ -114,6 +114,13 @@ namespace Presentation.Controllers
 
             try
             {
+                // Combinar fecha y hora del formulario
+                var saleDate = dto.Details.Date.Date; // Solo la fecha
+                if (!string.IsNullOrEmpty(dto.Details.Time) && TimeSpan.TryParse(dto.Details.Time, out var time))
+                {
+                    saleDate = saleDate.Add(time);
+                }
+                
                 var saleDto = new SaleForCreateDto
                 {
                     UserId = dto.UserId,
@@ -124,7 +131,7 @@ namespace Presentation.Controllers
                         Price = item.SalePrice,
                         PriceUSD = item.SalePriceUSD
                     }).ToList(),
-                    Date = dto.Details.Date,
+                    Date = saleDate,
                     PaymentMethod = dto.Details.PaymentMethod,
                     IsOnline = dto.Details.IsOnline,
                     DeliveryCost = dto.Details.DeliveryCost,

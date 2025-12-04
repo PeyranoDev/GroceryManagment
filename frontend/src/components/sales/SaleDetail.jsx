@@ -170,8 +170,20 @@ const SaleDetail = () => {
         )}
         <div className="flex justify-between text-[var(--color-text)] border-t border-[var(--color-border)] pt-2 mt-2">
           <p>Total:</p>
-          <p className="text-2xl font-extrabold"><MoneyText value={(sale.total ?? 0) + (sale.deliveryCost ?? 0)} /></p>
+          <p className={`text-2xl font-extrabold ${(sale.moneda === 2 || sale.moneda === 'USD') ? 'text-green-600' : ''}`}>
+            {(sale.moneda === 2 || sale.moneda === 'USD') 
+              ? `US$ ${(sale.totalUSD || sale.total || 0).toFixed(2)}`
+              : <MoneyText value={(sale.total ?? 0) + (sale.deliveryCost ?? 0)} />}
+          </p>
         </div>
+        {sale.cotizacionDolar > 0 && (
+          <div className="text-sm text-center text-[var(--color-secondary-text)] mt-2">
+            {(sale.moneda === 2 || sale.moneda === 'USD')
+              ? <>Equivalente en ARS: <MoneyText value={sale.totalARS || sale.total || 0} /></>
+              : <>Equivalente en USD: <span className="text-green-600">US$ {(sale.totalUSD || 0).toFixed(2)}</span></>}
+            <span className="text-xs ml-2">(Cotización: ${sale.cotizacionDolar?.toFixed(2)})</span>
+          </div>
+        )}
       </div>
       <Toast open={toastOpen} message={toastMsg} type={toastType} onClose={() => setToastOpen(false)} />
     </Card>
