@@ -1,3 +1,13 @@
+## [1.5.0](https://github.com/PeyranoDev/GroceryManagment/compare/v1.4.0...v1.5.0) (2025-12-04)
+
+### ✨ Features
+
+* **sales:** extend sales with online order and payment tracking ([6e79a59](https://github.com/PeyranoDev/GroceryManagment/commit/6e79a5953e58df3c68175ef41fcc79c6366db7c3))
+
+### ♻️ Code Refactoring
+
+* remove promotions and simplify product/inventory models ([c2a339e](https://github.com/PeyranoDev/GroceryManagment/commit/c2a339e00656d6a921dfb4097d5109b0bb9f00a7))
+
 ## [1.4.0](https://github.com/PeyranoDev/GroceryManagment/compare/v1.3.2...v1.4.0) (2025-12-04)
 
 ### ✨ Features
