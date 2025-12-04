@@ -9,7 +9,7 @@ import Select from "../ui/select/Select";
 import InventoryList from "./InventoryList";
 import ConfirmModal from "../ui/modal/ConfirmModal";
 import Toast from "../ui/toast/Toast";
-import { productsAPI } from "../../services/api";
+import { productsAPI } from "./productsApi";
 
 const Inventory = () => {
   const { inventory, loading, error, createItem, updateItem, deleteItem, refresh } = useInventory();

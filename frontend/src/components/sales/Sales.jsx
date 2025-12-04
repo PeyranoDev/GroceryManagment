@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useProducts } from "../../hooks/useProducts";
-import { inventoryAPI } from "../../services/api";
+import { inventoryAPI } from "../inventory/inventoryApi";
 import { useSales, useCart } from "../../hooks/useSales";
 import SalesInfo from "./SalesInfo";
 import Stepper from "./Stepper";
@@ -174,6 +174,11 @@ const Sales = () => {
         } catch {}
         return new Date().toISOString().slice(0,10);
       };
+      const toIsoDateTime = (dateVal, timeVal) => {
+        const d = toIsoDate(dateVal);
+        const t = (typeof timeVal === 'string' && /^\d{2}:\d{2}$/.test(timeVal.trim())) ? timeVal.trim() : new Date().toISOString().slice(11,16);
+        return `${d}T${t}:00`;
+      };
       const cartPayload = {
         userId: getUserId(),
         cart: cart.map((item) => ({
@@ -183,7 +188,7 @@ const Sales = () => {
           quantity: item.quantity,
         })),
         details: {
-          date: toIsoDate(details.date),
+          date: toIsoDateTime(details.date, details.time),
           time: details.time,
           client: details.client || '',
           paymentMethod: details.paymentMethod || 'Efectivo',

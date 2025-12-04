@@ -1,5 +1,6 @@
 import { useState, useCallback } from 'react';
-import { salesAPI, recentActivitiesAPI } from '../services/api';
+import { salesAPI } from '../components/sales/salesApi';
+import { recentActivitiesAPI } from '../components/dashboard/recentActivitiesApi';
 
 export const useSales = () => {
   const [sales, setSales] = useState([]);

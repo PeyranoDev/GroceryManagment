@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { inventoryAPI } from '../services/api';
+import { inventoryAPI } from '../components/inventory/inventoryApi';
 
 export const useInventory = () => {
   const [inventory, setInventory] = useState([]);
