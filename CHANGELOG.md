@@ -1,3 +1,9 @@
+## [1.4.0](https://github.com/PeyranoDev/GroceryManagment/compare/v1.3.2...v1.4.0) (2025-12-04)
+
+### ✨ Features
+
+* SuperAdmin only has access to Users page, sees all users in system ([33c7d4c](https://github.com/PeyranoDev/GroceryManagment/commit/33c7d4c2180d80c89d223cca16ae2cf20ba4ac32))
+
 ## [1.3.2](https://github.com/PeyranoDev/GroceryManagment/compare/v1.3.1...v1.3.2) (2025-12-04)
 
 ### 🐛 Bug Fixes
