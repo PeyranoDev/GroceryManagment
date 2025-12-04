@@ -141,7 +141,7 @@ namespace Application.Services.Implementations
                 return null;
             if (!user.IsActive)
                 return null;
-            if (string.IsNullOrEmpty(user.PasswordHash) || !_passwordHasher.Verify(password, user.PasswordHash))
+            if (!_passwordHasher.Verify(password, user.PasswordHash))
                 return null;
 
             return MapUserToInfoDto(user);

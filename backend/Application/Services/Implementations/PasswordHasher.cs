@@ -4,16 +4,22 @@ namespace Application.Services.Implementations
 {
     public class PasswordHasher : IPasswordHasher
     {
-        public string Hash(string password)
+        private readonly int _workFactor;
+
+        public PasswordHasher(int workFactor = 11) 
         {
-            // Almacenar contraseña en texto plano (sin hasheo)
-            return password;
+            _workFactor = workFactor;
         }
 
-        public bool Verify(string password, string storedPassword)
+        public string Hash(string password)
         {
-            // Comparación directa de contraseñas
-            return string.Equals(password, storedPassword, StringComparison.Ordinal);
+
+            return BCrypt.Net.BCrypt.HashPassword(password, _workFactor);
+        }
+
+        public bool Verify(string password, string hash)
+        {
+            return BCrypt.Net.BCrypt.Verify(password, hash);
         }
     }
 }
