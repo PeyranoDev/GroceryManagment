@@ -6,7 +6,8 @@ import Card from "../ui/card/Card";
 import Toast from "../ui/toast/Toast";
 import ConfirmModal from "../ui/modal/ConfirmModal";
 import UsersModal from "./UsersModal";
-import { usersAPI, authAPI } from "../../services/api";
+import { usersAPI } from "./usersApi";
+import { authAPI } from "../../services/auth/authApi";
 
 const UsersAdmin = () => {
   const [users, setUsers] = useState([]);

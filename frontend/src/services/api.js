@@ -1,18 +1,4 @@
-import {
-  mockProductsAPI,
-  mockInventoryAPI,
-  mockSalesAPI,
-  mockDashboardAPI,
-  mockRecentActivitiesAPI,
-  mockPurchasesAPI,
-  mockReportsAPI,
-  mockCategoriesAPI,
-  mockUsersAPI
-} from './mockApi.js';
-
-const DEMO_MODE = false;
-const USE_BACKEND_CATEGORIES = true;
-const USE_BACKEND_USERS = true;
+// All data must come from backend API; no mock imports or toggles
 
 const getToken = () => localStorage.getItem('auth_token');
 
@@ -51,14 +37,10 @@ const getHeaders = () => {
     const storedUser = localStorage.getItem('auth_user');
     if (storedUser) {
       const u = JSON.parse(storedUser);
-      const groceryId = u?.currentGroceryId ?? u?.groceryId ?? 1;
-      headers['X-Grocery-Id'] = String(groceryId);
-    } else {
-      headers['X-Grocery-Id'] = '1';
+      const groceryId = u?.currentGroceryId ?? u?.groceryId;
+      if (groceryId != null) headers['X-Grocery-Id'] = String(groceryId);
     }
-  } catch {
-    headers['X-Grocery-Id'] = '1';
-  }
+  } catch {}
 
   const token = getToken();
   if (token) {
@@ -143,7 +125,7 @@ export const authAPI = {
   impersonate: (userId) => apiRequest(`/Auth/impersonate/${userId}`, { method: 'POST' }),
 };
 
-export const productsAPI = DEMO_MODE ? mockProductsAPI : {
+export const productsAPI = {
   getAll: () => apiRequest('/Products'),
   getById: (id) => apiRequest(`/Products/${id}`),
   create: (product) => apiRequest('/Products', {
@@ -159,7 +141,7 @@ export const productsAPI = DEMO_MODE ? mockProductsAPI : {
   }),
 };
 
-export const inventoryAPI = DEMO_MODE ? mockInventoryAPI : {
+export const inventoryAPI = {
   getAll: () => apiRequest('/Inventory'),
   getFiltered: (params = {}) => {
     const queryString = new URLSearchParams(params).toString();
@@ -187,7 +169,7 @@ export const inventoryAPI = DEMO_MODE ? mockInventoryAPI : {
   }),
 };
 
-export const salesAPI = DEMO_MODE ? mockSalesAPI : {
+export const salesAPI = {
   getAll: () => apiRequest('/Sales'),
   getById: (id) => apiRequest(`/Sales/${id}`),
   getByDateRange: (startDate, endDate) => {
@@ -224,20 +206,20 @@ export const salesAPI = DEMO_MODE ? mockSalesAPI : {
   }),
 };
 
-export const dashboardAPI = DEMO_MODE ? mockDashboardAPI : {
+export const dashboardAPI = {
   getData: (activitiesCount = 4, activitiesDays = 30) => 
     apiRequest(`/Dashboard?activitiesCount=${activitiesCount}&activitiesDays=${activitiesDays}`),
   getStats: () => apiRequest('/Dashboard/stats'),
   getWeeklySales: () => apiRequest('/Dashboard/weekly-sales'),
 };
 
-export const recentActivitiesAPI = DEMO_MODE ? mockRecentActivitiesAPI : {
+export const recentActivitiesAPI = {
   // New endpoint: GET /api/recentactivities?count=10&days=30
   getAll: (count = 10, days = 30) => apiRequest(`/RecentActivities?count=${count}&days=${days}`),
   getRecent: (count = 10, days = 30) => apiRequest(`/RecentActivities?count=${count}&days=${days}`),
 };
 
-export const purchasesAPI = DEMO_MODE ? mockPurchasesAPI : {
+export const purchasesAPI = {
   getAll: () => apiRequest('/Purchases'),
   getById: (id) => apiRequest(`/Purchases/${id}`),
   getBySupplier: (supplier) => apiRequest(`/Purchases/supplier/${supplier}`),
@@ -261,7 +243,7 @@ export const purchasesAPI = DEMO_MODE ? mockPurchasesAPI : {
   }),
 };
 
-export const reportsAPI = DEMO_MODE ? mockReportsAPI : {
+export const reportsAPI = {
   getFilteredReports: (filters) => apiRequest('/Reports', {
     method: 'POST',
     body: JSON.stringify(filters),
@@ -277,7 +259,7 @@ export const reportsAPI = DEMO_MODE ? mockReportsAPI : {
   },
 };
 
-export const categoriesAPI = USE_BACKEND_CATEGORIES ? {
+export const categoriesAPI = {
   getAll: () => apiRequest('/Categories'),
   getById: (id) => apiRequest(`/Categories/${id}`),
   create: (category) => apiRequest('/Categories', {
@@ -291,9 +273,9 @@ export const categoriesAPI = USE_BACKEND_CATEGORIES ? {
   delete: (id) => apiRequest(`/Categories/${id}`, {
     method: 'DELETE',
   }),
-} : mockCategoriesAPI;
+};
 
-export const usersAPI = USE_BACKEND_USERS ? {
+export const usersAPI = {
   getAll: () => {
     try {
       const storedUser = localStorage.getItem('auth_user');
@@ -318,7 +300,7 @@ export const usersAPI = USE_BACKEND_USERS ? {
     return apiRequest(`/Users/${id}/role`, { method: 'PATCH', body: JSON.stringify(payload) });
   },
   activate: (id) => apiRequest(`/Users/${id}/activate`, { method: 'PATCH' }),
-} : mockUsersAPI;
+};
 
 export const handleApiError = (error) => {
   console.error('API Error:', error);

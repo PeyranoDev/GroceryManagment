@@ -114,6 +114,12 @@ namespace Presentation.Controllers
 
             try
             {
+                var effectiveDate = dto.Details.Date;
+                if (!string.IsNullOrWhiteSpace(dto.Details.Time) && TimeSpan.TryParse(dto.Details.Time, out var ts))
+                {
+                    effectiveDate = new DateTime(effectiveDate.Year, effectiveDate.Month, effectiveDate.Day, ts.Hours, ts.Minutes, 0, DateTimeKind.Local);
+                }
+
                 var saleDto = new SaleForCreateDto
                 {
                     UserId = dto.UserId,
@@ -124,7 +130,7 @@ namespace Presentation.Controllers
                         Price = item.SalePrice,
                         PriceUSD = item.SalePriceUSD
                     }).ToList(),
-                    Date = dto.Details.Date,
+                    Date = effectiveDate,
                     PaymentMethod = dto.Details.PaymentMethod,
                     IsOnline = dto.Details.IsOnline,
                     DeliveryCost = dto.Details.DeliveryCost,
