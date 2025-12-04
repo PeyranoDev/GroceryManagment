@@ -57,6 +57,7 @@ const Sales = () => {
   
   const [confirmCreateOpen, setConfirmCreateOpen] = useState(false);
   const [invalidStockOpen, setInvalidStockOpen] = useState(false);
+  const [invalidQuantityOpen, setInvalidQuantityOpen] = useState(false);
   const [stockEditModalOpen, setStockEditModalOpen] = useState(false);
   const [stockEditItem, setStockEditItem] = useState(null);
   const [confirmDiscardOpen, setConfirmDiscardOpen] = useState(false);
@@ -210,6 +211,16 @@ const Sales = () => {
 
   const gotoNext = async () => {
     if (step === 2) {
+      // Validar que no haya productos con cantidad 0 o menor
+      const zeroQty = cart.find((it) => {
+        const qty = typeof it.quantity === 'number' ? it.quantity : 0;
+        return qty <= 0;
+      });
+      if (zeroQty) {
+        setInvalidQuantityOpen(true);
+        return;
+      }
+      
       const invalid = cart.find((it) => {
         const qty = typeof it.quantity === 'number' ? it.quantity : 0;
         const stock = it.product?.stock ?? 0;
@@ -333,6 +344,16 @@ const Sales = () => {
         cancelText="Cancelar"
         onConfirm={finalizeSale}
         variant="success"
+      />
+      <ConfirmModal
+        isOpen={invalidQuantityOpen}
+        onClose={() => setInvalidQuantityOpen(false)}
+        title="Cantidad inválida"
+        message="Hay productos con cantidad 0. Por favor, ingrese una cantidad válida mayor a 0 o elimine el producto del carrito."
+        confirmText="Entendido"
+        cancelText=""
+        onConfirm={() => setInvalidQuantityOpen(false)}
+        variant="danger"
       />
       <ConfirmModal
         isOpen={invalidStockOpen}
