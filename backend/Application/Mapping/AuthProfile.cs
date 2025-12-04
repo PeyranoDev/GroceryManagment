@@ -11,8 +11,7 @@ namespace Application.Mapping
         public AuthProfile()
         {
             CreateMap<RegisterDto, User>()
-                .ForMember(dest => dest.PasswordHash, opt => opt.Ignore()) // Se maneja por separado
-                .ForMember(dest => dest.IsSuperAdmin, opt => opt.MapFrom(src => false))
+                .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
                 .ForMember(dest => dest.Id, opt => opt.Ignore());
             
             CreateMap<User, UserInfoDto>();
@@ -25,7 +24,6 @@ namespace Application.Mapping
             CreateMap<CreateStaffDto, User>()
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.PasswordHash, opt => opt.Ignore())
-                .ForMember(dest => dest.IsSuperAdmin, opt => opt.MapFrom(src => false))
                 .ForMember(dest => dest.Role, opt => opt.MapFrom(src => GroceryRole.Staff))
                 .ForMember(dest => dest.GroceryId, opt => opt.Ignore())
                 .ForMember(dest => dest.Grocery, opt => opt.Ignore());
