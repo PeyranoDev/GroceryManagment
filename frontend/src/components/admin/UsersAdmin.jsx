@@ -45,7 +45,8 @@ const UsersAdmin = () => {
   const activeUsers = useMemo(() => {
     const list = Array.isArray(users) ? users : [];
     const isActiveLocal = (x) => (x.isActive !== false) && !inactiveIds.includes(x.id);
-    return (isSuperAdmin() ? list.filter(isActiveLocal) : list.filter((x) => !x.isSuperAdmin && isActiveLocal(x)));
+    // SuperAdmin ve todos, Admin/Staff no ven a los SuperAdmin
+    return (isSuperAdmin() ? list.filter(isActiveLocal) : list.filter((x) => x.role !== 'SuperAdmin' && x.role !== 3 && isActiveLocal(x)));
   }, [users, inactiveIds, isSuperAdmin]);
 
   const inactiveUsers = useMemo(() => {
@@ -68,17 +69,11 @@ const UsersAdmin = () => {
         const res = await usersAPI.update(editingId, updatePayload);
         const updated = res.data || res;
         setUsers((prev) => prev.map((u) => (u.id === editingId ? updated : u)));
-        if (payload.role === 'superadmin' && !defaultValues?.isSuperAdmin) {
-          await usersAPI.setSuperAdmin(editingId, true);
-          setUsers((prev) => prev.map((u) => (u.id === editingId ? { ...u, isSuperAdmin: true, role: 'SuperAdmin' } : u)));
-        } else if (payload.role !== 'superadmin' && defaultValues?.isSuperAdmin) {
-          await usersAPI.setSuperAdmin(editingId, false);
-          setUsers((prev) => prev.map((u) => (u.id === editingId ? { ...u, isSuperAdmin: false } : u)));
-        }
-        if (payload.role !== 'superadmin') {
-          await usersAPI.setRole(editingId, payload.role);
-          setUsers((prev) => prev.map((u) => (u.id === editingId ? { ...u, role: payload.role === 'admin' ? 2 : 1 } : u)));
-        }
+        // Use setRole for all role changes (including SuperAdmin)
+        await usersAPI.setRole(editingId, payload.role);
+        const roleMap = { staff: 1, admin: 2, superadmin: 3 };
+        const newRoleNum = roleMap[String(payload.role).toLowerCase()] || 1;
+        setUsers((prev) => prev.map((u) => (u.id === editingId ? { ...u, role: newRoleNum } : u)));
         setToastMsg("Cambios guardados exitosamente");
         setToastType("success");
         setToastOpen(true);
@@ -94,13 +89,11 @@ const UsersAdmin = () => {
         const createdUser = (res.data || res)?.user || (res.User || {});
         const createdId = createdUser?.id ?? createdUser?.Id;
 
-        if (payload.role === 'superadmin') {
-          await usersAPI.setSuperAdmin(createdId, true);
-          setUsers((prev) => [{ id: createdId, name: createdUser?.name ?? createdUser?.Name, email: createdUser?.email ?? createdUser?.Email, isSuperAdmin: true, role: 'SuperAdmin' }, ...prev]);
-        } else {
-          await usersAPI.setRole(createdId, payload.role);
-          setUsers((prev) => [{ id: createdId, name: createdUser?.name ?? createdUser?.Name, email: createdUser?.email ?? createdUser?.Email, isSuperAdmin: false, role: payload.role === 'admin' ? 2 : 1 }, ...prev]);
-        }
+        // Use setRole for all roles (including SuperAdmin)
+        await usersAPI.setRole(createdId, payload.role);
+        const roleMap = { staff: 1, admin: 2, superadmin: 3 };
+        const newRoleNum = roleMap[String(payload.role).toLowerCase()] || 1;
+        setUsers((prev) => [{ id: createdId, name: createdUser?.name ?? createdUser?.Name, email: createdUser?.email ?? createdUser?.Email, role: newRoleNum, isActive: true }, ...prev]);
         setToastMsg("Usuario registrado correctamente");
         setToastType("success");
         setToastOpen(true);
@@ -122,7 +115,7 @@ const UsersAdmin = () => {
 
   const startEdit = (u) => {
     setEditingId(u.id);
-    setDefaultValues({ name: u.name, email: u.email, isSuperAdmin: !!u.isSuperAdmin, role: u.role });
+    setDefaultValues({ name: u.name, email: u.email, role: u.role });
     setModalMode('edit');
     setIsModalOpen(true);
   };
@@ -136,7 +129,8 @@ const UsersAdmin = () => {
     try {
       if (!isSuperAdmin()) return;
       const v = await impersonate(u.id);
-      const shouldGoToDashboard = v.isSuperAdmin || v.currentRole === 'Admin' || v.currentRole === 2;
+      const roleHierarchy = { Staff: 1, Admin: 2, SuperAdmin: 3 };
+      const shouldGoToDashboard = (roleHierarchy[v.currentRole] || 0) >= roleHierarchy.Admin;
       try {
         localStorage.setItem('toast_after_navigation', JSON.stringify({ message: `Sesión iniciada como ${u.name}`, type: 'success' }));
       } catch {}
@@ -203,10 +197,10 @@ const UsersAdmin = () => {
                 <td className="p-3 font-mono text-[var(--color-secondary-text)]">{u.id}</td>
                 <td className="p-3 text-[var(--color-text)]">{u.name}{user && u.id === user.id ? ' (Yo)' : ''}</td>
                 <td className="p-3 text-[var(--color-secondary-text)]">{u.email}</td>
-                <td className="p-3 text-[var(--color-secondary-text)]">{u.isSuperAdmin ? 'SuperAdmin' : ((u.role === 2 || String(u.role).toLowerCase() === 'admin') ? 'Admin' : 'Staff')}</td>
+                <td className="p-3 text-[var(--color-secondary-text)]">{u.role === 3 || String(u.role).toLowerCase() === 'superadmin' ? 'SuperAdmin' : ((u.role === 2 || String(u.role).toLowerCase() === 'admin') ? 'Admin' : 'Staff')}</td>
                 <td className="p-3">
                   <div className="flex justify-center gap-5">
-                    {(isSuperAdmin() || (isAdmin() && !u.isSuperAdmin)) && (
+                    {(isSuperAdmin() || (isAdmin() && u.role !== 3 && String(u.role).toLowerCase() !== 'superadmin')) && (
                       <>
                         <button onClick={() => startEdit(u)} className="text-[var(--color-secondary)] hover:text-[var(--color-secondary-dark)]" title="Editar">
                           <Edit size={20} />
@@ -251,7 +245,7 @@ const UsersAdmin = () => {
                     <td className="p-3 font-mono text-[var(--color-secondary-text)]">{u.id}</td>
                     <td className="p-3 text-[var(--color-text)]">{u.name}{user && u.id === user.id ? ' (Yo)' : ''}</td>
                     <td className="p-3 text-[var(--color-secondary-text)]">{u.email}</td>
-                    <td className="p-3 text-[var(--color-secondary-text)]">{u.isSuperAdmin ? 'SuperAdmin' : ((u.role === 2 || String(u.role).toLowerCase() === 'admin') ? 'Admin' : 'Staff')}</td>
+                    <td className="p-3 text-[var(--color-secondary-text)]">{u.role === 3 || String(u.role).toLowerCase() === 'superadmin' ? 'SuperAdmin' : ((u.role === 2 || String(u.role).toLowerCase() === 'admin') ? 'Admin' : 'Staff')}</td>
                     <td className="p-3">
                       <div className="flex justify-center gap-5">
                         <button onClick={async () => { try { await usersAPI.activate(u.id); setUsers((prev)=>prev.map((x)=>x.id===u.id? { ...x, isActive: true } : x)); setInactiveIds((prev)=>{ const updated = prev.filter((id)=>id!==u.id); if (updated.length === 0) setShowInactive(false); return updated; }); setToastMsg("Usuario reactivado"); setToastType("success"); setToastOpen(true);} catch(err){ setToastMsg(err.message||"No se pudo reactivar"); setToastType("info"); setToastOpen(true);} }} className="text-[var(--color-secondary)] hover:text-[var(--color-secondary-dark)]" title="Reactivar">
@@ -274,11 +268,11 @@ const UsersAdmin = () => {
               <div className="flex-1">
                 <h3 className="font-medium text-[var(--color-text)] text-base">{u.name}{user && u.id === user.id ? ' (Yo)' : ''}</h3>
                 <p className="text-sm text-[var(--color-secondary-text)] mt-1">{u.email}</p>
-                <p className="text-sm text-[var(--color-secondary-text)] mt-1">{u.isSuperAdmin ? 'SuperAdmin' : ((u.role === 2 || String(u.role).toLowerCase() === 'admin') ? 'Admin' : 'Staff')}</p>
+                <p className="text-sm text-[var(--color-secondary-text)] mt-1">{u.role === 3 || String(u.role).toLowerCase() === 'superadmin' ? 'SuperAdmin' : ((u.role === 2 || String(u.role).toLowerCase() === 'admin') ? 'Admin' : 'Staff')}</p>
               </div>
             </div>
             <div className="flex justify-center gap-5 pt-2">
-              {(isSuperAdmin() || (isAdmin() && !u.isSuperAdmin)) && (
+              {(isSuperAdmin() || (isAdmin() && u.role !== 3 && String(u.role).toLowerCase() !== 'superadmin')) && (
                 <>
                   <button onClick={() => startEdit(u)} className="text-[var(--color-secondary)] hover:text-[var(--color-secondary-dark)]" title="Editar">
                     <Edit size={20} />
@@ -305,7 +299,7 @@ const UsersAdmin = () => {
               <div className="flex-1">
                 <h3 className="font-medium text-[var(--color-text)] text-base">{u.name}{user && u.id === user.id ? ' (Yo)' : ''}</h3>
                 <p className="text-sm text-[var(--color-secondary-text)] mt-1">{u.email}</p>
-                <p className="text-sm text-[var(--color-secondary-text)] mt-1">{u.isSuperAdmin ? 'SuperAdmin' : ((u.role === 2 || String(u.role).toLowerCase() === 'admin') ? 'Admin' : 'Staff')}</p>
+                <p className="text-sm text-[var(--color-secondary-text)] mt-1">{u.role === 3 || String(u.role).toLowerCase() === 'superadmin' ? 'SuperAdmin' : ((u.role === 2 || String(u.role).toLowerCase() === 'admin') ? 'Admin' : 'Staff')}</p>
               </div>
             </div>
             <div className="flex justify-center gap-5 pt-2">
