@@ -30,21 +30,22 @@ export default function SalesCart({ cart, onRemove, onUpdateQuantity, onTogglePr
 
     const renderCartItem = ({ item }) => {
         const product = item.product;
+        const unitPrice = (product.salePrice ?? product.unitPrice ?? 0);
         const subtotal = item.promotionApplied && product.promotion
             ? (() => {
                 const promo = product.promotion;
                 const promoSets = Math.floor(item.quantity / promo.quantity);
                 const remaining = item.quantity % promo.quantity;
-                return promoSets * promo.price + remaining * product.unitPrice;
+                return promoSets * promo.price + remaining * unitPrice;
             })()
-            : item.quantity * product.unitPrice;
+            : item.quantity * unitPrice;
 
         return (
             <View style={styles.cartItem}>
                 <View style={styles.itemHeader}>
                     <View style={styles.itemInfo}>
                         <Text style={styles.itemName}>{product.name}</Text>
-                        <Text style={styles.itemPrice}>{formatCurrency(product.unitPrice)}/u</Text>
+                        <Text style={styles.itemPrice}>{formatCurrency(unitPrice)}/u</Text>
                         {product.promotion && (
                             <TouchableOpacity
                                 style={[styles.promotionBadge, item.promotionApplied && styles.promotionBadgeActive]}

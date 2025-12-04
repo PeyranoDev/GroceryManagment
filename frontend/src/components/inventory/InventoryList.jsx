@@ -50,14 +50,14 @@ const DesktopTable = memo(function DesktopTable({ items, onAdjustClick, sortBy, 
                 {item.stock || 0} {item.product?.unit || item.unit || "u"}
               </td>
               <td className="p-3 font-mono text-[var(--color-secondary-text)]">
-                ${((item.product?.salePrice ?? item.salePrice) || 0).toFixed(2)}
+                ${((item.salePrice ?? item.product?.salePrice) || 0).toFixed(2)}
               </td>
               <td className="p-3">
                 <StockStatus stock={item.stock || 0} />
               </td>
               <td className="p-3 text-[var(--color-secondary-text)]">
                 {item.lastUpdated
-                  ? new Date(item.lastUpdated).toLocaleString("es-AR")
+                  ? new Date(item.lastUpdated).toLocaleString("es-AR", { timeZone: "America/Argentina/Buenos_Aires" })
                   : "—"}
               </td>
               {isAdmin && (
@@ -121,7 +121,7 @@ const MobileCards = memo(function MobileCards({ items, onAdjustClick, onDeleteCl
               <span className="text-[var(--color-secondary-text)]">Última actualización:</span>
               <p className="text-[var(--color-secondary-text)] mt-1">
                 {p.lastUpdated
-                  ? new Date(p.lastUpdated).toLocaleString("es-AR")
+                  ? new Date(p.lastUpdated).toLocaleString("es-AR", { timeZone: "America/Argentina/Buenos_Aires" })
                   : "—"}
               </p>
             </div>

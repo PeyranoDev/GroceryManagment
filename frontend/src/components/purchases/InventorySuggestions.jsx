@@ -1,5 +1,6 @@
 import { createPortal } from "react-dom";
 import { useDropdownPosition } from "../../hooks/useDropdownPosition";
+import { Loader2 } from "lucide-react";
 
 const InventorySuggestions = ({
   anchorRef,
@@ -12,6 +13,7 @@ const InventorySuggestions = ({
   query = "",
   dropdownRef,
   usePortal = true,
+  loading = false,
 }) => {
   const enabled = !!open && !!(query || "").trim();
   const { pos } = useDropdownPosition(anchorRef, usePortal && enabled);
@@ -24,6 +26,9 @@ const InventorySuggestions = ({
       style={usePortal && pos ? { position: "absolute", top: pos.top, left: pos.left, width: pos.width, maxHeight: pos.maxHeight, zIndex: 10000 } : { position: "absolute", top: "100%", left: 0, right: 0, maxHeight: 240 }}
       ref={dropdownRef}
     >
+      {loading && (
+        <div className="px-3 py-2 text-[var(--color-secondary-text)] flex items-center gap-2"><Loader2 size={16} className="animate-spin" /> Buscando...</div>
+      )}
       {suggestions.length > 0 ? (
         suggestions.map((sug, idx) => (
           <button
@@ -38,7 +43,7 @@ const InventorySuggestions = ({
           </button>
         ))
       ) : (
-        <div className="px-3 py-2 text-[var(--color-secondary-text)]">Sin coincidencias</div>
+        !loading && <div className="px-3 py-2 text-[var(--color-secondary-text)]">Sin coincidencias</div>
       )}
       <div className="px-3 py-2 border-t border-[var(--color-border)]">
         <button type="button" onMouseDown={(ev) => { ev.preventDefault(); onCreateNew && onCreateNew(); }} className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-[var(--color-text)] font-semibold py-1 px-2 rounded-md text-xs">Crear producto</button>

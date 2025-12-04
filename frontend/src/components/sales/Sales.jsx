@@ -125,30 +125,40 @@ const Sales = () => {
 
     try {
       const { subtotal, total } = calculateTotals(details.isOnline ? details.deliveryCost : 0);
-      const isOnline = !!details.isOnline;
-      const cartData = {
-        userId: 1,
-        items: cart,
-        subtotal,
-        total,
-        deliveryCost: parseFloat(details.deliveryCost || 0),
-        customerName: details.client || '',
-        customerPhone: details.phone || '',
-        deliveryAddress: details.address || '',
-        paymentMethod: details.paymentMethod || 'Efectivo',
-        type: isOnline ? (details.deliveryMethod === 'Entrega a domicilio' ? 'OnlineDelivery' : 'OnlinePickup') : 'Presencial',
-        orderStatus: isOnline ? 'Created' : 'Delivered',
-        paymentStatus: isOnline ? 'Pending' : 'Paid',
-        payments: isOnline ? [] : [{ method: details.paymentMethod, amount: total }],
+      const getUserId = () => {
+        try {
+          const stored = window.localStorage.getItem('auth_user');
+          const u = stored ? JSON.parse(stored) : null;
+          return u?.id ?? u?.userId ?? 1;
+        } catch { return 1; }
       };
-      const created = await createSaleFromCart(cartData);
+      const cartPayload = {
+        userId: getUserId(),
+        cart: cart.map((item) => ({
+          productId: item.product.id,
+          salePrice: item.product.salePrice ?? item.product.unitPrice,
+          quantity: item.quantity,
+        })),
+        details: {
+          date: new Date(details.date),
+          time: details.time,
+          client: details.client || '',
+          paymentMethod: details.paymentMethod || 'Efectivo',
+          observations: details.observations || '',
+          isOnline: !!details.isOnline,
+          deliveryCost: parseFloat(details.deliveryCost || 0),
+        },
+      };
+      const created = await createSaleFromCart(cartPayload);
       resetSale();
-      setToastMsg(`Venta #${(created && created.id) || ''} creada`);
+      setToastMsg(`Venta creada`);
       setToastType("success");
       setToastOpen(true);
       setConfirmCreateOpen(false);
     } catch (error) {
-      alert(`Error al finalizar la venta: ${error.message}`);
+      setToastMsg(error?.message || 'No se pudo crear la venta');
+      setToastType('info');
+      setToastOpen(true);
     }
   };
 

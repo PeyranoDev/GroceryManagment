@@ -60,5 +60,18 @@ namespace Infraestructure.Repositories
                 .Include(p => p.User)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
+
+        public async Task<PurchaseItem?> GetItemById(int itemId)
+        {
+            return await _ctx.PurchaseItems
+                .Include(pi => pi.Product)
+                .FirstOrDefaultAsync(pi => pi.Id == itemId);
+        }
+
+        public async Task DeleteItem(PurchaseItem item)
+        {
+            _ctx.PurchaseItems.Remove(item);
+            await _ctx.SaveChangesAsync();
+        }
     }
 }

@@ -12,15 +12,16 @@ const SaleItemRow = ({
 }) => {
   const [unitSel, setUnitSel] = useState(item.product.unit === 'kg' ? 'kg' : item.product.unit);
   const total = useMemo(() => {
+    const unitPrice = (item.product.salePrice ?? item.product.unitPrice ?? 0);
     if (item.promotionApplied && item.product.promotion) {
       const promo = item.product.promotion;
       const qtyBase = typeof item.quantity === 'number' ? item.quantity : 0;
       const promoSets = Math.floor(qtyBase / promo.quantity);
       const remainingQty = qtyBase % promo.quantity;
-      return promoSets * promo.price + remainingQty * item.product.unitPrice;
+      return promoSets * promo.price + remainingQty * unitPrice;
     }
     const qtyBase = typeof item.quantity === 'number' ? item.quantity : 0;
-    return qtyBase * item.product.unitPrice;
+    return qtyBase * unitPrice;
   }, [item]);
 
   if (isMobile) {
@@ -87,7 +88,7 @@ const SaleItemRow = ({
           <div>
             <span className="text-[var(--color-secondary-text)]">Precio Unit.:</span>
             <p className="font-semibold text-[var(--color-text)] mt-1">
-              <MoneyText value={item.product.unitPrice || 0} />
+              <MoneyText value={(item.product.salePrice ?? item.product.unitPrice ?? 0)} />
             </p>
           </div>
           <div>
@@ -148,7 +149,7 @@ const SaleItemRow = ({
         {item.product.unit}
       </td>
       <td className="p-3 font-semibold text-[var(--color-text)]">
-        <MoneyText value={item.product.unitPrice || 0} />
+        <MoneyText value={(item.product.salePrice ?? item.product.unitPrice ?? 0)} />
       </td>
       <td className="p-3 font-semibold text-[var(--color-text)]">
         <MoneyText value={total || 0} />
