@@ -1,3 +1,9 @@
+## [1.3.1](https://github.com/PeyranoDev/GroceryManagment/compare/v1.3.0...v1.3.1) (2025-12-04)
+
+### ♻️ Code Refactoring
+
+* cambiar logica de roles en frontend ([30fc584](https://github.com/PeyranoDev/GroceryManagment/commit/30fc584de10a3f8cacc0abeba79f0500eaeee3c7))
+
 ## [1.3.0](https://github.com/PeyranoDev/GroceryManagment/compare/v1.2.0...v1.3.0) (2025-12-04)
 
 ### ✨ Features
