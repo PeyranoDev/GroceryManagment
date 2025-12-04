@@ -26,6 +26,7 @@ namespace Application.Services.Implementations
         {
             var entity = _mapper.Map<Sale>(dto);
             entity.GroceryId = _tenantProvider.CurrentGroceryId;
+            entity.Date = dto.Date != default ? dto.Date : DateTime.UtcNow;
             
             entity.Items = new List<SaleItem>();
             foreach (var itemDto in dto.Items)
@@ -54,7 +55,6 @@ namespace Application.Services.Implementations
             }
             
             entity.Total = entity.Items.Sum(item => item.Price * item.Quantity);
-            entity.Date = DateTime.UtcNow;
 
             await _sales.Create(entity);
             await _sales.SaveChanges();
@@ -94,7 +94,28 @@ namespace Application.Services.Implementations
             var entity = await _sales.GetById(id);
             if (entity is null || entity.GroceryId != _tenantProvider.CurrentGroceryId)
                 return null;
+            var prevOrder = entity.OrderStatus;
             entity.OrderStatus = status;
+            if (string.Equals(status, "Cancelled", StringComparison.OrdinalIgnoreCase))
+            {
+                entity.PaymentStatus = "Cancelled";
+                if (!string.Equals(prevOrder, "Cancelled", StringComparison.OrdinalIgnoreCase))
+                {
+                    foreach (var item in entity.Items)
+                    {
+                        var inventoryItem = await _inventory.GetByProductIdAndGroceryId(item.ProductId, _tenantProvider.CurrentGroceryId);
+                        if (inventoryItem != null)
+                        {
+                            inventoryItem.Stock += item.Quantity;
+                            inventoryItem.LastUpdated = DateTime.UtcNow;
+                            inventoryItem.Product = null!;
+                            inventoryItem.LastUpdatedByUser = null!;
+                            await _inventory.Update(inventoryItem);
+                        }
+                    }
+                    await _inventory.SaveChanges();
+                }
+            }
             await _sales.Update(entity);
             await _sales.SaveChanges();
             return _mapper.Map<SaleForResponseDto>(entity);
@@ -105,7 +126,28 @@ namespace Application.Services.Implementations
             var entity = await _sales.GetById(id);
             if (entity is null || entity.GroceryId != _tenantProvider.CurrentGroceryId)
                 return null;
+            var prevOrder = entity.OrderStatus;
             entity.PaymentStatus = status;
+            if (string.Equals(status, "Cancelled", StringComparison.OrdinalIgnoreCase))
+            {
+                entity.OrderStatus = "Cancelled";
+                if (!string.Equals(prevOrder, "Cancelled", StringComparison.OrdinalIgnoreCase))
+                {
+                    foreach (var item in entity.Items)
+                    {
+                        var inventoryItem = await _inventory.GetByProductIdAndGroceryId(item.ProductId, _tenantProvider.CurrentGroceryId);
+                        if (inventoryItem != null)
+                        {
+                            inventoryItem.Stock += item.Quantity;
+                            inventoryItem.LastUpdated = DateTime.UtcNow;
+                            inventoryItem.Product = null!;
+                            inventoryItem.LastUpdatedByUser = null!;
+                            await _inventory.Update(inventoryItem);
+                        }
+                    }
+                    await _inventory.SaveChanges();
+                }
+            }
             await _sales.Update(entity);
             await _sales.SaveChanges();
             return _mapper.Map<SaleForResponseDto>(entity);

@@ -24,6 +24,18 @@ const SaleItemRow = ({
     return qtyBase * unitPrice;
   }, [item]);
 
+  const remainingStock = useMemo(() => {
+    const qtyBase = (() => {
+      if (unitSel === 'gr') {
+        const q = typeof item.quantity === 'number' ? item.quantity : 0; // already converted to kg in handlers
+        return q;
+      }
+      return typeof item.quantity === 'number' ? item.quantity : 0;
+    })();
+    const stock = item.product.stock ?? 0;
+    return stock - qtyBase;
+  }, [item, unitSel]);
+
   if (isMobile) {
     return (
       <div className="bg-[var(--surface)] border border-[var(--color-border)] rounded-lg p-4 space-y-3">
@@ -32,8 +44,8 @@ const SaleItemRow = ({
             <p className="font-medium text-[var(--color-text)]">
               {item.product.name}
             </p>
-            <p className="text-sm text-[var(--color-secondary-text)]">
-              Stock: {item.product.stock} {item.product.unit}
+            <p className={`text-sm ${remainingStock < 0 ? 'text-[var(--color-error)]' : 'text-[var(--color-secondary-text)]'}`}>
+              Stock: {remainingStock < 0 ? 0 : remainingStock} {item.product.unit}
             </p>
           </div>
           <button
@@ -110,8 +122,8 @@ const SaleItemRow = ({
         <p className="font-medium text-[var(--color-text)]">
           {item.product.name}
         </p>
-        <p className="text-sm text-[var(--color-secondary-text)]">
-          Stock: {item.product.stock} {item.product.unit}
+        <p className={`text-sm ${remainingStock < 0 ? 'text-[var(--color-error)]' : 'text-[var(--color-secondary-text)]'}`}>
+          Stock: {remainingStock < 0 ? 0 : remainingStock} {item.product.unit}
         </p>
       </td>
       <td className="p-3">

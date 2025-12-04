@@ -9,7 +9,7 @@ namespace Application.Mapping
         public SaleProfile()
         {
             CreateMap<SaleForCreateDto, Sale>()
-                .ForMember(dest => dest.Date, opt => opt.MapFrom(src => DateTime.UtcNow))
+                .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.Date))
                 .ForMember(dest => dest.Total, opt => opt.Ignore())
                 .ForMember(dest => dest.Id, opt => opt.Ignore())
                 .ForMember(dest => dest.GroceryId, opt => opt.Ignore())
