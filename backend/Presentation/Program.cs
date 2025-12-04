@@ -68,6 +68,8 @@ builder.Services.AddCors(options =>
 
 builder.Services.AddControllers();
 
+System.IdentityModel.Tokens.Jwt.JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+
 builder.Services.AddAuthentication("Bearer")
     .AddJwtBearer("Bearer", options =>
     {
@@ -79,7 +81,9 @@ builder.Services.AddAuthentication("Bearer")
             ValidIssuer = builder.Configuration["Authentication:Issuer"],
             ValidAudience = builder.Configuration["Authentication:Audience"],
             IssuerSigningKey = new Microsoft.IdentityModel.Tokens.SymmetricSecurityKey(
-                System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Authentication:SecretForKey"]!))
+                System.Text.Encoding.UTF8.GetBytes(builder.Configuration["Authentication:SecretForKey"]!)),
+            RoleClaimType = "role",
+            NameClaimType = "name"
         };
     });
 
@@ -93,16 +97,18 @@ builder.Services.AddAuthorization(options =>
         policy.RequireAssertion(context =>
         {
             var allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "SuperAdmin", "3" };
-            return context.User.Claims.Any(c => c.Type == "role" && allowed.Contains(c.Value));
+            // Check both custom "role" claim and standard ClaimTypes.Role
+            bool hasCustomRole = context.User.Claims.Any(c => c.Type == "role" && allowed.Contains(c.Value));
+            bool hasStandardRole = context.User.Claims.Any(c => c.Type == System.Security.Claims.ClaimTypes.Role && allowed.Contains(c.Value));
+            return hasCustomRole || hasStandardRole;
         }));
 
     options.AddPolicy("Admin", policy =>
         policy.RequireAssertion(context =>
         {
-
             var allowed = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "Admin", "2", "SuperAdmin", "3" };
             bool hasCustomRole = context.User.Claims.Any(c => c.Type == "role" && allowed.Contains(c.Value));
-            bool hasStandardRole = context.User.Claims.Any(c => c.Type.EndsWith("/claims/role", StringComparison.OrdinalIgnoreCase) && allowed.Contains(c.Value));
+            bool hasStandardRole = context.User.Claims.Any(c => c.Type == System.Security.Claims.ClaimTypes.Role && allowed.Contains(c.Value));
             return hasCustomRole || hasStandardRole;
         }));
     
