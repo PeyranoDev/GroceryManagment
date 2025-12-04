@@ -7,6 +7,7 @@ namespace Application.Services.Interfaces
         Task<UserForResponseDto> Create(UserForCreateDto dto);
         Task<bool> Delete(int id);
         Task<IReadOnlyList<UserForResponseDto>> GetAll();
+        Task<IReadOnlyList<UserForResponseDto>> GetAllIncludingInactive();
         Task<IReadOnlyList<UserForResponseDto>> GetByGroceryId(int groceryId);
         Task<IReadOnlyList<UserForResponseDto>> GetByGroceryIdAll(int groceryId);
         Task<UserForResponseDto?> GetById(int id);

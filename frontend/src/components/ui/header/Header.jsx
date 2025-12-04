@@ -15,13 +15,14 @@ const Header = ({ user, onLogout }) => {
   const roleHierarchy = { Staff: 1, Admin: 2, SuperAdmin: 3 };
   const userRoleLevel = roleHierarchy[user?.currentRole] || 0;
   const isAdmin = userRoleLevel >= roleHierarchy.Admin;
+  const isSuperAdmin = user?.currentRole === 'SuperAdmin' || user?.currentRole === 3;
 
   const navItems = [
-    { name: "Dashboard", path: "/dashboard", end: true, adminOnly: true },
-    { name: "Caja", path: "/caja", end: true },
-    { name: "Ventas", path: "/ventas/registradas" },
-    { name: "Compras", path: "/compras", end: true, adminOnly: true },
-    { name: "Inventario", path: "/inventario", end: true },
+    { name: "Dashboard", path: "/dashboard", end: true, adminOnly: true, hiddenForSuperAdmin: true },
+    { name: "Caja", path: "/caja", end: true, hiddenForSuperAdmin: true },
+    { name: "Ventas", path: "/ventas/registradas", hiddenForSuperAdmin: true },
+    { name: "Compras", path: "/compras", end: true, adminOnly: true, hiddenForSuperAdmin: true },
+    { name: "Inventario", path: "/inventario", end: true, hiddenForSuperAdmin: true },
     { name: "Usuarios", path: "/usuarios", end: true, adminOnly: true },
   ];
 
@@ -34,6 +35,7 @@ const Header = ({ user, onLogout }) => {
   };
 
   const canShowItem = (item) => {
+    if (isSuperAdmin) return !item.hiddenForSuperAdmin;
     if (!item.adminOnly) return true;
     return isAdmin;
   };

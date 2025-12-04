@@ -39,6 +39,12 @@ namespace Infraestructure.Repositories
                 .Where(u => u.IsActive)
                 .ToListAsync();
 
+        public async Task<IReadOnlyList<User>> GetAllIncludingInactive()
+            => await _ctx.Users
+                .AsNoTracking()
+                .Include(u => u.Grocery)
+                .ToListAsync();
+
         public async Task<IReadOnlyList<User>> GetByGroceryIdAll(int groceryId)
             => await _ctx.Users
                 .AsNoTracking()

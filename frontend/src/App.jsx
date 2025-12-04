@@ -16,17 +16,22 @@ import Login from "./components/login/Login";
 
 function AppContent() {
   const navigate = useNavigate();
-  const { user, logout, isAdmin } = useAuth();
+  const { user, logout, isAdmin, isSuperAdmin } = useAuth();
   const location = useLocation();
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
   const [toastType, setToastType] = useState("success");
 
   const handleLogin = (userData) => {
-    const roleHierarchy = { Staff: 1, Admin: 2, SuperAdmin: 3 };
-    const userRoleLevel = roleHierarchy[userData.currentRole] || 0;
-    const shouldGoToDashboard = userRoleLevel >= roleHierarchy.Admin;
-    navigate(shouldGoToDashboard ? "/dashboard" : "/caja");
+
+    if (userData.currentRole === 'SuperAdmin' || userData.currentRole === 3) {
+      navigate("/usuarios");
+    } else {
+      const roleHierarchy = { Staff: 1, Admin: 2, SuperAdmin: 3 };
+      const userRoleLevel = roleHierarchy[userData.currentRole] || 0;
+      const shouldGoToDashboard = userRoleLevel >= roleHierarchy.Admin;
+      navigate(shouldGoToDashboard ? "/dashboard" : "/caja");
+    }
     setToastMsg("Sesión iniciada correctamente");
     setToastType("success");
     setToastOpen(true);
@@ -52,6 +57,8 @@ function AppContent() {
 
   const getDefaultRoute = () => {
     if (!user) return "/login";
+    // SuperAdmin solo tiene acceso a usuarios
+    if (isSuperAdmin()) return "/usuarios";
     return isAdmin() ? "/dashboard" : "/caja";
   };
 
