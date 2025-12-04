@@ -21,8 +21,9 @@ if (builder.Environment.IsProduction())
     try
     {
         var keyVaultEndpoint = new Uri("https://grocerymanagerkv.vault.azure.net/");
-        builder.Configuration.AddAzureKeyVault(keyVaultEndpoint, new DefaultAzureCredential());
-        Console.WriteLine("Key Vault configurado correctamente.");
+        // Usar ManagedIdentityCredential para Container Apps con System-Assigned Identity
+        builder.Configuration.AddAzureKeyVault(keyVaultEndpoint, new ManagedIdentityCredential());
+        Console.WriteLine("Key Vault configurado correctamente con Managed Identity.");
         
         var pgHost = builder.Configuration["PGHOST"];
         var pgPort = builder.Configuration["PGPORT"] ?? "5432";
