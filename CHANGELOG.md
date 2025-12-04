@@ -1,3 +1,9 @@
+## [1.8.1](https://github.com/PeyranoDev/GroceryManagment/compare/v1.8.0...v1.8.1) (2025-12-04)
+
+### 🐛 Bug Fixes
+
+* arreglar logica de purchases inhabilitado ([31ec538](https://github.com/PeyranoDev/GroceryManagment/commit/31ec5383db623fa2de6693954bb58de8896eaa51))
+
 ## [1.8.0](https://github.com/PeyranoDev/GroceryManagment/compare/v1.7.2...v1.8.0) (2025-12-04)
 
 ### ✨ Features
