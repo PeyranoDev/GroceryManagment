@@ -10,7 +10,7 @@ import {
   mockUsersAPI
 } from './mockApi.js';
 
-const DEMO_MODE = true;
+const DEMO_MODE = false;
 const USE_BACKEND_CATEGORIES = true;
 const USE_BACKEND_USERS = true;
 

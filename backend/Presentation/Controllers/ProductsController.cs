@@ -8,7 +8,7 @@ namespace Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Policy = "Staff")] 
+    [Authorize]
     public class ProductsController : ControllerBase
     {
         private readonly IProductService _productService;

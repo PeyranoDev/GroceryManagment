@@ -122,7 +122,7 @@ namespace Application.Services.Implementations
                         LastUpdated = DateTime.UtcNow,
                         LastUpdatedByUserId = userId,
                         GroceryId = purchase.GroceryId,
-                        UnitPrice = item.UnitCost,
+                        Unit = "u",
                         SalePrice = item.UnitCost * 1.3m
                     };
                     await _inventoryRepository.Create(newInventoryItem);

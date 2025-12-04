@@ -92,9 +92,7 @@ namespace Presentation.Controllers
                     {
                         ProductId = item.Product.Id,
                         Quantity = item.Quantity,
-                        Price = item.PromotionApplied && item.Product.Promotion != null 
-                            ? CalculatePromotionPrice(item) 
-                            : item.Product.UnitPrice * item.Quantity
+                        Price = item.Product.SalePrice
                     }).ToList()
                 };
 
@@ -156,21 +154,7 @@ namespace Presentation.Controllers
             return Ok(ApiResponse.SuccessResponse("Venta eliminada exitosamente"));
         }
 
-        private decimal CalculatePromotionPrice(SaleCartDto item)
-        {
-            if (item.Product.Promotion?.PromotionQuantity > 0 && item.Product.Promotion?.PromotionPrice > 0)
-            {
-                var promoQuantity = item.Product.Promotion.PromotionQuantity.Value;
-                var promoPrice = item.Product.Promotion.PromotionPrice.Value;
-                
-                var promoSets = item.Quantity / promoQuantity;
-                var remainingQty = item.Quantity % promoQuantity;
-                
-                return (promoSets * promoPrice) + (remainingQty * item.Product.UnitPrice);
-            }
-            
-            return item.Quantity * item.Product.UnitPrice;
-        }
+        
 
         private string GenerateWhatsAppText(SaleForResponseDto sale, SaleDetailsDto details)
         {

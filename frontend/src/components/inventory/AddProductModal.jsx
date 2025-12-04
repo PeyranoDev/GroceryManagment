@@ -1,15 +1,14 @@
 import { useState, useEffect, useMemo, useRef } from "react";
 import Modal from "../ui/modal/Modal";
 import Input from "../ui/input/Input";
-import Select from "../ui/select/Select";
 import Toast from "../ui/toast/Toast";
 import { categoriesAPI } from "../../services/api";
 import CreateCategoryModal from "../category/CreateCategoryModal";
-import { X, AlertTriangle } from "lucide-react";
+import { X, AlertTriangle, Loader2 } from "lucide-react";
 
-const AddProductModal = ({ isOpen, onClose, onSave, defaultName = "" }) => {
+const AddProductModal = ({ isOpen, onClose, onSave, defaultName = "", onCategoryCreated }) => {
   const [name, setName] = useState("");
-  const [unit, setUnit] = useState("kg");
+  const [emoji, setEmoji] = useState("");
   const [categories, setCategories] = useState([]);
   const [categoriesLoaded, setCategoriesLoaded] = useState(false);
   const [categoryQuery, setCategoryQuery] = useState("");
@@ -17,16 +16,19 @@ const AddProductModal = ({ isOpen, onClose, onSave, defaultName = "" }) => {
   const [categoryLocked, setCategoryLocked] = useState(false);
   const [invalidCategory, setInvalidCategory] = useState(false);
   const [createCatOpen, setCreateCatOpen] = useState(false);
+  const [createCatDefaultName, setCreateCatDefaultName] = useState("");
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
   const [toastType, setToastType] = useState("success");
   const categoryInputRef = useRef(null);
   const dropdownRef = useRef(null);
   const [activeIndex, setActiveIndex] = useState(-1);
+  const [submitting, setSubmitting] = useState(false);
 
   useEffect(() => {
     if (isOpen) {
       setName(defaultName || "");
+      setEmoji("");
       setCategoryQuery("");
       setSelectedCategory(null);
       setCategoryLocked(false);
@@ -79,19 +81,31 @@ const AddProductModal = ({ isOpen, onClose, onSave, defaultName = "" }) => {
     }
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const payload = {
       name: name.trim(),
-      unit,
+      emoji: (emoji || "").trim(),
       categoryId: selectedCategory?.id ?? selectedCategory?.Id,
     };
     if (!payload.categoryId) {
       setInvalidCategory(true);
       return;
     }
-    if (onSave) onSave(payload);
-    onClose();
+    try {
+      setSubmitting(true);
+      if (onSave) await onSave(payload);
+      setToastMsg("Producto creado correctamente");
+      setToastType("success");
+      setToastOpen(true);
+      onClose();
+    } catch (err) {
+      setToastMsg(err?.message || "No se pudo crear el producto");
+      setToastType("info");
+      setToastOpen(true);
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -109,11 +123,8 @@ const AddProductModal = ({ isOpen, onClose, onSave, defaultName = "" }) => {
 
         <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4">
           <div className="flex-1">
-            <label htmlFor="unit" className="block text-sm font-medium text-[var(--color-secondary-text)]">Unidad</label>
-            <Select value={unit} onChange={(e) => setUnit(e.target.value)}>
-              <option value="kg">Peso (kg)</option>
-              <option value="u">Unidad (u)</option>
-            </Select>
+            <label className="block text-sm font-medium text-[var(--color-secondary-text)]">Emoji (opcional, máx. 10)</label>
+            <Input type="text" value={emoji} onChange={(e) => setEmoji(e.target.value)} placeholder="Ej. 🥭" maxLength={10} />
           </div>
 
           <div className="flex-1 relative">
@@ -135,7 +146,7 @@ const AddProductModal = ({ isOpen, onClose, onSave, defaultName = "" }) => {
                       <button
                         key={c.id || c.Id}
                         type="button"
-                        className={`w-full text-left px-3 py-2 ${idx === activeIndex ? 'bg-[var(--color-primary-dark)]' : 'bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)]'} text-[var(--color-text)]`}
+                        className={`w-full text-left px-3 py-2 ${idx === activeIndex ? 'bg-[var(--surface-muted)]' : 'bg-[var(--surface)] hover:bg-[var(--surface-muted)]'} text-[var(--color-text)]`}
                         onClick={() => { setSelectedCategory(c); setCategoryLocked(true); setCategoryQuery(c.name || c.Name || ""); setInvalidCategory(false); }}
                       >
                         <div className="flex items-center justify-between">
@@ -146,7 +157,7 @@ const AddProductModal = ({ isOpen, onClose, onSave, defaultName = "" }) => {
                     ))}
                     <div className="border-t border-[var(--color-border)] bg-[var(--surface)]">
                       <div className="px-3 py-2">
-                        <button type="button" className="inline-flex items-center gap-2 bg-[var(--color-primary)] text-[var(--color-text)] hover:bg-[var(--color-primary-dark)] font-semibold py-1.5 px-3 rounded-md" onClick={() => setCreateCatOpen(true)}>
+                        <button type="button" className="inline-flex items-center gap-2 bg-[var(--color-primary)] text-[var(--color-text)] hover:bg-[var(--color-primary-dark)] font-semibold py-1.5 px-3 rounded-md" onClick={() => { setCreateCatDefaultName((categoryQuery || "").trim()); setCreateCatOpen(true); }}>
                           Crear categoría
                         </button>
                       </div>
@@ -180,16 +191,20 @@ const AddProductModal = ({ isOpen, onClose, onSave, defaultName = "" }) => {
           </button>
           <button
             type="submit"
-            className="bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-[var(--color-text)] font-semibold py-2 px-4 rounded-md text-sm sm:text-base"
+            disabled={submitting || !name.trim() || !selectedCategory}
+            className={`bg-[var(--color-primary)] ${submitting || !name.trim() || !selectedCategory ? 'opacity-70 cursor-not-allowed' : 'hover:bg-[var(--color-primary-dark)]'} text-[var(--color-text)] font-semibold py-2 px-4 rounded-md text-sm sm:text-base`}
           >
-            Guardar Producto
+            {submitting ? (
+              <span className="inline-flex items-center gap-2"><Loader2 size={16} className="animate-spin" /> Procesando...</span>
+            ) : 'Guardar Producto'}
           </button>
         </div>
       </form>
       <CreateCategoryModal
         isOpen={createCatOpen}
         onClose={() => setCreateCatOpen(false)}
-        onCreated={(cat) => { setCategories((prev)=>[...(Array.isArray(prev)?prev:[]), cat]); setCategoriesLoaded(true); setSelectedCategory(cat); setCategoryQuery(cat.name || cat.Name || ""); setCategoryLocked(true); setInvalidCategory(false); setCreateCatOpen(false); }}
+        defaultName={createCatDefaultName}
+        onCreated={(cat) => { setCategories((prev)=>[...(Array.isArray(prev)?prev:[]), cat]); setCategoriesLoaded(true); setSelectedCategory(cat); setCategoryQuery(cat.name || cat.Name || ""); setCategoryLocked(true); setInvalidCategory(false); setCreateCatOpen(false); if (typeof onCategoryCreated === 'function') onCategoryCreated(cat); }}
       />
       <Toast open={toastOpen} message={toastMsg} type={toastType} onClose={() => setToastOpen(false)} />
     </Modal>
