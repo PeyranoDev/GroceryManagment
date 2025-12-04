@@ -8,7 +8,7 @@ namespace Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Policy = "Staff")] 
+    [Authorize]
     public class SalesController : ControllerBase
     {
         private readonly ISaleService _saleService;
@@ -77,6 +77,31 @@ namespace Presentation.Controllers
             );
         }
 
+        [HttpPost("{id}/order-status")]
+        public async Task<ActionResult<ApiResponse<SaleForResponseDto>>> UpdateOrderStatus(int id, [FromBody] dynamic body)
+        {
+            var status = (string?)body?.status ?? "Created";
+            var sale = await _saleService.UpdateOrderStatus(id, status);
+            return Ok(ApiResponse<SaleForResponseDto>.SuccessResponse(sale!, "Estado de pedido actualizado"));
+        }
+
+        [HttpPost("{id}/payment-status")]
+        public async Task<ActionResult<ApiResponse<SaleForResponseDto>>> UpdatePaymentStatus(int id, [FromBody] dynamic body)
+        {
+            var status = (string?)body?.status ?? "Pending";
+            var sale = await _saleService.UpdatePaymentStatus(id, status);
+            return Ok(ApiResponse<SaleForResponseDto>.SuccessResponse(sale!, "Estado de pago actualizado"));
+        }
+
+        [HttpPost("{id}/payments")]
+        public async Task<ActionResult<ApiResponse<SaleForResponseDto>>> AddPayment(int id, [FromBody] dynamic body)
+        {
+            var method = (string?)body?.method ?? "Efectivo";
+            var amount = (decimal?)body?.amount ?? 0m;
+            var sale = await _saleService.AddPayment(id, method, amount);
+            return Ok(ApiResponse<SaleForResponseDto>.SuccessResponse(sale!, "Pago registrado"));
+        }
+
         [HttpPost("cart")]
         public async Task<ActionResult<ApiResponse<SaleForResponseDto>>> CreateSaleFromCart([FromBody] CreateSaleFromCartDto dto)
         {
@@ -90,10 +115,16 @@ namespace Presentation.Controllers
                     UserId = dto.UserId,
                     Items = dto.Cart.Select(item => new SaleItemForCreateDto
                     {
-                        ProductId = item.Product.Id,
+                        ProductId = item.ProductId,
                         Quantity = item.Quantity,
-                        Price = item.Product.SalePrice
-                    }).ToList()
+                        Price = item.SalePrice
+                    }).ToList(),
+                    PaymentMethod = dto.Details.PaymentMethod,
+                    IsOnline = dto.Details.IsOnline,
+                    DeliveryCost = dto.Details.DeliveryCost,
+                    CustomerName = dto.Details.Client,
+                    OrderStatus = dto.Details.IsOnline ? "Created" : "Delivered",
+                    PaymentStatus = dto.Details.IsOnline ? "Pending" : "Paid",
                 };
 
                 var sale = await _saleService.Create(saleDto);
@@ -201,7 +232,7 @@ namespace Presentation.Controllers
     public class CreateSaleFromCartDto
     {
         public int UserId { get; set; }
-        public List<SaleCartDto> Cart { get; set; } = new List<SaleCartDto>();
+        public List<Application.Schemas.Sales.SaleCartSimpleDto> Cart { get; set; } = new List<Application.Schemas.Sales.SaleCartSimpleDto>();
         public SaleDetailsDto Details { get; set; } = null!;
     }
 }

@@ -11,5 +11,7 @@ namespace Application.Services.Interfaces
         Task<IEnumerable<PurchaseForResponseDto>> GetPurchasesBySupplierAsync(string supplier, int groceryId);
         Task<IEnumerable<PurchaseForResponseDto>> GetPurchasesByDateRangeAsync(DateTime startDate, DateTime endDate, int groceryId);
         Task<bool> DeletePurchaseAsync(int id, int groceryId);
+        Task<PurchaseForResponseDto?> GetLatestAsync(int groceryId);
+        Task<bool> DeletePurchaseItemAsync(int purchaseId, int itemId, int groceryId, int? userId = null);
     }
 }

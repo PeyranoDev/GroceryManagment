@@ -91,7 +91,7 @@ const Inventory = () => {
     try {
       await updateItem(id, data);
       handleCloseModal();
-      setToastMsg("Producto actualizado");
+      setToastMsg("Item de inventario actualizado");
       setToastType("success");
       setToastOpen(true);
     } catch (err) {

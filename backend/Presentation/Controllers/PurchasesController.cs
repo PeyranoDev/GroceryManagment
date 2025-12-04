@@ -10,7 +10,7 @@ namespace Presentation.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    [Authorize(Policy = "Admin")]
+    [Authorize]
     public class PurchasesController : ControllerBase
     {
         private readonly IPurchaseService _purchaseService;
@@ -44,6 +44,40 @@ namespace Presentation.Controllers
             catch (Exception ex)
             {
                 return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("date/{date}")]
+        public async Task<IActionResult> GetPurchasesByDate(string date)
+        {
+            try
+            {
+                var groceryId = _tenantProvider.CurrentGroceryId;
+                if (!DateTime.TryParse(date, out var dt))
+                    return BadRequest(new { message = "Fecha inválida" });
+                var start = dt.Date;
+                var end = dt.Date.AddDays(1).AddTicks(-1);
+                var purchases = await _purchaseService.GetPurchasesByDateRangeAsync(start, end, groceryId);
+                return Ok(purchases);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpGet("latest")]
+        public async Task<IActionResult> GetLatest()
+        {
+            try
+            {
+                var groceryId = _tenantProvider.CurrentGroceryId;
+                var latest = await _purchaseService.GetLatestAsync(groceryId);
+                return Ok(latest);
+            }
+            catch (Exception ex)
+            {
+                return NotFound(new { message = ex.Message });
             }
         }
 
@@ -133,6 +167,22 @@ namespace Presentation.Controllers
                 var groceryId = _tenantProvider.CurrentGroceryId;
                 var purchases = await _purchaseService.GetPurchasesByDateRangeAsync(startDate, endDate, groceryId);
                 return Ok(purchases);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { message = ex.Message });
+            }
+        }
+
+        [HttpDelete("{purchaseId}/items/{itemId}")]
+        public async Task<IActionResult> DeletePurchaseItem(int purchaseId, int itemId)
+        {
+            try
+            {
+                var groceryId = _tenantProvider.CurrentGroceryId;
+                var userId = GetCurrentUserId();
+                var ok = await _purchaseService.DeletePurchaseItemAsync(purchaseId, itemId, groceryId, userId);
+                return Ok(new { success = ok });
             }
             catch (Exception ex)
             {

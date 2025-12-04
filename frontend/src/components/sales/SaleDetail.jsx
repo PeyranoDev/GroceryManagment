@@ -97,8 +97,10 @@ const SaleDetail = () => {
       <div className="grid grid-cols-1 md:grid-cols-3 gap-3 text-sm">
         <div><span className="text-[var(--color-secondary-text)]">Fecha:</span> <span className="text-[var(--color-text)]">{new Date(sale.date).toLocaleDateString('es-AR')}</span></div>
         <div><span className="text-[var(--color-secondary-text)]">Hora:</span> <span className="text-[var(--color-text)]">{(() => { const d = new Date(sale.date); const h = String(d.getHours()).padStart(2,'0'); const m = String(d.getMinutes()).padStart(2,'0'); return `${h}:${m}`; })()}</span></div>
-        <div><span className="text-[var(--color-secondary-text)]">Pago:</span> <span className="text-[var(--color-text)]">{sale.paymentMethod || '—'}</span></div>
-        {sale.deliveryAddress && <div className="md:col-span-3"><span className="text-[var(--color-secondary-text)]">Dirección:</span> <span className="text-[var(--color-text)]">{sale.deliveryAddress}</span></div>}
+        <div><span className="text-[var(--color-secondary-text)]">Método de Pago:</span> <span className="text-[var(--color-text)]">{sale.paymentMethod || '—'}</span></div>
+        {sale.customerName && <div><span className="text-[var(--color-secondary-text)]">Cliente:</span> <span className="text-[var(--color-text)]">{sale.customerName}</span></div>}
+        {sale.customerPhone && <div><span className="text-[var(--color-secondary-text)]">Teléfono:</span> <span className="text-[var(--color-text)]">{sale.customerPhone}</span></div>}
+        {sale.isOnline && sale.deliveryAddress && <div className="md:col-span-3"><span className="text-[var(--color-secondary-text)]">Dirección:</span> <span className="text-[var(--color-text)]">{sale.deliveryAddress}</span></div>}
       </div>
       <div className="mt-2 grid grid-cols-1 sm:grid-cols-2 gap-3">
         <div>
@@ -132,10 +134,10 @@ const SaleDetail = () => {
           <tbody>
             {(sale.items || []).map((it, idx) => (
               <tr key={`${it.productId}-${it.productName}`} className={`border-b border-[var(--color-border)] ${idx % 2 === 0 ? 'bg-[var(--surface)]' : 'bg-[var(--color-bg-input)]'}`}>
-                <td className="p-3 text-[var(--color-text)]">{it.productName}</td>
+                <td className="p-3 text-[var(--color-text)]">{it.product?.name || it.Product?.Name || it.productName}</td>
                 <td className="p-3 text-[var(--color-secondary-text)]">{it.quantity}</td>
-                <td className="p-3 text-right text-[var(--color-secondary-text)]"><MoneyText value={it.unitPrice || 0} /></td>
-                <td className="p-3 text-right"><MoneyText value={it.totalPrice || 0} /></td>
+                <td className="p-3 text-right text-[var(--color-secondary-text)]"><MoneyText value={it.price ?? it.Price ?? 0} /></td>
+                <td className="p-3 text-right"><MoneyText value={(it.price ?? it.Price ?? 0) * it.quantity} /></td>
               </tr>
             ))}
           </tbody>
@@ -145,10 +147,10 @@ const SaleDetail = () => {
       <div className="md:hidden space-y-2 mt-3">
         {(sale.items || []).map((it) => (
           <div key={`${it.productId}-${it.productName}`} className="p-3 rounded-lg border border-[var(--color-border)] bg-[var(--color-bg-input)] shadow-md">
-            <div className="flex justify-between"><span className="text-[var(--color-secondary-text)]">Producto</span><span className="text-[var(--color-text)]">{it.productName}</span></div>
+            <div className="flex justify-between"><span className="text-[var(--color-secondary-text)]">Producto</span><span className="text-[var(--color-text)]">{it.product?.name || it.Product?.Name || it.productName}</span></div>
             <div className="flex justify-between"><span className="text-[var(--color-secondary-text)]">Cantidad</span><span className="text-[var(--color-text)]">{it.quantity}</span></div>
-            <div className="flex justify-between"><span className="text-[var(--color-secondary-text)]">Precio Unitario</span><span className="text-[var(--color-secondary-text)]"><MoneyText value={it.unitPrice || 0} /></span></div>
-            <div className="flex justify-between"><span className="text-[var(--color-secondary-text)]">Subtotal</span><span><MoneyText value={it.totalPrice || 0} /></span></div>
+            <div className="flex justify-between"><span className="text-[var(--color-secondary-text)]">Precio Unitario</span><span className="text-[var(--color-secondary-text)]"><MoneyText value={it.price ?? it.Price ?? 0} /></span></div>
+            <div className="flex justify-between"><span className="text-[var(--color-secondary-text)]">Subtotal</span><span><MoneyText value={(it.price ?? it.Price ?? 0) * it.quantity} /></span></div>
           </div>
         ))}
       </div>
@@ -157,7 +159,7 @@ const SaleDetail = () => {
         {sale.deliveryCost > 0 && (
           <div className="flex justify-between text-[var(--color-secondary-text)]">
             <p>Subtotal:</p>
-            <p className="font-semibold text-[var(--color-text)]"><MoneyText value={sale.subtotal || 0} /></p>
+            <p className="font-semibold text-[var(--color-text)]"><MoneyText value={(sale.items || []).reduce((acc, it) => acc + (it.price ?? it.Price ?? 0) * it.quantity, 0)} /></p>
           </div>
         )}
         {sale.deliveryCost > 0 && (
@@ -168,7 +170,7 @@ const SaleDetail = () => {
         )}
         <div className="flex justify-between text-[var(--color-text)] border-t border-[var(--color-border)] pt-2 mt-2">
           <p>Total:</p>
-          <p className="text-2xl font-extrabold"><MoneyText value={sale.total || 0} /></p>
+          <p className="text-2xl font-extrabold"><MoneyText value={(sale.total ?? 0) + (sale.deliveryCost ?? 0)} /></p>
         </div>
       </div>
       <Toast open={toastOpen} message={toastMsg} type={toastType} onClose={() => setToastOpen(false)} />

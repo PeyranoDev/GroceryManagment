@@ -66,7 +66,7 @@ namespace Application.Services.Implementations
             return dtos;
         }
 
-        public async Task<ProductForResponseDto> Create(ProductForCreateDto dto)
+        public async Task<ProductForResponseDto> Create(ProductForCreateDto dto, int? userId = null)
         {
             // 1. Check if product exists globally by name
             var existingProduct = (await _products.Find(p => p.Name == dto.Name)).FirstOrDefault();
@@ -105,7 +105,8 @@ namespace Application.Services.Implementations
                 Stock = 0, // Default stock
                 Unit = "u",
                 SalePrice = 0,
-                LastUpdated = DateTime.UtcNow
+                LastUpdated = DateTime.UtcNow,
+                LastUpdatedByUserId = userId
             };
 
             await _inventory.Create(inventoryItem);

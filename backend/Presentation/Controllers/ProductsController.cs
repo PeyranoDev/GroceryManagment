@@ -12,6 +12,15 @@ namespace Presentation.Controllers
     public class ProductsController : ControllerBase
     {
         private readonly IProductService _productService;
+        private int? GetCurrentUserId()
+        {
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier) ?? User.FindFirst("userId");
+            if (userIdClaim != null && int.TryParse(userIdClaim.Value, out var userId))
+            {
+                return userId;
+            }
+            return null;
+        }
 
         public ProductsController(IProductService productService)
         {
@@ -44,7 +53,8 @@ namespace Presentation.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ApiResponse<ProductForResponseDto>.ErrorResponse("Datos de entrada inválidos."));
 
-            var product = await _productService.Create(dto);
+            var userId = GetCurrentUserId();
+            var product = await _productService.Create(dto, userId);
             return CreatedAtAction(
                 nameof(GetById), 
                 new { id = product.Id }, 
