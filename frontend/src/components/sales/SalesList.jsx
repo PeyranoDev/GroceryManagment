@@ -105,11 +105,15 @@ const SalesList = () => {
     setSortDir(column === "date" ? "desc" : "asc");
   };
 
-  const renderAmount = (n) => (
-    <span className="font-semibold text-[var(--color-text)]">
-      <MoneyText value={n || 0} />
-    </span>
-  );
+  const renderAmount = (sale) => {
+    const isUSD = sale.moneda === 2 || sale.moneda === 'USD';
+    const amount = isUSD ? (sale.totalUSD || sale.total) : (sale.total || 0);
+    return (
+      <span className={`font-semibold ${isUSD ? 'text-green-600' : 'text-[var(--color-text)]'}`}>
+        {isUSD ? `US$ ${amount.toFixed(2)}` : <MoneyText value={amount} />}
+      </span>
+    );
+  };
 
   if (loading) {
     return (
@@ -229,7 +233,7 @@ const SalesList = () => {
                       ? <span className="inline-block px-2 py-0.5 rounded-sm bg-[var(--color-success-dark)] text-[var(--color-text)] text-xs">Pagado</span>
                       : <StatusSelect type="payment" value={s.paymentStatus || "Pending"} disabled={updatingPaymentId===s.id} onChange={(val) => handlePaymentStatusChange(s.id, val)} />)}
                 </td>
-                <td className="p-3">{renderAmount(s.total || 0)}</td>
+                <td className="p-3">{renderAmount(s)}</td>
                 <td className="p-3 text-[var(--color-secondary-text)]">
                   {s.paymentMethod || "—"}
                 </td>
@@ -287,7 +291,7 @@ const SalesList = () => {
                   <span className="text-[var(--color-secondary-text)]">
                     Total:
                   </span>{" "}
-                  <span>{renderAmount(s.total || 0)}</span>
+                  <span>{renderAmount(s)}</span>
                 </div>
                 <div>
                   <span className="text-[var(--color-secondary-text)]">Canal:</span>{" "}

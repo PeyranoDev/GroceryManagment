@@ -117,6 +117,9 @@ const Sales = () => {
 
   // Obtener cotización del dólar del primer item del carrito
   const cotizacionDolar = cart.length > 0 ? (cart[0]?.product?.cotizacionDolar || 0) : 0;
+  
+  // Calcular total en USD
+  const totalUSD = cotizacionDolar > 0 ? (total / cotizacionDolar) : 0;
 
 
   const resetSale = () => {
@@ -315,6 +318,9 @@ const Sales = () => {
           <SalesPayment
             details={details}
             total={total}
+            totalUSD={totalUSD}
+            moneda={details.moneda}
+            cotizacionDolar={cotizacionDolar}
             onDetailChange={handleDetailChange}
             onPrev={gotoPrev}
             onConfirm={() => setConfirmCreateOpen(true)}
