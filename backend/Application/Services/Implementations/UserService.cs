@@ -51,7 +51,6 @@ namespace Application.Services.Implementations
 
             var entity = _mapper.Map<User>(dto);
             entity.PasswordHash = _passwordHasher.Hash(dto.Password);
-            entity.IsSuperAdmin = dto.IsSuperAdmin;
             entity.IsActive = true;
 
             var id = await _users.Create(entity);
@@ -96,8 +95,9 @@ namespace Application.Services.Implementations
             if (entity is null) 
                 throw new NotFoundException($"Usuario con ID {id} no encontrado.");
 
-            await _users.SetSuperAdmin(id, dto.IsSuperAdmin);
-            entity.IsSuperAdmin = dto.IsSuperAdmin;
+            var role = dto.GetRole();
+            await _users.SetRole(id, role);
+            entity.Role = role;
 
             return _mapper.Map<UserForResponseDto>(entity);
         }

@@ -49,9 +49,8 @@ namespace Presentation.Controllers
         {
             if (!ModelState.IsValid)
                 return BadRequest(ApiResponse<UserForResponseDto>.ErrorResponse("Datos de entrada inválidos."));
-            var isSuperAdmin = User.HasClaim(c => c.Type == "isSuperAdmin" && c.Value == "true");
-            if (!isSuperAdmin && dto.IsSuperAdmin)
-                return Forbid();
+            
+            var isSuperAdmin = User.Claims.Any(c => c.Type == "role" && (c.Value == "SuperAdmin" || c.Value == "3"));
 
             var user = await _userService.Create(dto);
             if (!isSuperAdmin)
@@ -76,10 +75,10 @@ namespace Presentation.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ApiResponse<UserForResponseDto>.ErrorResponse("Datos de entrada inválidos."));
             var target = await _userService.GetById(id);
-            var isSuperAdmin = User.HasClaim(c => c.Type == "isSuperAdmin" && c.Value == "true");
+            var isSuperAdmin = User.Claims.Any(c => c.Type == "role" && (c.Value == "SuperAdmin" || c.Value == "3"));
             if (!isSuperAdmin)
             {
-                if (target?.IsSuperAdmin == true) return Forbid();
+                if (target?.Role == GroceryRole.SuperAdmin) return Forbid();
                 var groceryId = _tenantProvider.CurrentGroceryId;
                 // si el usuario objetivo no pertenece a la verdulería actual, prohibir
                 var list = await _userService.GetByGroceryIdAll(groceryId);
@@ -98,10 +97,10 @@ namespace Presentation.Controllers
         public async Task<ActionResult<ApiResponse>> Delete(int id)
         {
             var target = await _userService.GetById(id);
-            var isSuperAdmin = User.HasClaim(c => c.Type == "isSuperAdmin" && c.Value == "true");
+            var isSuperAdmin = User.Claims.Any(c => c.Type == "role" && (c.Value == "SuperAdmin" || c.Value == "3"));
             if (!isSuperAdmin)
             {
-                if (target?.IsSuperAdmin == true) return Forbid();
+                if (target?.Role == GroceryRole.SuperAdmin) return Forbid();
                 var groceryId = _tenantProvider.CurrentGroceryId;
                 var list = await _userService.GetByGroceryIdAll(groceryId);
                 if (!list.Any(u => u.Id == id)) return Forbid();
@@ -156,7 +155,7 @@ namespace Presentation.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ApiResponse<UserForResponseDto>.ErrorResponse("Datos de entrada inválidos."));
 
-            var isSuperAdmin = User.HasClaim(c => c.Type == "isSuperAdmin" && c.Value == "true");
+            var isSuperAdmin = User.Claims.Any(c => c.Type == "role" && (c.Value == "SuperAdmin" || c.Value == "3"));
             if (!isSuperAdmin && dto.Role == GroceryRole.SuperAdmin)
                 return Forbid();
 

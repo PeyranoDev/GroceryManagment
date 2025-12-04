@@ -77,8 +77,6 @@ namespace Infraestructure
             mb.Entity<Product>(b =>
             {
                 b.Property(p => p.Name).IsRequired().HasMaxLength(200);
-                b.Property(p => p.Unit).IsRequired().HasMaxLength(50);
-                b.Property(p => p.Emoji).HasMaxLength(10);
                 
                 b.HasIndex(p => p.Name).IsUnique();
                 

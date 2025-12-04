@@ -62,7 +62,7 @@ namespace Presentation.Controllers
         [Authorize]
         public async Task<ActionResult<ApiResponse<AuthResponseDto>>> Impersonate(int userId)
         {
-            var isSuperAdmin = User.HasClaim(c => c.Type == "isSuperAdmin" && c.Value == "true");
+            var isSuperAdmin = User.Claims.Any(c => c.Type == "role" && (c.Value == "SuperAdmin" || c.Value == "3"));
             if (!isSuperAdmin)
                 return Forbid();
 
@@ -124,8 +124,7 @@ namespace Presentation.Controllers
             {
                 new Claim("sub", user.Id.ToString()),
                 new Claim("name", user.Name),
-                new Claim("email", user.Email),
-                new Claim("isSuperAdmin", user.IsSuperAdmin.ToString().ToLower())
+                new Claim("email", user.Email)
             };
 
             if (user.CurrentRole.HasValue)
