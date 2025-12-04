@@ -9,9 +9,10 @@ import Select from "../ui/select/Select";
 import InventoryList from "./InventoryList";
 import ConfirmModal from "../ui/modal/ConfirmModal";
 import Toast from "../ui/toast/Toast";
+import { productsAPI } from "../../services/api";
 
 const Inventory = () => {
-  const { inventory, loading, error, createItem, updateItem, deleteItem } = useInventory();
+  const { inventory, loading, error, createItem, updateItem, deleteItem, refresh } = useInventory();
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -69,16 +70,16 @@ const Inventory = () => {
 
 
   const handleCreateProduct = async (payload) => {
-    const item = {
-      name: payload.name,
-      unit: payload.unit,
-      salePrice: 0,
-      stock: 0,
-      lastUpdated: new Date().toISOString(),
-    };
     try {
-      await createItem(item);
-      setToastMsg("Producto creado");
+      await productsAPI.create({
+        name: (payload?.name || "").trim(),
+        emoji: (payload?.emoji || "").trim(),
+        categoryId: payload?.categoryId,
+      });
+      if (typeof refresh === "function") {
+        await refresh();
+      }
+      setToastMsg("Producto creado correctamente");
       setToastType("success");
       setToastOpen(true);
     } catch (err) {
@@ -193,6 +194,7 @@ const Inventory = () => {
         isOpen={isAddModalOpen}
         onClose={handleCloseAddModal}
         onSave={handleCreateProduct}
+        onCategoryCreated={(cat) => { setToastMsg("Categoría creada correctamente"); setToastType("success"); setToastOpen(true); }}
       />
 
       <ConfirmModal

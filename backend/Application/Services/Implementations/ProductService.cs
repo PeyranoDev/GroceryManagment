@@ -39,9 +39,8 @@ namespace Application.Services.Implementations
                 throw new ProductNotFoundException(id); // Or return null, but exception is consistent with previous behavior
             
             var dto = _mapper.Map<ProductForResponseDto>(product);
-            dto.UnitPrice = currentGroceryItem.UnitPrice;
             dto.SalePrice = currentGroceryItem.SalePrice;
-            dto.Promotion = _mapper.Map<PromotionDto>(currentGroceryItem.Promotion);
+            dto.Unit = currentGroceryItem.Unit;
             
             return dto;
         }
@@ -59,9 +58,8 @@ namespace Application.Services.Implementations
                 var item = product.InventoryItems.FirstOrDefault(i => i.GroceryId == _tenantProvider.CurrentGroceryId);
                 if (item != null)
                 {
-                    dto.UnitPrice = item.UnitPrice;
                     dto.SalePrice = item.SalePrice;
-                    dto.Promotion = _mapper.Map<PromotionDto>(item.Promotion);
+                    dto.Unit = item.Unit;
                 }
                 dtos.Add(dto);
             }
@@ -93,23 +91,20 @@ namespace Application.Services.Implementations
                     throw new CategoryNotValidException(dto.CategoryId);
 
                 product = _mapper.Map<Product>(dto);
-                // Product no longer has GroceryId
+                var currentGrocery = _tenantProvider.CurrentGroceryId;
+                product.GroceryId = currentGrocery > 0 ? currentGrocery : null;
                 var id = await _products.Create(product);
                 product = await _products.GetById(id)!;
             }
 
-            // 4. Create InventoryItem
-            if (dto.UnitPrice <= 0) throw new InvalidPriceException("precio unitario");
-            if (dto.SalePrice <= 0) throw new InvalidPriceException("precio de venta");
-
+            // 4. Create InventoryItem (default values)
             var inventoryItem = new InventoryItem
             {
                 ProductId = product.Id,
                 GroceryId = _tenantProvider.CurrentGroceryId,
                 Stock = 0, // Default stock
-                UnitPrice = dto.UnitPrice,
-                SalePrice = dto.SalePrice,
-                Promotion = _mapper.Map<Promotion>(dto.Promotion) ?? new Promotion(),
+                Unit = "u",
+                SalePrice = 0,
                 LastUpdated = DateTime.UtcNow
             };
 
@@ -117,9 +112,8 @@ namespace Application.Services.Implementations
 
             // 5. Return DTO
             var responseDto = _mapper.Map<ProductForResponseDto>(product);
-            responseDto.UnitPrice = inventoryItem.UnitPrice;
             responseDto.SalePrice = inventoryItem.SalePrice;
-            responseDto.Promotion = _mapper.Map<PromotionDto>(inventoryItem.Promotion);
+            responseDto.Unit = inventoryItem.Unit;
 
             return responseDto;
         }
@@ -155,22 +149,13 @@ namespace Application.Services.Implementations
             _mapper.Map(dto, product);
             await _products.Update(product);
 
-            // Update InventoryItem prices
-            if (dto.UnitPrice <= 0) throw new InvalidPriceException("precio unitario");
-            if (dto.SalePrice <= 0) throw new InvalidPriceException("precio de venta");
-
-            currentGroceryItem.UnitPrice = dto.UnitPrice;
-            currentGroceryItem.SalePrice = dto.SalePrice;
-            currentGroceryItem.Promotion = _mapper.Map<Promotion>(dto.Promotion) ?? new Promotion();
-            currentGroceryItem.LastUpdated = DateTime.UtcNow;
-
-            await _inventory.Update(currentGroceryItem);
-            await _products.SaveChanges(); // Saves both
+            // Inventory values not updated via Product update (only name/category here)
+            await _products.Update(product);
+            await _products.SaveChanges();
 
             var responseDto = _mapper.Map<ProductForResponseDto>(product);
-            responseDto.UnitPrice = currentGroceryItem.UnitPrice;
             responseDto.SalePrice = currentGroceryItem.SalePrice;
-            responseDto.Promotion = _mapper.Map<PromotionDto>(currentGroceryItem.Promotion);
+            responseDto.Unit = currentGroceryItem.Unit;
 
             return responseDto;
         }

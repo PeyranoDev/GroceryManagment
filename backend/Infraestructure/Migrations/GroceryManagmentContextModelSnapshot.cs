@@ -91,8 +91,10 @@ namespace Infraestructure.Migrations
                     b.Property<int>("Stock")
                         .HasColumnType("integer");
 
-                    b.Property<decimal>("UnitPrice")
-                        .HasColumnType("decimal(18,2)");
+                    b.Property<string>("Unit")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
 
                     b.HasKey("Id");
 
@@ -115,6 +117,10 @@ namespace Infraestructure.Migrations
 
                     b.Property<int>("CategoryId")
                         .HasColumnType("integer");
+
+                    b.Property<string>("Emoji")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
 
                     b.Property<int?>("GroceryId")
                         .HasColumnType("integer");
@@ -357,42 +363,11 @@ namespace Infraestructure.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.OwnsOne("Domain.Entities.Promotion", "Promotion", b1 =>
-                        {
-                            b1.Property<int>("InventoryItemId")
-                                .HasColumnType("integer");
-
-                            b1.Property<decimal?>("DiscountAmount")
-                                .HasColumnType("decimal(18,2)");
-
-                            b1.Property<decimal?>("DiscountPercent")
-                                .HasColumnType("decimal(5,2)");
-
-                            b1.Property<DateTime?>("ExpirationDate")
-                                .HasColumnType("timestamp without time zone");
-
-                            b1.Property<decimal?>("PromotionPrice")
-                                .HasColumnType("decimal(18,2)");
-
-                            b1.Property<int?>("PromotionQuantity")
-                                .HasColumnType("integer");
-
-                            b1.HasKey("InventoryItemId");
-
-                            b1.ToTable("InventoryItems");
-
-                            b1.WithOwner()
-                                .HasForeignKey("InventoryItemId");
-                        });
-
                     b.Navigation("Grocery");
 
                     b.Navigation("LastUpdatedByUser");
 
                     b.Navigation("Product");
-
-                    b.Navigation("Promotion")
-                        .IsRequired();
                 });
 
             modelBuilder.Entity("Domain.Entities.Product", b =>
@@ -403,11 +378,14 @@ namespace Infraestructure.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Domain.Entities.Grocery", null)
+                    b.HasOne("Domain.Entities.Grocery", "Grocery")
                         .WithMany("Products")
-                        .HasForeignKey("GroceryId");
+                        .HasForeignKey("GroceryId")
+                        .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Category");
+
+                    b.Navigation("Grocery");
                 });
 
             modelBuilder.Entity("Domain.Entities.Purchase", b =>

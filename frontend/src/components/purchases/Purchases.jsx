@@ -6,7 +6,7 @@ import PurchasesHeader from "./PurchasesHeader";
 import { useInventory } from "../../hooks/useInventory";
 import { isInvalidProduct } from "./validation";
 import { getLocalDateString } from "../../utils/date";
-import { purchasesAPI } from "../../services/api";
+import { purchasesAPI, productsAPI } from "../../services/api";
 import AddProductModal from "../inventory/AddProductModal";
 import ConfirmModal from "../ui/modal/ConfirmModal";
 import Toast from "../ui/toast/Toast";
@@ -84,23 +84,26 @@ const Purchases = () => {
   };
 
   const handleCreateProductSave = async (payload) => {
-    const item = {
+    const createdResp = await productsAPI.create({
       name: payload.name,
-      unit: payload.unit,
-      salePrice: payload.salePrice,
-      stock: 0,
-      lastUpdated: new Date().toISOString(),
-    };
-    const created = await createItem(item);
+      emoji: payload.emoji || "",
+      categoryId: payload.categoryId,
+    });
+    const createdProduct = createdResp.data || createdResp;
+    await fetchInventory();
+    const match = inventory.find(
+      (inv) => (inv.product?.id ?? inv.Product?.Id) === (createdProduct.id ?? createdProduct.Id)
+        || ((inv.name || inv.Name || '').toLowerCase() === (createdProduct.name || createdProduct.Name || '').toLowerCase())
+    );
     setProducts((prev) =>
       prev.map((p) =>
         p.id === creatingForProductId
           ? {
               ...p,
-              name: created.name,
-              selectedItemId: created.id,
+              name: createdProduct.name || createdProduct.Name,
+              selectedItemId: match?.id ?? match?.Id,
               appliedQuantity: 0,
-              unitLabel: created.unit || p.unitLabel || 'u',
+              unitLabel: match?.unit || match?.Unit || p.unitLabel || 'u',
               invalid: false,
               invalidProduct: false,
             }
@@ -109,7 +112,6 @@ const Purchases = () => {
     );
     setIsCreateModalOpen(false);
     setCreatingForProductId(null);
-    console.log("Nuevo producto: ", JSON.stringify(created));
   };
 
   const handleAdjustInventoryStock = async (itemId, delta) => {

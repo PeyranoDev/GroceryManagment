@@ -77,6 +77,7 @@ namespace Infraestructure
             mb.Entity<Product>(b =>
             {
                 b.Property(p => p.Name).IsRequired().HasMaxLength(200);
+                b.Property(p => p.Emoji).HasMaxLength(10);
                 
                 b.HasIndex(p => p.Name).IsUnique();
                 
@@ -84,12 +85,17 @@ namespace Infraestructure
                  .WithMany(c => c.Products)
                  .HasForeignKey(p => p.CategoryId)
                  .OnDelete(DeleteBehavior.Restrict);
+
+                b.HasOne(p => p.Grocery)
+                 .WithMany(g => g.Products)
+                 .HasForeignKey(p => p.GroceryId)
+                 .OnDelete(DeleteBehavior.Restrict);
             });
 
             mb.Entity<InventoryItem>(b =>
             {
-                b.Property(i => i.UnitPrice).HasColumnType("decimal(18,2)");
                 b.Property(i => i.SalePrice).HasColumnType("decimal(18,2)");
+                b.Property(i => i.Unit).IsRequired().HasMaxLength(10);
 
                 b.HasOne(i => i.Product)
                  .WithMany(p => p.InventoryItems)
@@ -101,12 +107,7 @@ namespace Infraestructure
                  .HasForeignKey(i => i.LastUpdatedByUserId)
                  .OnDelete(DeleteBehavior.SetNull);
 
-                b.OwnsOne(i => i.Promotion, promo =>
-                {
-                    promo.Property(pr => pr.DiscountPercent).HasColumnType("decimal(5,2)");
-                    promo.Property(pr => pr.DiscountAmount).HasColumnType("decimal(18,2)");
-                    promo.Property(pr => pr.PromotionPrice).HasColumnType("decimal(18,2)");
-                });
+                
             });
 
             mb.Entity<Purchase>(b =>
