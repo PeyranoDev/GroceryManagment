@@ -11,13 +11,38 @@ namespace Application.Services.Implementations
     {
         private readonly IInventoryRepository _inventory;
         private readonly ITenantProvider _tenantProvider;
+        private readonly IExchangeRateService _exchangeRateService;
         private readonly IMapper _mapper;
 
-        public InventoryService(IInventoryRepository inventory, ITenantProvider tenantProvider, IMapper mapper)
+        public InventoryService(
+            IInventoryRepository inventory, 
+            ITenantProvider tenantProvider, 
+            IExchangeRateService exchangeRateService,
+            IMapper mapper)
         {
             _inventory = inventory;
             _tenantProvider = tenantProvider;
+            _exchangeRateService = exchangeRateService;
             _mapper = mapper;
+        }
+
+        private async Task<InventoryItemForResponseDto> MapWithExchangeRate(InventoryItem item)
+        {
+            var dto = _mapper.Map<InventoryItemForResponseDto>(item);
+            var cotizacion = await _exchangeRateService.GetLatestOficialRateAsync();
+            
+            if (cotizacion.HasValue && cotizacion.Value > 0)
+            {
+                dto.CotizacionDolar = Math.Round(cotizacion.Value, 2);
+                dto.SalePriceUSD = Math.Round(item.SalePrice / cotizacion.Value, 2);
+            }
+            else
+            {
+                dto.CotizacionDolar = 0;
+                dto.SalePriceUSD = 0;
+            }
+            
+            return dto;
         }
 
         public async Task<InventoryItemForResponseDto?> GetById(int id)
@@ -26,26 +51,56 @@ namespace Application.Services.Implementations
             if (item is null || item.GroceryId != _tenantProvider.CurrentGroceryId)
                 return null;
             
-            return _mapper.Map<InventoryItemForResponseDto>(item);
+            return await MapWithExchangeRate(item);
         }
 
         public async Task<IReadOnlyList<InventoryItemForResponseDto>> GetAll()
         {
             var list = await _inventory.GetAllByGroceryId(_tenantProvider.CurrentGroceryId);
             
-            if (list == null)
+            if (list == null || !list.Any())
             {
                 return new List<InventoryItemForResponseDto>();
             }
+
+            // Get cotizacion once for all items
+            var cotizacion = await _exchangeRateService.GetLatestOficialRateAsync();
+            var cotizacionValue = cotizacion.HasValue && cotizacion.Value > 0 ? cotizacion.Value : 0;
+
+            var result = new List<InventoryItemForResponseDto>();
+            foreach (var item in list)
+            {
+                var dto = _mapper.Map<InventoryItemForResponseDto>(item);
+                dto.CotizacionDolar = Math.Round(cotizacionValue, 2);
+                dto.SalePriceUSD = cotizacionValue > 0 
+                    ? Math.Round(item.SalePrice / cotizacionValue, 2) 
+                    : 0;
+                result.Add(dto);
+            }
             
-            return list.Select(_mapper.Map<InventoryItemForResponseDto>).ToList();
+            return result;
         }
 
         public async Task<IReadOnlyList<InventoryItemForResponseDto>> GetByProductId(int productId)
         {
             var list = await _inventory.GetByProductId(productId);
             var filteredList = list.Where(i => i.GroceryId == _tenantProvider.CurrentGroceryId).ToList();
-            return filteredList.Select(_mapper.Map<InventoryItemForResponseDto>).ToList();
+            
+            var cotizacion = await _exchangeRateService.GetLatestOficialRateAsync();
+            var cotizacionValue = cotizacion.HasValue && cotizacion.Value > 0 ? cotizacion.Value : 0;
+
+            var result = new List<InventoryItemForResponseDto>();
+            foreach (var item in filteredList)
+            {
+                var dto = _mapper.Map<InventoryItemForResponseDto>(item);
+                dto.CotizacionDolar = Math.Round(cotizacionValue, 2);
+                dto.SalePriceUSD = cotizacionValue > 0 
+                    ? Math.Round(item.SalePrice / cotizacionValue, 2) 
+                    : 0;
+                result.Add(dto);
+            }
+            
+            return result;
         }
 
         public async Task<InventoryItemForResponseDto> Create(InventoryItemForCreateDto dto, int? userId = null)
@@ -57,7 +112,7 @@ namespace Application.Services.Implementations
             
             var id = await _inventory.Create(entity);
             var created = await _inventory.GetById(id)!;
-            return _mapper.Map<InventoryItemForResponseDto>(created);
+            return await MapWithExchangeRate(created!);
         }
 
         public async Task<InventoryItemForResponseDto?> Update(int id, InventoryItemForUpdateDto dto, int? userId = null)
@@ -72,7 +127,7 @@ namespace Application.Services.Implementations
             
             await _inventory.Update(entity);
             await _inventory.SaveChanges();
-            return _mapper.Map<InventoryItemForResponseDto>(entity);
+            return await MapWithExchangeRate(entity);
         }
 
         public async Task<bool> Delete(int id)

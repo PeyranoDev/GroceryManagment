@@ -121,7 +121,8 @@ namespace Presentation.Controllers
                     {
                         ProductId = item.ProductId,
                         Quantity = item.Quantity,
-                        Price = item.SalePrice
+                        Price = item.SalePrice,
+                        PriceUSD = item.SalePriceUSD
                     }).ToList(),
                     Date = dto.Details.Date,
                     PaymentMethod = dto.Details.PaymentMethod,
@@ -130,6 +131,7 @@ namespace Presentation.Controllers
                     CustomerName = dto.Details.Client,
                     OrderStatus = dto.Details.IsOnline ? "Created" : "Delivered",
                     PaymentStatus = dto.Details.IsOnline ? "Pending" : "Paid",
+                    Moneda = dto.Moneda
                 };
 
                 var sale = await _saleService.Create(saleDto);
@@ -239,5 +241,10 @@ namespace Presentation.Controllers
         public int UserId { get; set; }
         public List<Application.Schemas.Sales.SaleCartSimpleDto> Cart { get; set; } = new List<Application.Schemas.Sales.SaleCartSimpleDto>();
         public SaleDetailsDto Details { get; set; } = null!;
+        
+        /// <summary>
+        /// Moneda de la venta (1 = ARS, 2 = USD). Por defecto ARS.
+        /// </summary>
+        public Domain.Common.Enums.Moneda Moneda { get; set; } = Domain.Common.Enums.Moneda.ARS;
     }
 }
