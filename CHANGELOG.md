@@ -1,3 +1,10 @@
+## [1.6.0](https://github.com/PeyranoDev/GroceryManagment/compare/v1.5.0...v1.6.0) (2025-12-04)
+
+### ✨ Features
+
+* add dual currency support (ARS/USD) for sales ([7fdd840](https://github.com/PeyranoDev/GroceryManagment/commit/7fdd840d9bc1e97438817ef288200608863e04db))
+* **sales:** implement sale date handling and stock management ([daff5a8](https://github.com/PeyranoDev/GroceryManagment/commit/daff5a8ab473e5be2b62ba189ad0191e9681c8fa))
+
 ## [1.5.0](https://github.com/PeyranoDev/GroceryManagment/compare/v1.4.0...v1.5.0) (2025-12-04)
 
 ### ✨ Features
