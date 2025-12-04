@@ -57,6 +57,7 @@ const Sales = () => {
   
   const [confirmCreateOpen, setConfirmCreateOpen] = useState(false);
   const [invalidStockOpen, setInvalidStockOpen] = useState(false);
+  const [invalidQuantityOpen, setInvalidQuantityOpen] = useState(false);
   const [stockEditModalOpen, setStockEditModalOpen] = useState(false);
   const [stockEditItem, setStockEditItem] = useState(null);
   const [confirmDiscardOpen, setConfirmDiscardOpen] = useState(false);
@@ -64,16 +65,7 @@ const Sales = () => {
   const [toastMsg, setToastMsg] = useState("");
   const [toastType, setToastType] = useState("success");
 
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setDetails((prev) => ({
-        ...prev,
-        time: getCurrentTime(),
-      }));
-    }, 60000);
-
-    return () => clearInterval(interval);
-  }, []);
+  // La hora se toma del formulario, no se actualiza automáticamente
 
   const handleDetailChange = (key, value) =>
     setDetails((prev) => ({ ...prev, [key]: value }));
@@ -117,6 +109,9 @@ const Sales = () => {
 
   // Obtener cotización del dólar del primer item del carrito
   const cotizacionDolar = cart.length > 0 ? (cart[0]?.product?.cotizacionDolar || 0) : 0;
+  
+  // Calcular total en USD
+  const totalUSD = cotizacionDolar > 0 ? (total / cotizacionDolar) : 0;
 
 
   const resetSale = () => {
@@ -216,6 +211,16 @@ const Sales = () => {
 
   const gotoNext = async () => {
     if (step === 2) {
+      // Validar que no haya productos con cantidad 0 o menor
+      const zeroQty = cart.find((it) => {
+        const qty = typeof it.quantity === 'number' ? it.quantity : 0;
+        return qty <= 0;
+      });
+      if (zeroQty) {
+        setInvalidQuantityOpen(true);
+        return;
+      }
+      
       const invalid = cart.find((it) => {
         const qty = typeof it.quantity === 'number' ? it.quantity : 0;
         const stock = it.product?.stock ?? 0;
@@ -315,6 +320,9 @@ const Sales = () => {
           <SalesPayment
             details={details}
             total={total}
+            totalUSD={totalUSD}
+            moneda={details.moneda}
+            cotizacionDolar={cotizacionDolar}
             onDetailChange={handleDetailChange}
             onPrev={gotoPrev}
             onConfirm={() => setConfirmCreateOpen(true)}
@@ -336,6 +344,16 @@ const Sales = () => {
         cancelText="Cancelar"
         onConfirm={finalizeSale}
         variant="success"
+      />
+      <ConfirmModal
+        isOpen={invalidQuantityOpen}
+        onClose={() => setInvalidQuantityOpen(false)}
+        title="Cantidad inválida"
+        message="Hay productos con cantidad 0. Por favor, ingrese una cantidad válida mayor a 0 o elimine el producto del carrito."
+        confirmText="Entendido"
+        cancelText=""
+        onConfirm={() => setInvalidQuantityOpen(false)}
+        variant="danger"
       />
       <ConfirmModal
         isOpen={invalidStockOpen}
