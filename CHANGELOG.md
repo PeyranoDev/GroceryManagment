@@ -1,3 +1,9 @@
+## [1.8.2](https://github.com/PeyranoDev/GroceryManagment/compare/v1.8.1...v1.8.2) (2025-12-04)
+
+### 🐛 Bug Fixes
+
+* **purchases:** enable edit button and save for items loaded from API ([e2c0008](https://github.com/PeyranoDev/GroceryManagment/commit/e2c000812761304b521ec24c44ea386d54838a1d))
+
 ## [1.8.1](https://github.com/PeyranoDev/GroceryManagment/compare/v1.8.0...v1.8.1) (2025-12-04)
 
 ### 🐛 Bug Fixes
