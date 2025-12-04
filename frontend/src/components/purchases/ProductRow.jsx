@@ -283,9 +283,9 @@ export const ProductRow = ({
           {product.isRegistered && (
             <button
               onClick={() => onAdjustClick && onAdjustClick(product)}
-              disabled={!product.selectedItemId}
-              className={`${product.selectedItemId ? 'text-[var(--color-secondary)] hover:text-[var(--color-secondary-dark)]' : 'text-[var(--color-secondary-text)] cursor-not-allowed'}`}
-              title="Ajustar"
+              disabled={!product.selectedItemId && !product.selectedProductId && !product.remoteItemId}
+              className={`${(product.selectedItemId || product.selectedProductId || product.remoteItemId) ? 'text-[var(--color-secondary)] hover:text-[var(--color-secondary-dark)]' : 'text-[var(--color-secondary-text)] cursor-not-allowed'}`}
+              title="Editar"
             >
               <Edit size={30} />
             </button>

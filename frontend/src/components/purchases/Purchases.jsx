@@ -194,7 +194,7 @@ const Purchases = () => {
   }, [date]);
 
   const openAdjustForRow = (row) => {
-    if (!row?.selectedItemId) return;
+    if (!row?.selectedItemId && !row?.selectedProductId && !row?.remoteItemId) return;
     setAdjustTargetId(row.id);
     setConfirmAdjustOpen(true);
   };
