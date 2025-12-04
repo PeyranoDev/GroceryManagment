@@ -11,6 +11,7 @@ import {
 } from './mockApi.js';
 
 const DEMO_MODE = true;
+const USE_BACKEND_CATEGORIES = true;
 const USE_BACKEND_USERS = true;
 
 const getToken = () => localStorage.getItem('auth_token');
@@ -274,7 +275,7 @@ export const reportsAPI = DEMO_MODE ? mockReportsAPI : {
   },
 };
 
-export const categoriesAPI = DEMO_MODE ? mockCategoriesAPI : {
+export const categoriesAPI = USE_BACKEND_CATEGORIES ? {
   getAll: () => apiRequest('/Categories'),
   getById: (id) => apiRequest(`/Categories/${id}`),
   create: (category) => apiRequest('/Categories', {
@@ -288,7 +289,7 @@ export const categoriesAPI = DEMO_MODE ? mockCategoriesAPI : {
   delete: (id) => apiRequest(`/Categories/${id}`, {
     method: 'DELETE',
   }),
-};
+} : mockCategoriesAPI;
 
 export const usersAPI = USE_BACKEND_USERS ? {
   getAll: () => {
