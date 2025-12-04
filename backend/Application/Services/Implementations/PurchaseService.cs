@@ -127,6 +127,8 @@ namespace Application.Services.Implementations
                 inventoryItem.Stock = Math.Max(0, inventoryItem.Stock - item.Quantity);
                 inventoryItem.LastUpdated = DateTime.UtcNow;
                 inventoryItem.LastUpdatedByUserId = userId;
+                inventoryItem.Product = null!;
+                inventoryItem.LastUpdatedByUser = null!;
                 await _inventoryRepository.Update(inventoryItem);
             }
 
@@ -153,6 +155,8 @@ namespace Application.Services.Implementations
                     inventoryItem.Stock += item.Quantity;
                     inventoryItem.LastUpdated = DateTime.UtcNow;
                     inventoryItem.LastUpdatedByUserId = userId;
+                    inventoryItem.Product = null!;
+                    inventoryItem.LastUpdatedByUser = null!;
                     await _inventoryRepository.Update(inventoryItem);
                 }
                 else

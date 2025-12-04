@@ -1,6 +1,7 @@
 import { BarChart2 } from "lucide-react";
 import "./dashboard.css";
 import Card from "../ui/card/Card";
+import { formatCurrencyAR } from "../../utils/money";
 
 const WeeklySalesChart = ({ weeklySales = [] }) => {
   // Generate dynamic default data for last 7 days
@@ -51,7 +52,7 @@ const WeeklySalesChart = ({ weeklySales = [] }) => {
                 }}
               >
                 <span className="weeklySalesChart__barValue">
-                  {sale.sales}
+                  ${formatCurrencyAR(sale.sales)}
                 </span>
               </div>
               <span className={`weeklySalesChart__dayLabel ${isToday ? 'weeklySalesChart__dayLabel--today' : ''}`}>

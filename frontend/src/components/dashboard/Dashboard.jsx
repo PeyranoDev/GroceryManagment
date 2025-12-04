@@ -1,4 +1,5 @@
 import { useDashboard } from "../../hooks/useDashboard";
+import { formatCurrencyAR } from "../../utils/money";
 import KPIcard from "./KPIcard";
 import WeeklySalesChart from "./WeeklySalesChart";
 import RecentActivity from "./RecentActivity";
@@ -27,13 +28,13 @@ const Dashboard = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-3">
         <KPIcard
           title={"Ventas de hoy"}
-          value={stats?.todaySales || 0}
+          value={Number(stats?.todaySales || 0).toLocaleString('es-AR')}
           comparisonText={stats?.todaySalesComparison || "Sin datos de comparación"}
           comparisonColor={stats?.todaySalesComparison?.includes('+') ? "text-[var(--color-success)]" : "text-[var(--color-error)]"}
         />
         <KPIcard
           title={"Ingresos del Mes"}
-          value={stats?.monthlyRevenue ? `$${stats.monthlyRevenue.toFixed(2)}` : "$0.00"}
+          value={`$${formatCurrencyAR(stats?.monthlyRevenue || 0)}`}
           comparisonText={stats?.monthlyRevenueComparison || "Sin datos de comparación"}
           comparisonColor={stats?.monthlyRevenueComparison?.includes('+') ? "text-[var(--color-success)]" : "text-[var(--color-error)]"}
           valueColor={"text-[var(--color-text)]"}
@@ -47,7 +48,7 @@ const Dashboard = () => {
         />
         <KPIcard
           title={"Ticket Promedio"}
-          value={stats?.averageTicket ? `$${stats.averageTicket.toFixed(2)}` : "$0.00"}
+          value={`$${formatCurrencyAR(stats?.averageTicket || 0)}`}
           comparisonText={stats?.averageTicketComparison || "Sin datos de comparación"}
           valueColor={"text-[var(--color-text)]"}
           comparisonColor={stats?.averageTicketComparison?.includes('+') ? "text-[var(--color-success)]" : "text-[var(--color-error)]"}

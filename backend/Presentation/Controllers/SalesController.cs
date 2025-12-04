@@ -77,20 +77,24 @@ namespace Presentation.Controllers
             );
         }
 
+        public class StatusUpdateDto { public string? Status { get; set; } }
+
         [HttpPost("{id}/order-status")]
-        public async Task<ActionResult<ApiResponse<SaleForResponseDto>>> UpdateOrderStatus(int id, [FromBody] dynamic body)
+        public async Task<ActionResult<ApiResponse<SaleForResponseDto>>> UpdateOrderStatus(int id, [FromBody] StatusUpdateDto dto)
         {
-            var status = (string?)body?.status ?? "Created";
+            var status = string.IsNullOrWhiteSpace(dto?.Status) ? "Created" : dto!.Status!;
             var sale = await _saleService.UpdateOrderStatus(id, status);
-            return Ok(ApiResponse<SaleForResponseDto>.SuccessResponse(sale!, "Estado de pedido actualizado"));
+            if (sale is null) return NotFound(ApiResponse<SaleForResponseDto>.ErrorResponse("Venta no encontrada"));
+            return Ok(ApiResponse<SaleForResponseDto>.SuccessResponse(sale, "Estado de pedido actualizado"));
         }
 
         [HttpPost("{id}/payment-status")]
-        public async Task<ActionResult<ApiResponse<SaleForResponseDto>>> UpdatePaymentStatus(int id, [FromBody] dynamic body)
+        public async Task<ActionResult<ApiResponse<SaleForResponseDto>>> UpdatePaymentStatus(int id, [FromBody] StatusUpdateDto dto)
         {
-            var status = (string?)body?.status ?? "Pending";
+            var status = string.IsNullOrWhiteSpace(dto?.Status) ? "Pending" : dto!.Status!;
             var sale = await _saleService.UpdatePaymentStatus(id, status);
-            return Ok(ApiResponse<SaleForResponseDto>.SuccessResponse(sale!, "Estado de pago actualizado"));
+            if (sale is null) return NotFound(ApiResponse<SaleForResponseDto>.ErrorResponse("Venta no encontrada"));
+            return Ok(ApiResponse<SaleForResponseDto>.SuccessResponse(sale, "Estado de pago actualizado"));
         }
 
         [HttpPost("{id}/payments")]
@@ -119,6 +123,7 @@ namespace Presentation.Controllers
                         Quantity = item.Quantity,
                         Price = item.SalePrice
                     }).ToList(),
+                    Date = dto.Details.Date,
                     PaymentMethod = dto.Details.PaymentMethod,
                     IsOnline = dto.Details.IsOnline,
                     DeliveryCost = dto.Details.DeliveryCost,
