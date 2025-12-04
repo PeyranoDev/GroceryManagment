@@ -1,3 +1,9 @@
+## [1.7.0](https://github.com/PeyranoDev/GroceryManagment/compare/v1.6.2...v1.7.0) (2025-12-04)
+
+### ✨ Features
+
+* agregar informacion de dolares en ventas ([dc66963](https://github.com/PeyranoDev/GroceryManagment/commit/dc66963cfb86206c4c615ea8a21c100ad18e7998))
+
 ## [1.6.2](https://github.com/PeyranoDev/GroceryManagment/compare/v1.6.1...v1.6.2) (2025-12-04)
 
 ### 🔨 Chores
