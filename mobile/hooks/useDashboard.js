@@ -1,58 +1,41 @@
-import { useState, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useState, useEffect, useCallback } from 'react';
 import { dashboardAPI } from '../services/api';
-import { mockDashboardStats, mockWeeklySales } from '../utils/mockData';
 
 export const useDashboard = () => {
     const [stats, setStats] = useState(null);
     const [weeklySales, setWeeklySales] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [isDemoMode, setIsDemoMode] = useState(false);
 
     useEffect(() => {
-        checkDemoMode();
+        fetchDashboardData();
     }, []);
 
-    const checkDemoMode = async () => {
-        try {
-            const token = await AsyncStorage.getItem('userToken');
-            setIsDemoMode(token === 'demo-token-123');
-            fetchDashboardData(token === 'demo-token-123');
-        } catch (err) {
-            fetchDashboardData(false);
-        }
-    };
-
-    const fetchDashboardData = async (isDemo = isDemoMode) => {
+    const fetchDashboardData = useCallback(async () => {
         setLoading(true);
         setError(null);
 
-        if (isDemo) {
-            // Demo mode: use mock data
-            setTimeout(() => {
-                setStats(mockDashboardStats);
-                setWeeklySales(mockWeeklySales);
-                setLoading(false);
-            }, 500); // Simulate network delay
-            return;
-        }
-
         try {
+            console.log('📊 Fetching dashboard data...');
             const [statsResponse, weeklyResponse] = await Promise.all([
                 dashboardAPI.getStats(),
                 dashboardAPI.getWeeklySales(),
             ]);
 
-            setStats(statsResponse.data || statsResponse);
-            setWeeklySales(weeklyResponse.data || weeklyResponse);
+            // Handle API response structure - the data might be wrapped
+            const statsData = statsResponse.data?.data || statsResponse.data || statsResponse;
+            const weeklyData = weeklyResponse.data?.data || weeklyResponse.data || weeklyResponse;
+
+            console.log('✅ Dashboard stats loaded');
+            setStats(statsData);
+            setWeeklySales(Array.isArray(weeklyData) ? weeklyData : []);
         } catch (err) {
-            console.error('Error fetching dashboard data:', err);
-            setError(err.message);
+            console.error('❌ Error fetching dashboard data:', err);
+            setError(err.message || 'Error al cargar el dashboard');
         } finally {
             setLoading(false);
         }
-    };
+    }, []);
 
     return {
         stats,

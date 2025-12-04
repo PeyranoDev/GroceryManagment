@@ -42,30 +42,12 @@ export const AuthProvider = ({ children }) => {
 
     const login = async (email, password) => {
         try {
-            // DEMO MODE
-            if (email === 'demo@test.com' && password === 'demo') {
-                const demoUser = {
-                    id: 'demo-123',
-                    name: 'Usuario Demo',
-                    email: 'demo@test.com',
-                    currentRole: 1, // Staff
-                    currentGroceryId: 1
-                };
-
-                await Promise.all([
-                    AsyncStorage.setItem('userToken', 'demo-token-123'),
-                    AsyncStorage.setItem('user', JSON.stringify(demoUser)),
-                    AsyncStorage.setItem('groceryId', '1'),
-                ]);
-
-                setUser(demoUser);
-                setIsAuthenticated(true);
-                return { success: true, user: demoUser };
-            }
+            console.log('🔐 Attempting login for:', email);
 
             const response = await authAPI.login({ email, password });
-
             const { data } = response;
+
+            console.log('📦 Login response:', JSON.stringify(data, null, 2));
 
             if (data.success && data.data) {
                 const { token, expiration, user: userData } = data.data;
@@ -80,19 +62,21 @@ export const AuthProvider = ({ children }) => {
                 setUser(userData);
                 setIsAuthenticated(true);
 
+                console.log('✅ Login successful for:', userData.name || userData.email);
                 return { success: true, user: userData };
             } else {
                 throw new Error(data.message || 'Error en el inicio de sesión');
             }
         } catch (error) {
             const errorMessage = handleApiError(error);
-            console.error('Login error:', errorMessage);
+            console.error('❌ Login error:', errorMessage);
             return { success: false, error: errorMessage };
         }
     };
 
     const logout = async () => {
         try {
+            console.log('🚪 Logging out...');
             await Promise.all([
                 AsyncStorage.removeItem('userToken'),
                 AsyncStorage.removeItem('user'),
@@ -101,6 +85,7 @@ export const AuthProvider = ({ children }) => {
 
             setUser(null);
             setIsAuthenticated(false);
+            console.log('✅ Logout successful');
         } catch (error) {
             console.error('Logout error:', error);
         }

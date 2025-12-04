@@ -1,11 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { View, TextInput, FlatList, Text, TouchableOpacity, StyleSheet, ActivityIndicator } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { Search } from 'lucide-react-native';
 import { colors } from '../../utils/colors';
-import { productsAPI } from '../../services/api';
+import { inventoryAPI } from '../../services/api';
 import { formatCurrency } from '../../utils/formatters';
-import { mockProducts } from '../../utils/mockData';
 
 export default function ProductSearch({ onProductSelect }) {
     const [search, setSearch] = useState('');
@@ -21,7 +19,8 @@ export default function ProductSearch({ onProductSelect }) {
         if (search.trim()) {
             const filtered = products.filter(
                 (p) =>
-                    p.name.toLowerCase().includes(search.toLowerCase())
+                    p.name?.toLowerCase().includes(search.toLowerCase()) ||
+                    p.productName?.toLowerCase().includes(search.toLowerCase())
             );
             setFilteredProducts(filtered);
         } else {
@@ -32,22 +31,27 @@ export default function ProductSearch({ onProductSelect }) {
     const fetchProducts = async () => {
         setLoading(true);
         try {
-            const token = await AsyncStorage.getItem('userToken');
-            const isDemo = token === 'demo-token-123';
-
-            if (isDemo) {
-                setTimeout(() => {
-                    setProducts(mockProducts);
-                    setLoading(false);
-                }, 300);
-                return;
-            }
-
-            const response = await productsAPI.getAll();
-            const items = response.data || response;
-            setProducts(Array.isArray(items) ? items : []);
+            console.log('🔍 Fetching inventory for product search...');
+            // Use inventory API to get products with stock info
+            const response = await inventoryAPI.getAll();
+            const data = response.data?.data || response.data || response;
+            const items = Array.isArray(data) ? data : [];
+            
+            // Map inventory items to product format for the cart
+            const mappedProducts = items.map(item => ({
+                id: item.productId || item.id,
+                name: item.productName || item.name,
+                unitPrice: item.unitPrice || item.product?.unitPrice || 0,
+                stock: item.currentStock ?? item.stock ?? 0,
+                barcode: item.barcode || item.product?.barcode,
+                categoryName: item.categoryName || item.product?.categoryName,
+                promotion: item.promotion || item.product?.promotion,
+            }));
+            
+            console.log(`✅ Loaded ${mappedProducts.length} products for search`);
+            setProducts(mappedProducts);
         } catch (err) {
-            console.error('Error fetching products:', err);
+            console.error('❌ Error fetching products:', err);
         } finally {
             setLoading(false);
         }

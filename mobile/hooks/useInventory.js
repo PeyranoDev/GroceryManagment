@@ -1,90 +1,92 @@
-import { useState, useCallback, useEffect } from 'react';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useState, useCallback } from 'react';
 import { inventoryAPI } from '../services/api';
-import { mockInventory } from '../utils/mockData';
 
 export const useInventory = () => {
     const [inventory, setInventory] = useState([]);
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState(null);
-    const [isDemoMode, setIsDemoMode] = useState(false);
-
-    useEffect(() => {
-        checkDemoMode();
-    }, []);
-
-    const checkDemoMode = async () => {
-        try {
-            const token = await AsyncStorage.getItem('userToken');
-            setIsDemoMode(token === 'demo-token-123');
-        } catch (err) {
-            setIsDemoMode(false);
-        }
-    };
 
     const fetchInventory = useCallback(async () => {
         setLoading(true);
         setError(null);
 
-        const isDemo = await AsyncStorage.getItem('userToken') === 'demo-token-123';
-
-        if (isDemo) {
-            // Demo mode: use mock data
-            setTimeout(() => {
-                setInventory(mockInventory);
-                setLoading(false);
-            }, 500);
-            return;
-        }
-
         try {
+            console.log('📦 Fetching inventory...');
             const response = await inventoryAPI.getAll();
-            const items = response.data || response;
-            setInventory(Array.isArray(items) ? items : []);
+            // Handle API response structure
+            const data = response.data?.data || response.data || response;
+            const items = Array.isArray(data) ? data : [];
+            console.log(`✅ Loaded ${items.length} inventory items`);
+            setInventory(items);
         } catch (err) {
-            console.error('Error fetching inventory:', err);
-            setError(err.message);
+            console.error('❌ Error fetching inventory:', err);
+            setError(err.message || 'Error al cargar el inventario');
             setInventory([]);
         } finally {
             setLoading(false);
         }
     }, []);
 
-    const getLowStock = async (threshold = 10) => {
-        const isDemo = await AsyncStorage.getItem('userToken') === 'demo-token-123';
-
-        if (isDemo) {
-            return mockInventory.filter(item => item.stock > 0 && item.stock < threshold);
-        }
-
+    const getLowStock = useCallback(async (threshold = 10) => {
         try {
+            console.log(`📦 Fetching low stock items (threshold: ${threshold})...`);
             const response = await inventoryAPI.getLowStock(threshold);
-            return response.data || response;
+            const data = response.data?.data || response.data || response;
+            return Array.isArray(data) ? data : [];
         } catch (err) {
-            console.error('Error fetching low stock:', err);
+            console.error('❌ Error fetching low stock:', err);
             throw err;
         }
-    };
+    }, []);
 
-    const adjustStock = async (id, newStock) => {
-        const isDemo = await AsyncStorage.getItem('userToken') === 'demo-token-123';
-
-        if (isDemo) {
-            // Demo mode: update local state only
-            setInventory(prev => prev.map(item => item.id === id ? { ...item, stock: newStock } : item));
-            return { id, stock: newStock };
-        }
-
+    const getOutOfStock = useCallback(async () => {
         try {
+            console.log('📦 Fetching out of stock items...');
+            const response = await inventoryAPI.getOutOfStock();
+            const data = response.data?.data || response.data || response;
+            return Array.isArray(data) ? data : [];
+        } catch (err) {
+            console.error('❌ Error fetching out of stock:', err);
+            throw err;
+        }
+    }, []);
+
+    const adjustStock = useCallback(async (id, newStock) => {
+        try {
+            console.log(`📦 Adjusting stock for item ${id} to ${newStock}...`);
             const response = await inventoryAPI.adjustStock(id, newStock);
-            const updated = response.data || response;
-            setInventory(prev => prev.map(item => item.id === id ? updated : item));
+            const updated = response.data?.data || response.data || response;
+            
+            // Update local state
+            setInventory(prev => prev.map(item => 
+                item.id === id ? { ...item, ...updated, stock: newStock } : item
+            ));
+            
+            console.log('✅ Stock adjusted successfully');
             return updated;
         } catch (err) {
-            console.error('Error adjusting stock:', err);
+            console.error('❌ Error adjusting stock:', err);
             throw err;
         }
-    };
+    }, []);
+
+    const updateInventoryItem = useCallback(async (id, data) => {
+        try {
+            console.log(`📦 Updating inventory item ${id}...`);
+            const response = await inventoryAPI.update(id, data);
+            const updated = response.data?.data || response.data || response;
+            
+            setInventory(prev => prev.map(item => 
+                item.id === id ? { ...item, ...updated } : item
+            ));
+            
+            console.log('✅ Inventory item updated');
+            return updated;
+        } catch (err) {
+            console.error('❌ Error updating inventory:', err);
+            throw err;
+        }
+    }, []);
 
     return {
         inventory,
@@ -92,7 +94,9 @@ export const useInventory = () => {
         error,
         fetchInventory,
         getLowStock,
+        getOutOfStock,
         adjustStock,
+        updateInventoryItem,
         refresh: fetchInventory,
     };
 };

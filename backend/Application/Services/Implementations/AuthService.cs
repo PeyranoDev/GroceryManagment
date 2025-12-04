@@ -141,7 +141,11 @@ namespace Application.Services.Implementations
                 return null;
             if (!user.IsActive)
                 return null;
+<<<<<<< Updated upstream
             if (!_passwordHasher.Verify(password, user.PasswordHash))
+=======
+            if (string.IsNullOrEmpty(user.PasswordHash) || !_passwordHasher.Verify(password, user.PasswordHash))
+>>>>>>> Stashed changes
                 return null;
 
             return MapUserToInfoDto(user);
