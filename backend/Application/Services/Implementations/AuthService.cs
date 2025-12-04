@@ -138,12 +138,28 @@ namespace Application.Services.Implementations
         {
             var user = await _userRepository.GetByEmail(email);
             if (user == null)
+            {
+                Console.WriteLine($"[Auth] User not found for email: {email}");
                 return null;
+            }
             if (!user.IsActive)
+            {
+                Console.WriteLine($"[Auth] User {email} is not active");
                 return null;
-            if (!_passwordHasher.Verify(password, user.PasswordHash))
+            }
+            
+            // Log hash comparison for debugging
+            Console.WriteLine($"[Auth] Verifying password for user: {email}");
+            Console.WriteLine($"[Auth] Stored hash length: {user.PasswordHash?.Length ?? 0}");
+            Console.WriteLine($"[Auth] Stored hash prefix: {user.PasswordHash?.Substring(0, Math.Min(20, user.PasswordHash?.Length ?? 0))}...");
+            
+            if (string.IsNullOrEmpty(user.PasswordHash) || !_passwordHasher.Verify(password, user.PasswordHash))
+            {
+                Console.WriteLine($"[Auth] Password verification FAILED for user: {email}");
                 return null;
+            }
 
+            Console.WriteLine($"[Auth] Password verification SUCCESS for user: {email}");
             return MapUserToInfoDto(user);
         }
 
