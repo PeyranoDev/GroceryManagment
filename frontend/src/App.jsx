@@ -23,7 +23,9 @@ function AppContent() {
   const [toastType, setToastType] = useState("success");
 
   const handleLogin = (userData) => {
-    const shouldGoToDashboard = userData.isSuperAdmin || userData.currentRole === 'Admin' || userData.currentRole === 2;
+    const roleHierarchy = { Staff: 1, Admin: 2, SuperAdmin: 3 };
+    const userRoleLevel = roleHierarchy[userData.currentRole] || 0;
+    const shouldGoToDashboard = userRoleLevel >= roleHierarchy.Admin;
     navigate(shouldGoToDashboard ? "/dashboard" : "/caja");
     setToastMsg("Sesión iniciada correctamente");
     setToastType("success");

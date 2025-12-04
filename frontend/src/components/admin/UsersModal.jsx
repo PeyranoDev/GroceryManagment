@@ -10,24 +10,22 @@ const UsersModal = ({ isOpen, onClose, onSave, defaultValues = {}, mode = 'creat
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("user");
 
-  useEffect(() => {
-    if (isOpen) {
-      setName(defaultValues.name || "");
-      setEmail(defaultValues.email || "");
-      setPassword(defaultValues.password || "");
-      const dvRole = defaultValues.role;
-      const normalizedRole = defaultValues.isSuperAdmin ? 'superadmin' : ((dvRole === 2 || String(dvRole).toLowerCase() === 'admin') ? 'admin' : 'staff');
-      setRole(normalizedRole);
-    }
-  }, [isOpen, defaultValues]);
-
   const normalizeRole = (r) => {
     if (r === 3 || String(r).toLowerCase() === 'superadmin') return 'superadmin';
     if (r === 2 || String(r).toLowerCase() === 'admin') return 'admin';
     return 'staff';
   };
 
-  const defaultRoleNorm = normalizeRole(defaultValues.isSuperAdmin ? 'superadmin' : defaultValues.role);
+  useEffect(() => {
+    if (isOpen) {
+      setName(defaultValues.name || "");
+      setEmail(defaultValues.email || "");
+      setPassword(defaultValues.password || "");
+      setRole(normalizeRole(defaultValues.role));
+    }
+  }, [isOpen, defaultValues]);
+
+  const defaultRoleNorm = normalizeRole(defaultValues.role);
   const hasChanges = (
     mode === 'edit' && (
       name.trim() !== (defaultValues.name || '').trim() ||
