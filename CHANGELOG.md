@@ -1,3 +1,9 @@
+## [1.8.0](https://github.com/PeyranoDev/GroceryManagment/compare/v1.7.2...v1.8.0) (2025-12-04)
+
+### ✨ Features
+
+* agregar validacion de cantidad en venta ([c57945b](https://github.com/PeyranoDev/GroceryManagment/commit/c57945b87f75422cc3946a8dc40cebf7a7ba6d77))
+
 ## [1.7.2](https://github.com/PeyranoDev/GroceryManagment/compare/v1.7.1...v1.7.2) (2025-12-04)
 
 ### 🐛 Bug Fixes
