@@ -41,11 +41,13 @@ export const useSales = () => {
       const response = await salesAPI.createFromCart(cartData);
       const newSale = response.data || response;
       
-      await recentActivitiesAPI.create({
-        type: 'Venta',
-        description: `Venta #${newSale.id} creada (${newSale.orderStatus}/${newSale.paymentStatus})`,
-        userId: cartData.userId
-      });
+      if (recentActivitiesAPI && typeof recentActivitiesAPI.create === 'function') {
+        await recentActivitiesAPI.create({
+          type: 'Venta',
+          description: `Venta #${newSale.id} creada (${newSale.orderStatus}/${newSale.paymentStatus})`,
+          userId: cartData.userId
+        });
+      }
       
       setSales(prev => [newSale, ...prev]);
       return newSale;
@@ -227,13 +229,14 @@ export const useCart = () => {
 
     cart.forEach((item) => {
       const qty = typeof item.quantity === "number" ? item.quantity : 0;
+      const unitPrice = (item.product?.salePrice ?? item.product?.unitPrice ?? 0);
       if (item.promotionApplied && item.product.promotion) {
         const promo = item.product.promotion;
         const promoSets = Math.floor(qty / promo.quantity);
         const remainingQty = qty % promo.quantity;
-        subtotal += promoSets * promo.price + remainingQty * item.product.unitPrice;
+        subtotal += promoSets * promo.price + remainingQty * unitPrice;
       } else {
-        subtotal += qty * item.product.unitPrice;
+        subtotal += qty * unitPrice;
       }
     });
 

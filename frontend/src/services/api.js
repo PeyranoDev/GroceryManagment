@@ -10,7 +10,7 @@ import {
   mockUsersAPI
 } from './mockApi.js';
 
-const DEMO_MODE = true;
+const DEMO_MODE = false;
 const USE_BACKEND_CATEGORIES = true;
 const USE_BACKEND_USERS = true;
 
@@ -166,6 +166,7 @@ export const inventoryAPI = DEMO_MODE ? mockInventoryAPI : {
     return apiRequest(`/Inventory/filtered?${queryString}`);
   },
   getById: (id) => apiRequest(`/Inventory/${id}`),
+  getByProductId: (productId) => apiRequest(`/Inventory/product/${productId}`),
   getStockStatus: (id) => apiRequest(`/Inventory/${id}/status`),
   adjustStock: (id, newStock) => apiRequest(`/Inventory/${id}/adjust-stock`, {
     method: 'POST',
@@ -246,6 +247,7 @@ export const purchasesAPI = DEMO_MODE ? mockPurchasesAPI : {
   },
   getLatest: () => apiRequest('/Purchases/latest'),
   getByDate: (date) => apiRequest(`/Purchases/date/${date}`),
+  deleteItem: (purchaseId, itemId) => apiRequest(`/Purchases/${purchaseId}/items/${itemId}`, { method: 'DELETE' }),
   create: (purchase) => apiRequest('/Purchases', {
     method: 'POST',
     body: JSON.stringify(purchase),

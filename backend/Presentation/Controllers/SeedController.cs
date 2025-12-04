@@ -91,30 +91,14 @@ namespace Presentation.Controllers
                     new ProductForCreateDto 
                     { 
                         Name = "Mango", 
-                        UnitPrice = 2000, 
-                        SalePrice = 2000, 
-                        Unit = "u", 
                         Emoji = "??",
-                        CategoryId = frutasTropicales.Id,
-                        Promotion = new Application.Schemas.Products.PromotionDto 
-                        { 
-                            PromotionQuantity = 2, 
-                            PromotionPrice = 3500 
-                        }
+                        CategoryId = frutasTropicales.Id
                     },
                     new ProductForCreateDto 
                     { 
                         Name = "Banana Bolivia", 
-                        UnitPrice = 1500, 
-                        SalePrice = 1500, 
-                        Unit = "kg", 
                         Emoji = "??",
-                        CategoryId = frutasTropicales.Id,
-                        Promotion = new Application.Schemas.Products.PromotionDto 
-                        { 
-                            PromotionQuantity = 2, 
-                            PromotionPrice = 2500 
-                        }
+                        CategoryId = frutasTropicales.Id
                     }
                 };
 
@@ -127,7 +111,9 @@ namespace Presentation.Controllers
                         await _seedService.CreateInventoryItem(new InventoryItemForCreateDto
                         {
                             ProductId = created.Id,
-                            Stock = Random.Shared.Next(10, 50)
+                            Stock = Random.Shared.Next(10, 50),
+                            Unit = "u",
+                            SalePrice = 0
                         }, groceryId);
                         
                         productosCreados++;
@@ -192,30 +178,14 @@ namespace Presentation.Controllers
                     new ProductForCreateDto 
                     { 
                         Name = "Mango", 
-                        UnitPrice = 2000, 
-                        SalePrice = 2000, 
-                        Unit = "u", 
                         Emoji = "??",
-                        CategoryId = frutasTropicales.Id,
-                        Promotion = new Application.Schemas.Products.PromotionDto 
-                        { 
-                            PromotionQuantity = 2, 
-                            PromotionPrice = 3500 
-                        }
+                        CategoryId = frutasTropicales.Id
                     },
                     new ProductForCreateDto 
                     { 
                         Name = "Banana Bolivia", 
-                        UnitPrice = 1500, 
-                        SalePrice = 1500, 
-                        Unit = "kg", 
                         Emoji = "??",
-                        CategoryId = frutasTropicales.Id,
-                        Promotion = new Application.Schemas.Products.PromotionDto 
-                        { 
-                            PromotionQuantity = 2, 
-                            PromotionPrice = 2500 
-                        }
+                        CategoryId = frutasTropicales.Id
                     }
                 };
 
@@ -227,7 +197,9 @@ namespace Presentation.Controllers
                         await _seedService.CreateInventoryItem(new InventoryItemForCreateDto
                         {
                             ProductId = created.Id,
-                            Stock = Random.Shared.Next(10, 50)
+                            Stock = Random.Shared.Next(10, 50),
+                            Unit = "u",
+                            SalePrice = 0
                         }, grocery.Id);
                         productosCreados++;
                     }

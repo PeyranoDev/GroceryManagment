@@ -8,12 +8,10 @@ namespace Application.Schemas.Inventory
         [Required, Range(0, int.MaxValue, ErrorMessage = "El stock debe ser mayor o igual a 0")]
         public int Stock { get; set; }
 
-        [Required, Range(0.01, double.MaxValue, ErrorMessage = "El precio unitario debe ser mayor a 0")]
-        public decimal UnitPrice { get; set; }
-
-        [Required, Range(0.01, double.MaxValue, ErrorMessage = "El precio de venta debe ser mayor a 0")]
+        [Range(0, double.MaxValue, ErrorMessage = "El precio de venta no puede ser negativo")]
         public decimal SalePrice { get; set; }
 
-        public PromotionDto? Promotion { get; set; }
+        [Required]
+        public string Unit { get; set; } = "u";
     }
 }

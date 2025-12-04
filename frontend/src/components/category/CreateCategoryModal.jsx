@@ -4,7 +4,7 @@ import Input from "../ui/input/Input";
 import Toast from "../ui/toast/Toast";
 import { categoriesAPI } from "../../services/api";
 
-const CreateCategoryModal = ({ isOpen, onClose, onCreated }) => {
+const CreateCategoryModal = ({ isOpen, onClose, onCreated, defaultName = "" }) => {
   const [name, setName] = useState("");
   const [icon, setIcon] = useState("");
   const [submitting, setSubmitting] = useState(false);
@@ -14,11 +14,11 @@ const CreateCategoryModal = ({ isOpen, onClose, onCreated }) => {
 
   useEffect(() => {
     if (isOpen) {
-      setName("");
+      setName(defaultName || "");
       setIcon("");
       setSubmitting(false);
     }
-  }, [isOpen]);
+  }, [isOpen, defaultName]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();

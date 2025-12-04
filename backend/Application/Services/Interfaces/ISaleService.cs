@@ -10,5 +10,8 @@ namespace Application.Services.Interfaces
         Task<bool> Delete(int id);
         Task<IReadOnlyList<SaleForResponseDto>> GetByDateRange(DateTime startDate, DateTime endDate);
         Task<IReadOnlyList<SaleForResponseDto>> GetByUserId(int userId);
+        Task<SaleForResponseDto?> UpdateOrderStatus(int id, string status);
+        Task<SaleForResponseDto?> UpdatePaymentStatus(int id, string status);
+        Task<SaleForResponseDto?> AddPayment(int id, string method, decimal amount);
     }
 }

@@ -28,6 +28,10 @@ namespace Application.Services.Implementations
             var purchase = _mapper.Map<Purchase>(purchaseDto);
             purchase.GroceryId = groceryId;
             purchase.UserId = userId;
+            if (string.IsNullOrWhiteSpace(purchase.Supplier))
+                purchase.Supplier = "Mercado de concentración";
+            if (string.IsNullOrWhiteSpace(purchase.Notes))
+                purchase.Notes = $"Compra {purchase.Date:dd/MM/yyyy}";
             
             purchase.Total = purchase.Items.Sum(item => item.Quantity * item.UnitCost);
             
@@ -88,6 +92,13 @@ namespace Application.Services.Implementations
             return _mapper.Map<IEnumerable<PurchaseForResponseDto>>(purchases);
         }
 
+        public async Task<PurchaseForResponseDto?> GetLatestAsync(int groceryId)
+        {
+            var purchases = await _purchaseRepository.GetAllByGroceryId(groceryId);
+            var latest = purchases.OrderByDescending(p => p.Date).FirstOrDefault();
+            return latest == null ? null : _mapper.Map<PurchaseForResponseDto>(latest);
+        }
+
         public async Task<bool> DeletePurchaseAsync(int id, int groceryId)
         {
             var purchase = await _purchaseRepository.GetById(id);
@@ -97,6 +108,37 @@ namespace Application.Services.Implementations
             await _purchaseRepository.Delete(purchase);
             await _purchaseRepository.SaveChanges();
 
+            return true;
+        }
+
+        public async Task<bool> DeletePurchaseItemAsync(int purchaseId, int itemId, int groceryId, int? userId = null)
+        {
+            var purchase = await _purchaseRepository.GetById(purchaseId);
+            if (purchase == null || purchase.GroceryId != groceryId)
+                throw new NotFoundException("Compra no encontrada");
+
+            var item = purchase.Items.FirstOrDefault(i => i.Id == itemId);
+            if (item == null)
+                throw new NotFoundException("Item de compra no encontrado");
+
+            var inventoryItem = await _inventoryRepository.GetByProductIdAndGroceryId(item.ProductId, groceryId);
+            if (inventoryItem != null)
+            {
+                inventoryItem.Stock = Math.Max(0, inventoryItem.Stock - item.Quantity);
+                inventoryItem.LastUpdated = DateTime.UtcNow;
+                inventoryItem.LastUpdatedByUserId = userId;
+                await _inventoryRepository.Update(inventoryItem);
+            }
+
+            purchase.Total -= (item.Quantity * item.UnitCost);
+            if (purchase.Total < 0) purchase.Total = 0;
+
+            // remove item from context
+            await _purchaseRepository.DeleteItem(item);
+
+            // persist purchase total change
+            await _purchaseRepository.Update(purchase);
+            await _purchaseRepository.SaveChanges();
             return true;
         }
 
@@ -122,7 +164,7 @@ namespace Application.Services.Implementations
                         LastUpdated = DateTime.UtcNow,
                         LastUpdatedByUserId = userId,
                         GroceryId = purchase.GroceryId,
-                        UnitPrice = item.UnitCost,
+                        Unit = "u",
                         SalePrice = item.UnitCost * 1.3m
                     };
                     await _inventoryRepository.Create(newInventoryItem);
