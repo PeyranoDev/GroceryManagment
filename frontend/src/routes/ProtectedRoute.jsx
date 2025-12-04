@@ -1,11 +1,12 @@
-import { Navigate, Outlet } from "react-router-dom";
+import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 
 export default function ProtectedRoute({
   requiredRole = null,
   deniedPath = "/login",
 }) {
-  const { user, loading, hasRole } = useAuth();
+  const { user, loading, hasRole, isSuperAdmin } = useAuth();
+  const location = useLocation();
 
   if (loading) {
     return (
@@ -16,6 +17,11 @@ export default function ProtectedRoute({
   }
 
   if (!user) return <Navigate to={deniedPath} />;
+
+  // SuperAdmin solo puede acceder a /usuarios
+  if (isSuperAdmin() && location.pathname !== '/usuarios') {
+    return <Navigate to="/usuarios" />;
+  }
 
   if (requiredRole && !hasRole(requiredRole)) {
     return <Navigate to="/caja" />;
