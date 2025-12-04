@@ -1,3 +1,9 @@
+## [1.6.1](https://github.com/PeyranoDev/GroceryManagment/compare/v1.6.0...v1.6.1) (2025-12-04)
+
+### ♻️ Code Refactoring
+
+* eliminar bcrypt por mal funcionamiento del nuget ([d08edb9](https://github.com/PeyranoDev/GroceryManagment/commit/d08edb9d917e1b444b3adaa3addc41e19cda3c62))
+
 ## [1.6.0](https://github.com/PeyranoDev/GroceryManagment/compare/v1.5.0...v1.6.0) (2025-12-04)
 
 ### ✨ Features
