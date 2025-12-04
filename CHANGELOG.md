@@ -1,3 +1,9 @@
+## [1.3.2](https://github.com/PeyranoDev/GroceryManagment/compare/v1.3.1...v1.3.2) (2025-12-04)
+
+### 🐛 Bug Fixes
+
+* disable JWT claim mapping to preserve 'role' claim type ([05e2ddd](https://github.com/PeyranoDev/GroceryManagment/commit/05e2ddd36a14ca9f3e929fb7c33906848fa04076))
+
 ## [1.3.1](https://github.com/PeyranoDev/GroceryManagment/compare/v1.3.0...v1.3.1) (2025-12-04)
 
 ### ♻️ Code Refactoring
