@@ -1,6 +1,7 @@
 export const isEmpty = (v) => v === undefined || v === null || String(v).trim() === "";
 
 export const isInvalidProduct = (p) => {
-  return isEmpty(p.name) || isEmpty(p.quantity) || !p.selectedItemId || p.invalid || p.invalidProduct || p.invalidQuantity;
+  const hasValidProduct = p.selectedItemId || p.selectedProductId;
+  return isEmpty(p.name) || isEmpty(p.quantity) || !hasValidProduct || p.invalid || p.invalidProduct || p.invalidQuantity;
 };
 
