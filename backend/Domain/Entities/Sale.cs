@@ -1,3 +1,5 @@
+using Domain.Common.Enums;
+
 namespace Domain.Entities
 {
     public class Sale : IEntity, IHasGrocery
@@ -20,6 +22,26 @@ namespace Domain.Entities
         public string? DeliveryAddress { get; set; }
         public bool IsOnline { get; set; }
         public decimal DeliveryCost { get; set; }
+
+        /// <summary>
+        /// Moneda en la que se realizó la venta (ARS = Pesos, USD = Dólares)
+        /// </summary>
+        public Moneda Moneda { get; set; } = Moneda.ARS;
+
+        /// <summary>
+        /// Cotización del dólar oficial utilizada en el momento de la venta
+        /// </summary>
+        public decimal? CotizacionDolar { get; set; }
+
+        /// <summary>
+        /// Total en dólares estadounidenses
+        /// </summary>
+        public decimal TotalUSD { get; set; }
+
+        /// <summary>
+        /// Total en pesos argentinos
+        /// </summary>
+        public decimal TotalARS { get; set; }
 
         public ICollection<SaleItem> Items { get; set; } = new List<SaleItem>();
     }

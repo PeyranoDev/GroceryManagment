@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { useProducts } from "../../hooks/useProducts";
+import { inventoryAPI } from "../../services/api";
 import { useSales, useCart } from "../../hooks/useSales";
 import SalesInfo from "./SalesInfo";
 import Stepper from "./Stepper";
@@ -10,6 +11,7 @@ import SalesPayment from "./SalesPayment";
 import ConfirmModal from "../ui/modal/ConfirmModal";
 import Toast from "../ui/toast/Toast";
 import SalesCart from "./SalesCart";
+import EditProductModal from "../inventory/EditProductModal";
 
 const Sales = () => {
   const getCurrentTime = () => {
@@ -39,6 +41,7 @@ const Sales = () => {
     observations: "",
     isOnline: false,
     deliveryCost: "",
+    moneda: 1, // 1 = ARS, 2 = USD
   });
   const [step, setStep] = useState(() => {
     try {
@@ -53,6 +56,9 @@ const Sales = () => {
   const [searchResults, setSearchResults] = useState([]);
   
   const [confirmCreateOpen, setConfirmCreateOpen] = useState(false);
+  const [invalidStockOpen, setInvalidStockOpen] = useState(false);
+  const [stockEditModalOpen, setStockEditModalOpen] = useState(false);
+  const [stockEditItem, setStockEditItem] = useState(null);
   const [confirmDiscardOpen, setConfirmDiscardOpen] = useState(false);
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
@@ -83,15 +89,34 @@ const Sales = () => {
     }
   };
 
-  const handleAddProductToCart = (product) => {
-    addProductToCart(product);
-    setSearchTerm("");
-    setSearchResults([]);
+  const handleAddProductToCart = async (product) => {
+    try {
+      const invResp = await inventoryAPI.getByProductId(product.id);
+      const items = invResp?.data || invResp || [];
+      const invItem = (Array.isArray(items) ? items : []).find(() => true);
+      const enriched = {
+        ...product,
+        stock: invItem?.stock ?? product.stock ?? 0,
+        unit: invItem?.unit ?? product.unit ?? 'u',
+        salePrice: invItem?.salePrice ?? product.salePrice ?? product.unitPrice,
+        salePriceUSD: invItem?.salePriceUSD ?? 0,
+        cotizacionDolar: invItem?.cotizacionDolar ?? 0,
+      };
+      addProductToCart(enriched);
+    } catch {
+      addProductToCart(product);
+    } finally {
+      setSearchTerm("");
+      setSearchResults([]);
+    }
   };
 
   const { subtotal, total } = calculateTotals(
     details.isOnline ? details.deliveryCost : 0
   );
+
+  // Obtener cotización del dólar del primer item del carrito
+  const cotizacionDolar = cart.length > 0 ? (cart[0]?.product?.cotizacionDolar || 0) : 0;
 
 
   const resetSale = () => {
@@ -104,6 +129,7 @@ const Sales = () => {
       observations: "",
       isOnline: false,
       deliveryCost: "",
+      moneda: 1,
     });
     setStep(1);
   };
@@ -132,15 +158,32 @@ const Sales = () => {
           return u?.id ?? u?.userId ?? 1;
         } catch { return 1; }
       };
+      const toIsoDate = (val) => {
+        if (!val) return new Date().toISOString().slice(0,10);
+        if (typeof val === 'string') {
+          const s = val.trim();
+          if (s.includes('/')) {
+            const [dd, mm, yyyy] = s.split('/');
+            if (dd && mm && yyyy) return `${yyyy}-${mm.padStart(2,'0')}-${dd.padStart(2,'0')}`;
+          }
+          if (/^\d{4}-\d{2}-\d{2}$/.test(s)) return s;
+        }
+        try {
+          const d = new Date(val);
+          if (!Number.isNaN(d.getTime())) return d.toISOString().slice(0,10);
+        } catch {}
+        return new Date().toISOString().slice(0,10);
+      };
       const cartPayload = {
         userId: getUserId(),
         cart: cart.map((item) => ({
           productId: item.product.id,
           salePrice: item.product.salePrice ?? item.product.unitPrice,
+          salePriceUSD: item.product.salePriceUSD ?? 0,
           quantity: item.quantity,
         })),
         details: {
-          date: new Date(details.date),
+          date: toIsoDate(details.date),
           time: details.time,
           client: details.client || '',
           paymentMethod: details.paymentMethod || 'Efectivo',
@@ -148,6 +191,7 @@ const Sales = () => {
           isOnline: !!details.isOnline,
           deliveryCost: parseFloat(details.deliveryCost || 0),
         },
+        moneda: details.moneda || 1,
       };
       const created = await createSaleFromCart(cartPayload);
       resetSale();
@@ -170,7 +214,21 @@ const Sales = () => {
     }
   }, [step, details]);
 
-  const gotoNext = () => setStep((s) => Math.min(s + 1, 4));
+  const gotoNext = async () => {
+    if (step === 2) {
+      const invalid = cart.find((it) => {
+        const qty = typeof it.quantity === 'number' ? it.quantity : 0;
+        const stock = it.product?.stock ?? 0;
+        return qty > stock;
+      });
+      if (invalid) {
+        setStockEditItem(invalid);
+        setInvalidStockOpen(true);
+        return;
+      }
+    }
+    setStep((s) => Math.min(s + 1, 4));
+  };
   const gotoPrev = () => setStep((s) => Math.max(s - 1, 1));
 
   const headerValid = () => {
@@ -238,6 +296,9 @@ const Sales = () => {
                 isOnline={details ? details.isOnline : false}
                 cart={cart}
                 details={details}
+                moneda={details.moneda || 1}
+                onMonedaChange={(m) => handleDetailChange('moneda', m)}
+                cotizacionDolar={cotizacionDolar}
                 footerActions={(
                   <>
                     <button onClick={gotoPrev} className="px-4 py-2 rounded-md bg-[var(--surface)] hover:bg-[var(--surface-muted)] text-[var(--color-text)] font-semibold">Anterior</button>
@@ -267,12 +328,71 @@ const Sales = () => {
         isOpen={confirmCreateOpen}
         onClose={() => setConfirmCreateOpen(false)}
         title="Confirmar Venta"
-        message={`Total: $${Number(total || 0).toLocaleString()}`}
+        message={details.moneda === 2 && cotizacionDolar > 0
+          ? `Total: US$ ${(total / cotizacionDolar).toFixed(2)}`
+          : `Total: $${Number(total || 0).toLocaleString()}`
+        }
         confirmText="Confirmar"
         cancelText="Cancelar"
         onConfirm={finalizeSale}
         variant="success"
       />
+      <ConfirmModal
+        isOpen={invalidStockOpen}
+        onClose={() => setInvalidStockOpen(false)}
+        title="Stock insuficiente"
+        message="La cantidad supera el stock disponible. Ingrese una cantidad menor o igual, o añada stock manualmente."
+        confirmText="Añadir stock manualmente"
+        cancelText="Cancelar"
+        onConfirm={async () => {
+          try {
+            // preparar datos para editar inventory item
+            const invResp = await inventoryAPI.getByProductId(stockEditItem.product.id);
+            const items = invResp?.data || invResp || [];
+            const invItem = (Array.isArray(items) ? items : []).find(() => true);
+            if (!invItem) { setInvalidStockOpen(false); return; }
+            setStockEditItem({ ...stockEditItem, invItem });
+            setInvalidStockOpen(false);
+            setStockEditModalOpen(true);
+          } catch {
+            setInvalidStockOpen(false);
+          }
+        }}
+        variant="danger"
+      />
+      {stockEditModalOpen && stockEditItem?.invItem && (
+        <EditProductModal
+          isOpen={stockEditModalOpen}
+          onClose={() => setStockEditModalOpen(false)}
+          product={{
+            id: stockEditItem.invItem.id,
+            product: { name: stockEditItem.product.name },
+            unit: stockEditItem.invItem.unit || 'u',
+            stock: stockEditItem.invItem.stock || 0,
+            salePrice: stockEditItem.invItem.salePrice || (stockEditItem.product.salePrice ?? stockEditItem.product.unitPrice) || 0,
+          }}
+          onSave={async (id, data) => {
+            await inventoryAPI.update(id, data);
+            try {
+              const fresh = await inventoryAPI.getByProductId(stockEditItem.product.id);
+              const arr = fresh?.data || fresh || [];
+              const invUpdated = (Array.isArray(arr) ? arr : []).find(() => true);
+              if (invUpdated) {
+                // reconstruir carrito con nuevo stock para este producto
+                const snapshot = [...cart];
+                clearCart();
+                snapshot.forEach((it) => {
+                  const baseProd = it.product.id === stockEditItem.product.id
+                    ? { ...it.product, stock: invUpdated.stock, unit: invUpdated.unit, salePrice: invUpdated.salePrice }
+                    : it.product;
+                  addProductToCart(baseProd);
+                  updateQuantity(baseProd.id, it.quantity);
+                });
+              }
+            } catch {}
+          }}
+        />
+      )}
       <ConfirmModal
         isOpen={confirmDiscardOpen}
         onClose={() => setConfirmDiscardOpen(false)}

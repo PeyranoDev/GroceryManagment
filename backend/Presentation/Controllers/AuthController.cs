@@ -1,4 +1,4 @@
-using Application.Schemas;
+﻿using Application.Schemas;
 using Application.Schemas.Auth;
 using Application.Services.Interfaces;
 using Domain.Exceptions;
@@ -59,13 +59,9 @@ namespace Presentation.Controllers
         }
 
         [HttpPost("impersonate/{userId:int}")]
-        [Authorize]
+        [Authorize(Policy = "SuperAdmin")]
         public async Task<ActionResult<ApiResponse<AuthResponseDto>>> Impersonate(int userId)
         {
-            var isSuperAdmin = User.Claims.Any(c => c.Type == "role" && (c.Value == "SuperAdmin" || c.Value == "3"));
-            if (!isSuperAdmin)
-                return Forbid();
-
             var result = await _authService.Impersonate(userId);
             result.Token = GenerateJwtToken(result.User);
             return Ok(ApiResponse<AuthResponseDto>.SuccessResponse(result, "Impersonación exitosa"));

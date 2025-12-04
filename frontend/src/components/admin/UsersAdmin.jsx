@@ -69,8 +69,12 @@ const UsersAdmin = () => {
         const res = await usersAPI.update(editingId, updatePayload);
         const updated = res.data || res;
         setUsers((prev) => prev.map((u) => (u.id === editingId ? updated : u)));
-        // Use setRole for all role changes (including SuperAdmin)
-        await usersAPI.setRole(editingId, payload.role);
+        // Use setSuperAdmin when target role is SuperAdmin; otherwise setRole
+        if (String(payload.role).toLowerCase() === 'superadmin' || payload.role === 3) {
+          await usersAPI.setSuperAdmin(editingId, true);
+        } else {
+          await usersAPI.setRole(editingId, payload.role);
+        }
         const roleMap = { staff: 1, admin: 2, superadmin: 3 };
         const newRoleNum = roleMap[String(payload.role).toLowerCase()] || 1;
         setUsers((prev) => prev.map((u) => (u.id === editingId ? { ...u, role: newRoleNum } : u)));
@@ -89,8 +93,11 @@ const UsersAdmin = () => {
         const createdUser = (res.data || res)?.user || (res.User || {});
         const createdId = createdUser?.id ?? createdUser?.Id;
 
-        // Use setRole for all roles (including SuperAdmin)
-        await usersAPI.setRole(createdId, payload.role);
+        if (String(payload.role).toLowerCase() === 'superadmin' || payload.role === 3) {
+          await usersAPI.setSuperAdmin(createdId, true);
+        } else {
+          await usersAPI.setRole(createdId, payload.role);
+        }
         const roleMap = { staff: 1, admin: 2, superadmin: 3 };
         const newRoleNum = roleMap[String(payload.role).toLowerCase()] || 1;
         setUsers((prev) => [{ id: createdId, name: createdUser?.name ?? createdUser?.Name, email: createdUser?.email ?? createdUser?.Email, role: newRoleNum, isActive: true }, ...prev]);

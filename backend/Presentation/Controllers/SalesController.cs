@@ -77,20 +77,24 @@ namespace Presentation.Controllers
             );
         }
 
+        public class StatusUpdateDto { public string? Status { get; set; } }
+
         [HttpPost("{id}/order-status")]
-        public async Task<ActionResult<ApiResponse<SaleForResponseDto>>> UpdateOrderStatus(int id, [FromBody] dynamic body)
+        public async Task<ActionResult<ApiResponse<SaleForResponseDto>>> UpdateOrderStatus(int id, [FromBody] StatusUpdateDto dto)
         {
-            var status = (string?)body?.status ?? "Created";
+            var status = string.IsNullOrWhiteSpace(dto?.Status) ? "Created" : dto!.Status!;
             var sale = await _saleService.UpdateOrderStatus(id, status);
-            return Ok(ApiResponse<SaleForResponseDto>.SuccessResponse(sale!, "Estado de pedido actualizado"));
+            if (sale is null) return NotFound(ApiResponse<SaleForResponseDto>.ErrorResponse("Venta no encontrada"));
+            return Ok(ApiResponse<SaleForResponseDto>.SuccessResponse(sale, "Estado de pedido actualizado"));
         }
 
         [HttpPost("{id}/payment-status")]
-        public async Task<ActionResult<ApiResponse<SaleForResponseDto>>> UpdatePaymentStatus(int id, [FromBody] dynamic body)
+        public async Task<ActionResult<ApiResponse<SaleForResponseDto>>> UpdatePaymentStatus(int id, [FromBody] StatusUpdateDto dto)
         {
-            var status = (string?)body?.status ?? "Pending";
+            var status = string.IsNullOrWhiteSpace(dto?.Status) ? "Pending" : dto!.Status!;
             var sale = await _saleService.UpdatePaymentStatus(id, status);
-            return Ok(ApiResponse<SaleForResponseDto>.SuccessResponse(sale!, "Estado de pago actualizado"));
+            if (sale is null) return NotFound(ApiResponse<SaleForResponseDto>.ErrorResponse("Venta no encontrada"));
+            return Ok(ApiResponse<SaleForResponseDto>.SuccessResponse(sale, "Estado de pago actualizado"));
         }
 
         [HttpPost("{id}/payments")]
@@ -117,14 +121,17 @@ namespace Presentation.Controllers
                     {
                         ProductId = item.ProductId,
                         Quantity = item.Quantity,
-                        Price = item.SalePrice
+                        Price = item.SalePrice,
+                        PriceUSD = item.SalePriceUSD
                     }).ToList(),
+                    Date = dto.Details.Date,
                     PaymentMethod = dto.Details.PaymentMethod,
                     IsOnline = dto.Details.IsOnline,
                     DeliveryCost = dto.Details.DeliveryCost,
                     CustomerName = dto.Details.Client,
                     OrderStatus = dto.Details.IsOnline ? "Created" : "Delivered",
                     PaymentStatus = dto.Details.IsOnline ? "Pending" : "Paid",
+                    Moneda = dto.Moneda
                 };
 
                 var sale = await _saleService.Create(saleDto);
@@ -234,5 +241,10 @@ namespace Presentation.Controllers
         public int UserId { get; set; }
         public List<Application.Schemas.Sales.SaleCartSimpleDto> Cart { get; set; } = new List<Application.Schemas.Sales.SaleCartSimpleDto>();
         public SaleDetailsDto Details { get; set; } = null!;
+        
+        /// <summary>
+        /// Moneda de la venta (1 = ARS, 2 = USD). Por defecto ARS.
+        /// </summary>
+        public Domain.Common.Enums.Moneda Moneda { get; set; } = Domain.Common.Enums.Moneda.ARS;
     }
 }

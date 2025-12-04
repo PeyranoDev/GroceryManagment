@@ -10,7 +10,15 @@ namespace Application.Schemas.Sales
         [Required, Range(1, int.MaxValue)]
         public int Quantity { get; set; }
 
+        /// <summary>
+        /// Precio unitario en ARS
+        /// </summary>
         public decimal SalePrice { get; set; }
+        
+        /// <summary>
+        /// Precio unitario en USD (calculado dinámicamente)
+        /// </summary>
+        public decimal SalePriceUSD { get; set; }
     }
 }
 
