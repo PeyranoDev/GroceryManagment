@@ -1,3 +1,14 @@
+## [1.3.0](https://github.com/PeyranoDev/GroceryManagment/compare/v1.2.0...v1.3.0) (2025-12-04)
+
+### ✨ Features
+
+* **inventory:** add category selection to product creation ([5aa9d0d](https://github.com/PeyranoDev/GroceryManagment/commit/5aa9d0d7f997950219b3e9670867d8afc5785cda))
+
+### ♻️ Code Refactoring
+
+* refactorizar las entidades y eliminar IsSuperAdmin para usar Roles nada mas ([38c9f69](https://github.com/PeyranoDev/GroceryManagment/commit/38c9f692768cbaf6b012a958df309b4895a7a2bc))
+* usar managed entity para keyvault en produccion ([05e5b19](https://github.com/PeyranoDev/GroceryManagment/commit/05e5b199b0b863e8f3cbb2126f4e9be96d1e54de))
+
 ## [1.2.0](https://github.com/PeyranoDev/GroceryManagment/compare/v1.1.0...v1.2.0) (2025-12-03)
 
 ### ✨ Features
