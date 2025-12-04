@@ -1,3 +1,9 @@
+## [1.7.1](https://github.com/PeyranoDev/GroceryManagment/compare/v1.7.0...v1.7.1) (2025-12-04)
+
+### 🐛 Bug Fixes
+
+* arreglar error de formulario en front ([d04132b](https://github.com/PeyranoDev/GroceryManagment/commit/d04132b5f5ebf1d4c7bd5781f42c0eb37012e72a))
+
 ## [1.7.0](https://github.com/PeyranoDev/GroceryManagment/compare/v1.6.2...v1.7.0) (2025-12-04)
 
 ### ✨ Features
