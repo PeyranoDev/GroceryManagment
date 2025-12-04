@@ -80,12 +80,14 @@ export const useSales = () => {
     try {
       const response = await salesAPI.updateOrderStatus(saleId, status);
       const updated = response.data || response;
-      setSales(prev => prev.map(s => s.id === saleId ? updated : s));
-      await recentActivitiesAPI.create({
-        type: 'Pedido',
-        description: `Estado del pedido #${saleId} cambiado a ${status}`,
-        userId: 1,
-      });
+      setSales(prev => prev.map(s => s.id === saleId ? { ...s, orderStatus: (updated.orderStatus ?? status), paymentStatus: (updated.paymentStatus ?? s.paymentStatus) } : s));
+      if (recentActivitiesAPI && typeof recentActivitiesAPI.create === 'function') {
+        await recentActivitiesAPI.create({
+          type: 'Pedido',
+          description: `Estado del pedido #${saleId} cambiado a ${status}`,
+          userId: 1,
+        });
+      }
       return updated;
     } catch (err) {
       console.error('Error updating order status:', err);
@@ -97,12 +99,14 @@ export const useSales = () => {
     try {
       const response = await salesAPI.updatePaymentStatus(saleId, status);
       const updated = response.data || response;
-      setSales(prev => prev.map(s => s.id === saleId ? updated : s));
-      await recentActivitiesAPI.create({
-        type: 'Caja',
-        description: `Estado de pago #${saleId} cambiado a ${status}`,
-        userId: 1,
-      });
+      setSales(prev => prev.map(s => s.id === saleId ? { ...s, paymentStatus: (updated.paymentStatus ?? status), orderStatus: (updated.orderStatus ?? s.orderStatus) } : s));
+      if (recentActivitiesAPI && typeof recentActivitiesAPI.create === 'function') {
+        await recentActivitiesAPI.create({
+          type: 'Caja',
+          description: `Estado de pago #${saleId} cambiado a ${status}`,
+          userId: 1,
+        });
+      }
       return updated;
     } catch (err) {
       console.error('Error updating payment status:', err);

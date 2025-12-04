@@ -10,6 +10,8 @@ namespace Application.Schemas.Sales
         [Required]
         public List<SaleItemForCreateDto> Items { get; set; } = new List<SaleItemForCreateDto>();
 
+        public DateTime Date { get; set; }
+
         public string PaymentMethod { get; set; } = "Efectivo";
         public string OrderStatus { get; set; } = "Created";
         public string PaymentStatus { get; set; } = "Pending";

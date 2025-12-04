@@ -18,7 +18,6 @@ const SalesList = () => {
     fetchSales,
     updateOrderStatus,
     updatePaymentStatus,
-    getSalesByDateRange,
   } = useSales();
   const [toastOpen, setToastOpen] = useState(false);
   const [toastMsg, setToastMsg] = useState("");
@@ -28,10 +27,8 @@ const SalesList = () => {
   const [paymentFilter, setPaymentFilter] = useState("all");
   const [sortBy, setSortBy] = useState("date");
   const [sortDir, setSortDir] = useState("desc");
-  const [rangeLoading, setRangeLoading] = useState(false);
-  const [startDate, setStartDate] = useState("");
-  const [endDate, setEndDate] = useState("");
-  const [rangeResults, setRangeResults] = useState(null);
+  const [updatingOrderId, setUpdatingOrderId] = useState(null);
+  const [updatingPaymentId, setUpdatingPaymentId] = useState(null);
 
   useEffect(() => {
     fetchSales();
@@ -45,46 +42,36 @@ const SalesList = () => {
 
   const handleOrderStatusChange = async (saleId, value) => {
     try {
+      setUpdatingOrderId(saleId);
       await updateOrderStatus(saleId, value);
       openToast(`Pedido #${saleId} → ${value}`, "success");
     } catch {
       openToast(`Error cambiando pedido #${saleId}`, "info");
+    } finally {
+      setUpdatingOrderId(null);
     }
   };
 
-  const handleFetchRange = async () => {
-    if (!startDate || !endDate) {
-      openToast("Seleccione ambas fechas", "info");
-      return;
-    }
-    try {
-      setRangeLoading(true);
-      const result = await getSalesByDateRange(startDate, endDate);
-      const items = result.data || result || [];
-      setRangeResults(Array.isArray(items) ? items : []);
-      openToast(`Ventas del rango: ${Array.isArray(items) ? items.length : 0}`, "success");
-    } catch (err) {
-      openToast(err?.message || "No se pudieron obtener ventas por rango", "info");
-    } finally {
-      setRangeLoading(false);
-    }
-  };
 
   const handlePaymentStatusChange = async (saleId, value) => {
     try {
+      setUpdatingPaymentId(saleId);
       await updatePaymentStatus(saleId, value);
       openToast(`Pago #${saleId} → ${value}`, "success");
     } catch {
       openToast(`Error cambiando pago #${saleId}`, "info");
+    } finally {
+      setUpdatingPaymentId(null);
     }
   };
 
-  const isClosed = (s) => (s.orderStatus === 'Delivered' && s.paymentStatus === 'Paid');
-  const isCancelled = (s) => (s.orderStatus === 'Cancelled' || s.paymentStatus === 'Cancelled');
+  const isClosed = (s) => (String(s.orderStatus||'').toLowerCase() === 'delivered' && String(s.paymentStatus||'').toLowerCase() === 'paid');
+  const isOrderCancelled = (s) => (String(s.orderStatus||'').toLowerCase() === 'cancelled');
+  const isPaymentCancelled = (s) => (String(s.paymentStatus||'').toLowerCase() === 'cancelled');
 
   const filtered = useMemo(() => {
     const term = searchTerm.trim().toLowerCase();
-    const base = rangeResults !== null ? rangeResults : (sales || []);
+    const base = sales || [];
     return base
       .filter((s) => {
         const idMatch = String(s.id).includes(term);
@@ -160,11 +147,6 @@ const SalesList = () => {
           }
         />
       <div className="flex items-center gap-3 w-full md:w-auto">
-          <Input type="date" value={startDate} onChange={(e)=>setStartDate(e.target.value)} className="max-w-xs" label="Desde" />
-          <Input type="date" value={endDate} onChange={(e)=>setEndDate(e.target.value)} className="max-w-xs" label="Hasta" />
-          <button onClick={handleFetchRange} className="px-3 py-2 rounded-md bg-[var(--color-primary)] hover:bg-[var(--color-primary-dark)] text-[var(--color-text)] font-semibold">
-            {rangeLoading ? "Procesando..." : "Buscar"}
-          </button>
           <Select
             value={channelFilter}
             onChange={(e) => setChannelFilter(e.target.value)}
@@ -194,7 +176,6 @@ const SalesList = () => {
           <thead className="text-xs text-[var(--color-secondary-text)] uppercase bg-[var(--color-border)]">
             <tr>
               <th className="p-3">N°</th>
-              <th className="p-3">ID</th>
               <th className="p-3">
                 <button
                   onClick={() => handleSort("date")}
@@ -225,9 +206,6 @@ const SalesList = () => {
                 <td className="p-3 font-mono text-[var(--color-secondary-text)]">
                   {filtered.length - idx}
                 </td>
-                <td className="p-3 font-mono text-[var(--color-secondary-text)]">
-                  {s.id}
-                </td>
                 <td className="p-3 text-[var(--color-secondary-text)]">
                   {new Date(s.date).toLocaleString("es-AR")}
                 </td>
@@ -238,18 +216,18 @@ const SalesList = () => {
                   {s.isOnline ? 'online' : 'presencial'}
                 </td>
                 <td className="p-3">
-                  {isCancelled(s)
+                  {isOrderCancelled(s)
                     ? <span className="inline-block px-2 py-0.5 rounded-sm bg-[var(--color-error-dark)] text-[var(--color-text)] text-xs">Cancelado</span>
                     : (isClosed(s)
                       ? <span className="inline-block px-2 py-0.5 rounded-sm bg-[var(--color-success-dark)] text-[var(--color-text)] text-xs">Entregado</span>
-                      : <StatusSelect type="order" value={s.orderStatus || "Created"} onChange={(val) => handleOrderStatusChange(s.id, val)} />)}
+                      : <StatusSelect type="order" value={s.orderStatus || "Created"} disabled={updatingOrderId===s.id} onChange={(val) => handleOrderStatusChange(s.id, val)} />)}
                 </td>
                 <td className="p-3">
-                  {isCancelled(s)
+                  {isPaymentCancelled(s)
                     ? <span className="inline-block px-2 py-0.5 rounded-sm bg-[var(--color-error-dark)] text-[var(--color-text)] text-xs">Cancelado</span>
                     : (isClosed(s)
                       ? <span className="inline-block px-2 py-0.5 rounded-sm bg-[var(--color-success-dark)] text-[var(--color-text)] text-xs">Pagado</span>
-                      : <StatusSelect type="payment" value={s.paymentStatus || "Pending"} onChange={(val) => handlePaymentStatusChange(s.id, val)} />)}
+                      : <StatusSelect type="payment" value={s.paymentStatus || "Pending"} disabled={updatingPaymentId===s.id} onChange={(val) => handlePaymentStatusChange(s.id, val)} />)}
                 </td>
                 <td className="p-3">{renderAmount(s.total || 0)}</td>
                 <td className="p-3 text-[var(--color-secondary-text)]">
@@ -286,7 +264,7 @@ const SalesList = () => {
               <div className="flex justify-between items-start">
                 <div className="flex-1">
                   <h3 className="font-medium text-[var(--color-text)] text-base">
-                    Venta #{s.id}
+                    Venta registrada
                   </h3>
                   <p className="text-xs text-[var(--color-secondary-text)]">
                     N° {filtered.length - idx}
@@ -317,7 +295,7 @@ const SalesList = () => {
                 </div>
                 <div>
                   <span className="text-[var(--color-secondary-text)]">Pedido:</span>{" "}
-                  {isCancelled(s)
+                  {isOrderCancelled(s)
                     ? <span className="inline-block px-2 py-0.5 rounded-sm bg-[var(--color-error-dark)] text-[var(--color-text)] text-xs">Cancelado</span>
                     : (isClosed(s)
                       ? <span className="inline-block px-2 py-0.5 rounded-sm bg-[var(--color-success-dark)] text-[var(--color-text)] text-xs">Entregado</span>
@@ -325,7 +303,7 @@ const SalesList = () => {
                 </div>
                 <div>
                   <span className="text-[var(--color-secondary-text)]">Pago:</span>{" "}
-                  {isCancelled(s)
+                  {isPaymentCancelled(s)
                     ? <span className="inline-block px-2 py-0.5 rounded-sm bg-[var(--color-error-dark)] text-[var(--color-text)] text-xs">Cancelado</span>
                     : (isClosed(s)
                       ? <span className="inline-block px-2 py-0.5 rounded-sm bg-[var(--color-success-dark)] text-[var(--color-text)] text-xs">Pagado</span>
